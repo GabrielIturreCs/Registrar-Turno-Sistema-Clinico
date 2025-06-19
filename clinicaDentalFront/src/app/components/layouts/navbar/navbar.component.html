@@ -47,12 +47,12 @@
         <!-- Si es DENTISTA -->
         <ng-container *ngIf="isLoggedIn && role === 'dentista'">
           <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-1" routerLink="/agenda">
+            <a class="nav-link d-flex align-items-center gap-1" [routerLink]="['agenda']">
               <i class="bi bi-journal-medical"></i> Agenda
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-1" routerLink="/reprogramar">
+            <a class="nav-link d-flex align-items-center gap-1" [routerLink]="['reprogramar']">
               <i class="bi bi-arrow-repeat"></i> Reprogramar
             </a>
           </li>
