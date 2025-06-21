@@ -1,0 +1,67 @@
+<div class="dental-system">
+  <!-- Alertas -->
+  <div *ngIf="alertVisible" [class]="'alert alert-' + currentAlertType + ' alert-dismissible fade show'" role="alert">
+    {{ currentAlertMessage }}
+    <button type="button" class="btn-close" (click)="closeAlert()"></button>
+  </div>
+
+  <!-- Vista Gestión de Dentistas -->
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5><i class="fas fa-user-md"></i> Gestión de Dentistas</h5>
+      </div>
+      <div class="card-body">
+        <!-- Filtros -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Buscar dentistas..."
+              [(ngModel)]="searchTerm">
+          </div>
+        </div>
+
+        <!-- Lista de dentistas -->
+        <div *ngIf="filteredUsuarios.length === 0" class="text-center text-muted">
+          No se encontraron dentistas
+        </div>
+        <div *ngIf="filteredUsuarios.length > 0" class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Nombre</th>
+                <th>DNI</th>
+                <th>Tipo</th>
+                <th>Teléfono</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let usuario of filteredUsuarios">
+                <td>{{ usuario.nombreUsuario }}</td>
+                <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
+                <td>{{ usuario.dni }}</td>
+                <td>
+                  <span [class]="getTipoClass(usuario.tipoUsuario)">
+                    {{ usuario.tipoUsuario }}
+                  </span>
+                </td>
+                <td>{{ usuario.telefono || 'No especificado' }}</td>
+                <td>
+                  <button 
+                    class="btn btn-sm btn-danger"
+                    (click)="eliminarUsuario(usuario)">
+                    <i class="fas fa-trash"></i> Eliminar
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
