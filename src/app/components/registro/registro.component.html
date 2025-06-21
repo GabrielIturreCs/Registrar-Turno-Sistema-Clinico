@@ -1,0 +1,153 @@
+<div *ngIf="currentView === 'register'" class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
+    <div class="card shadow-lg" style="max-width: 600px; width: 100%;">
+      <div class="card-header text-center bg-success text-white">
+        <h3><i class="fas fa-user-plus"></i> Registro de Usuario</h3>
+      </div>
+      <div class="card-body">
+        <form #registerFormRef="ngForm" (ngSubmit)="register()">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="regTipoUsuario" class="form-label">Tipo de Usuario</label>
+              <select 
+                class="form-select" 
+                id="regTipoUsuario"
+                [(ngModel)]="registerForm.tipoUsuario" 
+                name="tipoUsuario"
+                required>
+                <option value="paciente">Paciente</option>
+                <option value="dentista">Dentista</option>
+                <option value="administrador">Administrador</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="regUsuario" class="form-label">Nombre de Usuario</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="regUsuario"
+                [(ngModel)]="registerForm.nombreUsuario" 
+                name="nombreUsuario"
+                required
+                placeholder="Usuario único">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="regNombre" class="form-label">Nombre</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="regNombre"
+                [(ngModel)]="registerForm.nombre" 
+                name="nombre"
+                required
+                placeholder="Tu nombre">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="regApellido" class="form-label">Apellido</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="regApellido"
+                [(ngModel)]="registerForm.apellido" 
+                name="apellido"
+                required
+                placeholder="Tu apellido">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="regDni" class="form-label">DNI</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="regDni"
+                [(ngModel)]="registerForm.dni" 
+                name="dni"
+                required
+                placeholder="12345678">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="regTelefono" class="form-label">Teléfono</label>
+              <input 
+                type="tel" 
+                class="form-control" 
+                id="regTelefono"
+                [(ngModel)]="registerForm.telefono" 
+                name="telefono"
+                placeholder="123456789">
+            </div>
+          </div>
+
+          <div class="mb-3" *ngIf="registerForm.tipoUsuario === 'paciente'">
+            <label for="regObraSocial" class="form-label">Obra Social</label>
+            <select 
+              class="form-select" 
+              id="regObraSocial"
+              [(ngModel)]="registerForm.obraSocial" 
+              name="obraSocial"
+              [required]="registerForm.tipoUsuario === 'paciente'">
+              <option value="">Selecciona tu obra social</option>
+              <option value="OSDE">OSDE</option>
+              <option value="Swiss Medical">Swiss Medical</option>
+              <option value="Galeno">Galeno</option>
+              <option value="Medicus">Medicus</option>
+              <option value="IOMA">IOMA</option>
+              <option value="Particular">Particular</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="regDireccion" class="form-label">Dirección</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="regDireccion"
+              [(ngModel)]="registerForm.direccion" 
+              name="direccion"
+              placeholder="Tu dirección completa">
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="regPassword" class="form-label">Contraseña</label>
+              <input 
+                type="password" 
+                class="form-control" 
+                id="regPassword"
+                [(ngModel)]="registerForm.password" 
+                name="password"
+                required
+                placeholder="Contraseña segura">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="regConfirmPassword" class="form-label">Confirmar Contraseña</label>
+              <input 
+                type="password" 
+                class="form-control" 
+                id="regConfirmPassword"
+                [(ngModel)]="registerForm.confirmPassword" 
+                name="confirmPassword"
+                required
+                placeholder="Repite la contraseña">
+            </div>
+          </div>
+
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button type="button" class="btn btn-secondary me-md-2" (click)="navigateToLogin()">
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              class="btn btn-success"
+              [disabled]="!canRegister || isLoading">
+              <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+              {{ isLoading ? 'Registrando...' : 'Registrar' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
