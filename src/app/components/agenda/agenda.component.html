@@ -1,0 +1,176 @@
+<!-- Vista Agenda del Dentista -->
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5><i class="fas fa-calendar-alt"></i> Agenda del Dentista</h5>
+      <div>
+        <button class="btn btn-primary btn-sm me-2" (click)="navigateToReservar()">
+          <i class="fas fa-plus"></i> Nuevo Turno
+        </button>
+        <button class="btn btn-secondary btn-sm" (click)="navigateToDashboard()">
+          <i class="fas fa-arrow-left"></i> Volver
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros y controles -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <label class="form-label">Fecha</label>
+      <input 
+        type="date" 
+        class="form-control" 
+        [(ngModel)]="selectedDate"
+        (change)="onDateChange()">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Estado</label>
+      <select class="form-select" [(ngModel)]="filterEstado">
+        <option value="todos">Todos los estados</option>
+        <option value="reservado">Reservados</option>
+        <option value="completado">Completados</option>
+        <option value="cancelado">Cancelados</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Buscar</label>
+      <input 
+        type="text" 
+        class="form-control" 
+        placeholder="Buscar paciente..."
+        [(ngModel)]="searchTerm">
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+      <button class="btn btn-outline-primary w-100" (click)="exportarAgenda()">
+        <i class="fas fa-download"></i> Exportar
+      </button>
+    </div>
+  </div>
+
+  <!-- Estadísticas del día -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center bg-primary text-white">
+        <div class="card-body">
+          <h5 class="card-title">{{ turnosHoy }}</h5>
+          <p class="card-text">Turnos Hoy</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center bg-success text-white">
+        <div class="card-body">
+          <h5 class="card-title">{{ turnosCompletados }}</h5>
+          <p class="card-text">Completados</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center bg-warning text-white">
+        <div class="card-body">
+          <h5 class="card-title">{{ turnosPendientes }}</h5>
+          <p class="card-text">Pendientes</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center bg-info text-white">
+        <div class="card-body">
+          <h5 class="card-title">${{ ingresosHoy }}</h5>
+          <p class="card-text">Ingresos Hoy</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de turnos -->
+  <div class="card">
+    <div class="card-header">
+      <h6><i class="fas fa-list"></i> Turnos del {{ selectedDate | date:'dd/MM/yyyy' }}</h6>
+    </div>
+    <div class="card-body">
+      <div *ngIf="filteredTurnos.length === 0" class="text-center text-muted py-4">
+        <i class="fas fa-calendar-times fa-3x mb-3"></i>
+        <p>No hay turnos programados para esta fecha</p>
+      </div>
+      <div *ngIf="filteredTurnos.length > 0" class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Paciente</th>
+              <th>DNI</th>
+              <th>Tratamiento</th>
+              <th>Estado</th>
+              <th>Precio</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let turno of filteredTurnos">
+              <td>
+                <strong>{{ turno.hora }}</strong>
+              </td>
+              <td>
+                <div>
+                  <strong>{{ turno.nombre }} {{ turno.apellido }}</strong>
+                  <br>
+                  <small class="text-muted">{{ turno.telefono || 'Sin teléfono' }}</small>
+                </div>
+              </td>
+              <td>{{ turno.dni }}</td>
+              <td>
+                <div>
+                  <strong>{{ turno.tratamiento }}</strong>
+                  <br>
+                  <small class="text-muted">{{ turno.duracion }} min</small>
+                </div>
+              </td>
+              <td>
+                <span [class]="getStatusClass(turno.estado)">
+                  {{ turno.estado }}
+                </span>
+              </td>
+              <td>
+                <strong>${{ turno.precioFinal }}</strong>
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <button 
+                    *ngIf="turno.estado === 'reservado'" 
+                    class="btn btn-success"
+                    (click)="completarTurno(turno)"
+                    title="Marcar como completado">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button 
+                    *ngIf="turno.estado === 'reservado'" 
+                    class="btn btn-warning"
+                    (click)="reprogramarTurno(turno)"
+                    title="Reprogramar">
+                    <i class="fas fa-clock"></i>
+                  </button>
+                  <button 
+                    *ngIf="turno.estado === 'reservado'" 
+                    class="btn btn-danger"
+                    (click)="cancelarTurno(turno)"
+                    title="Cancelar">
+                    <i class="fas fa-times"></i>
+                  </button>
+                  <button 
+                    class="btn btn-info"
+                    (click)="verDetalles(turno)"
+                    title="Ver detalles">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
