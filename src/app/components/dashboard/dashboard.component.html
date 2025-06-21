@@ -1,0 +1,145 @@
+<!-- Dashboard Principal -->
+<div class="container-fluid">
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+      <div class="container-fluid">
+        <span class="navbar-brand">
+          <i class="fas fa-tooth"></i> DentalTurnos
+        </span>
+        <div class="navbar-nav ms-auto">
+          <span class="navbar-text me-3">
+            Bienvenido, {{ user?.nombre }} {{ user?.apellido }}
+            <span [class]="getTipoClass(user?.tipoUsuario || '')">{{ user?.tipoUsuario }}</span>
+          </span>
+          <button class="btn btn-outline-light btn-sm" (click)="logout()">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    </nav>
+    <!-- Menú de navegación -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="btn-group w-100" role="group">
+        <button 
+          type="button" 
+          class="btn btn-outline-primary"
+          [class.active]="true"
+          (click)="navigateToDashboard()">
+          <i class="fas fa-home"></i> Dashboard
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-outline-primary"
+          (click)="navigateToReservar()">
+          <i class="fas fa-plus"></i> Registrar Turno
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-outline-primary"
+          (click)="navigateToTurnos()">
+          <i class="fas fa-calendar"></i> Mis Turnos
+        </button>
+        <button 
+          *ngIf="user?.tipoUsuario === 'administrador' || user?.tipoUsuario === 'dentista'" 
+          type="button" 
+          class="btn btn-outline-info"
+          (click)="navigateToEstadisticas()">
+          <i class="fas fa-chart-bar"></i> Estadísticas
+        </button>
+        <button 
+          *ngIf="user?.tipoUsuario === 'administrador'" 
+          type="button" 
+          class="btn btn-outline-danger"
+          (click)="navigateToAdmin()">
+          <i class="fas fa-cog"></i> Administración
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Estadísticas -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center bg-primary text-white">
+        <div class="card-body">
+          <h5 class="card-title">{{ totalTurnos }}</h5>
+          <p class="card-text">Total Turnos</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center bg-success text-white">
+        <div class="card-body">
+          <h5 class="card-title">{{ turnosHoy }}</h5>
+          <p class="card-text">Turnos Hoy</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center bg-info text-white">
+        <div class="card-body">
+          <h5 class="card-title">{{ proximoTurno?.fecha || 'Sin turnos' }}</h5>
+          <p class="card-text">Próximo Turno</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center bg-warning text-white">
+        <div class="card-body">
+          <h5 class="card-title">{{ filteredTurnos.length }}</h5>
+          <p class="card-text">Turnos Activos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+   <!-- Turnos recientes -->
+   <div class="card">
+    <div class="card-header">
+      <h5><i class="fas fa-calendar-alt"></i> Turnos Recientes</h5>
+    </div>
+    <div class="card-body">
+      <div *ngIf="filteredTurnos.length === 0" class="text-center text-muted">
+        No hay turnos registrados
+      </div>
+      <div *ngIf="filteredTurnos.length > 0" class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th *ngIf="user?.tipoUsuario !== 'paciente'">Paciente</th>
+              <th>Tratamiento</th>
+              <th>Estado</th>
+              <th>Precio</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let turno of filteredTurnos.slice(0, 5)">
+              <td>{{ turno.nroTurno }}</td>
+              <td>{{ turno.fecha }}</td>
+              <td>{{ turno.hora }}</td>
+              <td *ngIf="user?.tipoUsuario !== 'paciente'">{{ turno.nombre }} {{ turno.apellido }}</td>
+              <td>{{ turno.tratamiento }}</td>
+              <td>
+                <span [class]="getStatusClass(turno.estado)">
+                  {{ turno.estado }}
+                </span>
+              </td>
+              <td>${{ turno.precioFinal }}</td>
+              <td>
+                <button 
+                  *ngIf="turno.estado === 'reservado'" 
+                  class="btn btn-sm btn-danger"
+                  (click)="cancelarTurno(turno)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
