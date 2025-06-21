@@ -1,0 +1,216 @@
+<!-- Turnos recientes -->
+<div class="card">
+  <div class="card-header">
+    <h5><i class="fas fa-calendar-alt"></i> Turnos Recientes</h5>
+  </div>
+  <div class="card-body">
+    <div *ngIf="filteredTurnos.length === 0" class="text-center text-muted">
+      No hay turnos registrados
+    </div>
+    <div *ngIf="filteredTurnos.length > 0" class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th *ngIf="user?.tipoUsuario !== 'paciente'">Paciente</th>
+            <th>Tratamiento</th>
+            <th>Estado</th>
+            <th>Precio</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let turno of filteredTurnos.slice(0, 5)">
+            <td>{{ turno.nroTurno }}</td>
+            <td>{{ turno.fecha }}</td>
+            <td>{{ turno.hora }}</td>
+            <td *ngIf="user?.tipoUsuario !== 'paciente'">{{ turno.nombre }} {{ turno.apellido }}</td>
+            <td>{{ turno.tratamiento }}</td>
+            <td>
+              <span [class]="getStatusClass(turno.estado)">
+                {{ turno.estado }}
+              </span>
+            </td>
+            <td>${{ turno.precioFinal }}</td>
+            <td>
+              <button 
+                *ngIf="turno.estado === 'reservado'" 
+                class="btn btn-sm btn-danger"
+                (click)="cancelarTurno(turno)">
+                <i class="fas fa-times"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Vista Registrar Turno -->
+<div *ngIf="currentView === 'registrar-turno'" class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-plus"></i> Registrar Nuevo Turno</h5>
+        </div>
+        <div class="card-body">
+          <form #turnoFormRef="ngForm" (ngSubmit)="registrarTurno()">
+            <!-- Selección de paciente (solo para dentista/admin) -->
+            <div *ngIf="user?.tipoUsuario !== 'paciente'" class="mb-3">
+              <label for="turnoSelectPaciente" class="form-label">Paciente</label>
+              <select 
+                class="form-select" 
+                id="turnoSelectPaciente"
+                [(ngModel)]="turnoForm.pacienteId" 
+                name="pacienteId"
+                required>
+                <option value="">Selecciona un paciente</option>
+                <option *ngFor="let paciente of pacientes" [value]="paciente.id">
+                  {{ paciente.nombre }} {{ paciente.apellido }} - {{ paciente.dni }}
+                </option>
+              </select>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="turnoFecha" class="form-label">Fecha</label>
+                <input 
+                  type="date" 
+                  class="form-control" 
+                  id="turnoFecha"
+                  [(ngModel)]="turnoForm.fecha" 
+                  name="fecha"
+                  [min]="getCurrentDate()"
+                  required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="turnoHora" class="form-label">Hora</label>
+                <input 
+                  type="time" 
+                  class="form-control" 
+                  id="turnoHora"
+                  [(ngModel)]="turnoForm.hora" 
+                  name="hora"
+                  required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="turnoTratamiento" class="form-label">Tratamiento</label>
+              <select 
+                class="form-select" 
+                id="turnoTratamiento"
+                [(ngModel)]="turnoForm.tratamientoId" 
+                name="tratamientoId"
+                required>
+                <option value="">Selecciona un tratamiento</option>
+                <option *ngFor="let tratamiento of tratamientos" [value]="tratamiento.id">
+                  {{ tratamiento.descripcion }} - ${{ tratamiento.precio }} ({{ tratamiento.duracion }} min)
+                </option>
+              </select>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="button" class="btn btn-secondary me-md-2" (click)="navigateTo('dashboard')">
+                Cancelar
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="!canRegisterTurno || isLoading">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isLoading ? 'Registrando...' : 'Registrar Turno' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Vista Mis Turnos -->
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5><i class="fas fa-calendar"></i> Mis Turnos</h5>
+      <button class="btn btn-primary btn-sm" (click)="navigateToDashboard()">
+        <i class="fas fa-arrow-left"></i> Volver
+      </button>
+    </div>
+    <div class="card-body">
+      <!-- Filtros -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Buscar turnos..."
+            [(ngModel)]="searchTerm">
+        </div>
+        <div class="col-md-6">
+          <select class="form-select" [(ngModel)]="filterEstado">
+            <option value="todos">Todos los estados</option>
+            <option value="reservado">Reservados</option>
+            <option value="cancelado">Cancelados</option>
+            <option value="completado">Completados</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Lista de turnos -->
+      <div *ngIf="filteredTurnos.length === 0" class="text-center text-muted">
+        No se encontraron turnos
+      </div>
+      <div *ngIf="filteredTurnos.length > 0" class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th *ngIf="user?.tipoUsuario !== 'paciente'">Paciente</th>
+              <th>Tratamiento</th>
+              <th>Estado</th>
+              <th>Precio</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let turno of filteredTurnos">
+              <td>{{ turno.nroTurno }}</td>
+              <td>{{ turno.fecha }}</td>
+              <td>{{ turno.hora }}</td>
+              <td *ngIf="user?.tipoUsuario !== 'paciente'">{{ turno.nombre }} {{ turno.apellido }}</td>
+              <td>{{ turno.tratamiento }}</td>
+              <td>
+                <span [class]="getStatusClass(turno.estado)">
+                  {{ turno.estado }}
+                </span>
+              </td>
+              <td>${{ turno.precioFinal }}</td>
+              <td>
+                <button 
+                  *ngIf="turno.estado === 'reservado'" 
+                  class="btn btn-sm btn-danger"
+                  (click)="cancelarTurno(turno)">
+                  <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button 
+                  *ngIf="turno.estado === 'reservado' && user?.tipoUsuario !== 'paciente'" 
+                  class="btn btn-sm btn-success ms-1"
+                  (click)="completarTurno(turno)">
+                  <i class="fas fa-check"></i> Completar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
