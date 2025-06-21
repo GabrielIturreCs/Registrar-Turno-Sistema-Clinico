@@ -1,0 +1,68 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-3">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" [routerLink]="['/']">
+      <i class="bi bi-hospital"></i> Clínica
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+
+        <!--si no esta logueado-->
+        <ng-container *ngIf="!isLoggedIn">
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-1" [routerLink]="['login']">
+              <i class="bi bi-box-arrow-in-right"></i> Login
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-1" [routerLink]="['registro']">
+              <i class="bi bi-person-plus"></i> Registro
+            </a>
+          </li>
+        </ng-container>
+
+        <!--si es paciente-->
+        <ng-container *ngIf="isLoggedIn && role === 'paciente'">
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-1" [routerLink]="['misTurnos']">
+              <i class="bi bi-calendar-check"></i> Mis Turnos
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-1" [routerLink]="['reservarTurno']">
+              <i class="bi bi-calendar-plus"></i> Reservar Turno
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-1 text-danger" (click)="logout()">
+              <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </a>
+          </li>
+        </ng-container>
+
+        <!-- Si es DENTISTA -->
+        <ng-container *ngIf="isLoggedIn && role === 'dentista'">
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-1" [routerLink]="['agenda']">
+              <i class="bi bi-journal-medical"></i> Agenda
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-1" [routerLink]="['reprogramar']">
+              <i class="bi bi-arrow-repeat"></i> Reprogramar
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-1 text-danger" (click)="logout()">
+              <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </a>
+          </li>
+        </ng-container>
+      </ul>
+    </div>
+  </div>
+</nav>
