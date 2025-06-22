@@ -1,0 +1,34 @@
+ <!-- Menú de navegación -->
+ <div class="row mb-4">
+    <div class="col-12">
+      <div class="btn-group w-100" role="group">
+        <button 
+          type="button" 
+          class="btn btn-outline-primary"
+          [class.active]="currentView === 'dashboard'"
+          (click)="navigateTo('dashboard')">
+          <i class="fas fa-home"></i> Dashboard
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-outline-primary"
+          (click)="navigateTo('registrar-turno')">
+          <i class="fas fa-plus"></i> Registrar Turno
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-outline-primary"
+          (click)="navigateTo('mis-turnos')">
+          <i class="fas fa-calendar"></i> Mis Turnos
+        </button>
+        <button 
+          *ngIf="user?.tipoUsuario === 'administrador'" 
+          type="button" 
+          class="btn btn-outline-danger"
+          (click)="navigateTo('admin')">
+          <i class="fas fa-cog"></i> Administración
+        </button>
+      </div>
+    </div>
+  </div>
+ 

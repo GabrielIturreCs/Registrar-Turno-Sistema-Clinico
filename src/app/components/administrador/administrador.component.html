@@ -1,0 +1,70 @@
+<!-- Vista Administración -->
+<div *ngIf="currentView === 'admin' && user?.tipoUsuario === 'administrador'" class="container-fluid">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5><i class="fas fa-cog"></i> Panel de Administración</h5>
+        <button class="btn btn-primary btn-sm" (click)="navigateTo('dashboard')">
+          <i class="fas fa-arrow-left"></i> Volver
+        </button>
+      </div>
+      <div class="card-body">
+        <!-- Filtros -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Buscar usuarios..."
+              [(ngModel)]="searchTerm">
+          </div>
+          <div class="col-md-6">
+            <select class="form-select" [(ngModel)]="filterTipo">
+              <option value="todos">Todos los tipos</option>
+              <option value="paciente">Pacientes</option>
+              <option value="dentista">Dentistas</option>
+              <option value="administrador">Administradores</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Lista de usuarios -->
+        <div *ngIf="filteredUsuarios.length === 0" class="text-center text-muted">
+          No se encontraron usuarios
+        </div>
+        <div *ngIf="filteredUsuarios.length > 0" class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Nombre</th>
+                <th>DNI</th>
+                <th>Tipo</th>
+                <th>Teléfono</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let usuario of filteredUsuarios">
+                <td>{{ usuario.nombreUsuario }}</td>
+                <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
+                <td>{{ usuario.dni }}</td>
+                <td>
+                  <span [class]="getTipoClass(usuario.tipoUsuario)">
+                    {{ usuario.tipoUsuario }}
+                  </span>
+                </td>
+                <td>{{ usuario.telefono || 'No especificado' }}</td>
+                <td>
+                  <button 
+                    class="btn btn-sm btn-danger"
+                    (click)="eliminarUsuario(usuario)">
+                    <i class="fas fa-trash"></i> Eliminar
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
