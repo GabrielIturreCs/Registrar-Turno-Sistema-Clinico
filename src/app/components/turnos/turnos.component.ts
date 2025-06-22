@@ -55,6 +55,11 @@ export class TurnosComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserData();
     this.loadTurnosData();
+
+
+  if (this.user?.tipoUsuario === 'paciente') {
+    this.turnoForm.pacienteId = this.user.id.toString();
+  }
   }
 
   loadUserData(): void {
