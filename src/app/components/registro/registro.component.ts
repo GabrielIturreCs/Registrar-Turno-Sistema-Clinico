@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { RegisterForm } from '../../interfaces';
+import { RegisterService } from '../../services/register.service';
 
 @Component({
   selector: 'app-registro',
@@ -9,11 +11,11 @@ import { Router } from '@angular/router';
   templateUrl: './registro.component.html',
   styleUrl: './registro.component.css'
 })
-export class RegistroComponent implements OnInit {
+export class RegistroComponent{
   currentView: string = 'register';
   isLoading: boolean = false;
   
-  registerForm = {
+  registerForm : RegisterForm = {
     nombreUsuario: '',
     password: '',
     confirmPassword: '',
@@ -26,9 +28,12 @@ export class RegistroComponent implements OnInit {
     obraSocial: ''
   };
 
-  constructor(private router: Router) {}
+  constructor(private router: Router,
+              private registerService: RegisterService) {
 
-  ngOnInit(): void {}
+  }
+
+  //ngOnInit(): void {}
 
   register(): void {
     if (!this.canRegister) return;
@@ -46,7 +51,7 @@ export class RegistroComponent implements OnInit {
     this.isLoading = true;
 
     // Simular registro
-    setTimeout(() => {
+    /*setTimeout(() => {
       // Aquí normalmente harías una llamada al backend
       console.log('Usuario registrado:', this.registerForm);
       
@@ -55,6 +60,21 @@ export class RegistroComponent implements OnInit {
       
       this.isLoading = false;
     }, 1000);
+  }*/
+
+       this.registerService.addUsuario(this.registerForm).subscribe(
+      (result: any) => {
+        console.log(result);
+        alert('¡Usuario registrado exitosamente!');
+        this.router.navigate(['/login']);
+        this.isLoading = false;
+      },
+      (error: any) => {
+        console.log(error);
+        alert('Error al registrar usuario');
+        this.isLoading = false;
+      }
+    );
   }
 
   navigateToLogin(): void {
