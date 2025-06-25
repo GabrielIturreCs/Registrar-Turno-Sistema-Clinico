@@ -29,6 +29,10 @@
             required
             placeholder="Ingresa tu contraseña">
         </div>
+        <!-- Mensaje de error -->
+        <div *ngIf="msglogin" class="alert alert-danger text-center py-2">
+          {{ msglogin }}
+        </div>
         <button 
           type="submit" 
           class="btn btn-primary w-100 mb-3"
