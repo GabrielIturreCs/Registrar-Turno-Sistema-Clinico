@@ -1,29 +1,30 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Paciente } from '../interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PacienteService {
-  private apiUrl = 'http://localhost:3000/api/pacientes'; 
+  private apiUrl = 'http://localhost:3000/api/paciente'; 
 
   constructor(private http: HttpClient) { }
 
-  getPacientes(): Observable<any> {
-    return this.http.get(this.apiUrl);
+  getPacientes(): Observable<Paciente[]> {
+    return this.http.get<Paciente[]>(this.apiUrl);
   }
 
-  getPacienteById(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}`);
+  getPacienteById(id: string): Observable<Paciente> {
+    return this.http.get<Paciente>(`${this.apiUrl}/${id}`);
   }
 
-  createPaciente(paciente: any): Observable<any> {
-    return this.http.post(this.apiUrl, paciente);
+  createPaciente(paciente: Paciente): Observable<Paciente> {
+    return this.http.post<Paciente>(this.apiUrl, paciente);
   }
 
-  updatePaciente(id: string, paciente: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, paciente);
+  updatePaciente(id: string, paciente: Paciente): Observable<Paciente> {
+    return this.http.put<Paciente>(`${this.apiUrl}/${id}`, paciente);
   }
 
   deletePaciente(id: string): Observable<any> {
