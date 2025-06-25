@@ -68,7 +68,9 @@ export class DashboardComponent implements OnInit {
       alert('Turno cancelado exitosamente');
     }
   }
-
+  navigateToBoot() {
+    this.router.navigate(['/boot']);
+  }
   get filteredTurnos(): Turno[] {
     return this.turnos.filter(turno => turno.estado !== 'cancelado');
   }

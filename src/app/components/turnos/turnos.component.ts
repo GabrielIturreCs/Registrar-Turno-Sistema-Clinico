@@ -1,24 +1,33 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+
+// Interfaces y servicios para turnos
 import { User, Turno, Tratamiento, Paciente } from '../../interfaces';
+import { ChatbotService } from '../../services/ChatBot.service';
+
+// Interfaces y servicios para chatbot avanzado
+import { Message, QuickQuestion, ConsultorioInfo } from '../../interfaces/message.interface';
+import { ChatService } from '../../services/chat.service';
+import { DataService } from '../../services/data.service';
 
 @Component({
-  selector: 'app-turnos',
-  imports: [CommonModule, FormsModule],
+  selector: 'app-turnos-chatbot',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './turnos.component.html',
-  styleUrl: './turnos.component.css'
+  styleUrls: ['./turnos.component.css']
 })
-export class TurnosComponent implements OnInit {
+export class TurnoComponent implements OnInit {
+  // ----- Turnos -----
   currentView: string = 'turnos';
   user: User | null = null;
   turnos: Turno[] = [];
   searchTerm: string = '';
   filterEstado: string = 'todos';
   isLoading: boolean = false;
-  
-  // Formulario de turno
+
   turnoForm = {
     pacienteId: '',
     fecha: '',
@@ -26,7 +35,6 @@ export class TurnosComponent implements OnInit {
     tratamientoId: ''
   };
 
-  // Datos de prueba
   pacientes: Paciente[] = [
     { id: 1, nombre: 'Juan', apellido: 'Pérez', dni: '87654321', obraSocial: 'OSDE', telefono: '123456789' },
     { id: 2, nombre: 'María', apellido: 'García', dni: '20123456', obraSocial: 'Swiss Medical', telefono: '987654321' },
@@ -50,24 +58,64 @@ export class TurnosComponent implements OnInit {
     ]
   };
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private chatbotService: ChatbotService,
+    private fb: FormBuilder,
+    private chatService: ChatService,
+    private dataService: DataService
+  ) {
+    // Chatbot avanzado
+    this.chatForm = this.fb.group({
+      message: ["", [Validators.required, Validators.minLength(1)]],
+    });
+    this.quickQuestions = this.dataService.getQuickQuestions();
+    this.consultorioInfo = this.dataService.getConsultorioInfo();
+  }
 
   ngOnInit(): void {
     this.loadUserData();
     this.loadTurnosData();
-
-
-  if (this.user?.tipoUsuario === 'paciente') {
-    this.turnoForm.pacienteId = this.user.id.toString();
+    if (this.user?.tipoUsuario === 'paciente') {
+      this.turnoForm.pacienteId = this.user.id.toString();
+    }
+    this.addWelcomeMessage();
   }
+
+  // ----- Chatbot simple -----
+  userMessage = '';
+  chat: { role: string, content: string }[] = [];
+  loading = false;
+
+  send(): void {
+    if (!this.userMessage.trim()) return;
+    this.chat.push({ role: 'user', content: this.userMessage });
+    this.loading = true;
+
+    this.chatbotService.sendMessage(this.userMessage).subscribe({
+      next: (res) => {
+        const botReply = res?.message || 'Sin respuesta del bot';
+        this.chat.push({ role: 'bot', content: botReply });
+        this.loading = false;
+      },
+      error: () => {
+        this.chat.push({ role: 'bot', content: 'Error al conectar con el bot.' });
+        this.loading = false;
+      }
+    });
+
+    this.userMessage = '';
   }
 
+  // ----- Turnos -----
   loadUserData(): void {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      this.user = JSON.parse(userStr);
-    } else {
-      this.router.navigate(['/login']);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        this.user = JSON.parse(userStr);
+      } else {
+        this.router.navigate(['/login']);
+      }
     }
   }
 
@@ -92,7 +140,6 @@ export class TurnosComponent implements OnInit {
 
     this.isLoading = true;
 
-    // Simular registro de turno
     setTimeout(() => {
       const newTurno: Turno = {
         id: this.turnos.length + 1,
@@ -107,15 +154,7 @@ export class TurnosComponent implements OnInit {
       };
 
       this.turnos.push(newTurno);
-      
-      // Limpiar formulario
-      this.turnoForm = {
-        pacienteId: '',
-        fecha: '',
-        hora: '',
-        tratamientoId: ''
-      };
-
+      this.turnoForm = { pacienteId: '', fecha: '', hora: '', tratamientoId: '' };
       this.currentView = 'turnos';
       this.isLoading = false;
       alert('Turno registrado exitosamente');
@@ -146,10 +185,9 @@ export class TurnosComponent implements OnInit {
   get filteredTurnos(): Turno[] {
     let filtered = this.turnos;
 
-    // Filtrar por búsqueda
     if (this.searchTerm.trim() !== '') {
       const search = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(turno => 
+      filtered = filtered.filter(turno =>
         turno.nroTurno.toLowerCase().includes(search) ||
         turno.tratamiento.toLowerCase().includes(search) ||
         turno.nombre?.toLowerCase().includes(search) ||
@@ -157,12 +195,10 @@ export class TurnosComponent implements OnInit {
       );
     }
 
-    // Filtrar por estado
     if (this.filterEstado !== 'todos') {
       filtered = filtered.filter(turno => turno.estado === this.filterEstado);
     }
 
-    // Filtrar por usuario (si es paciente, solo mostrar sus turnos)
     if (this.user?.tipoUsuario === 'paciente') {
       filtered = filtered.filter(turno => turno.pacienteId === this.user?.id);
     }
@@ -177,5 +213,95 @@ export class TurnosComponent implements OnInit {
       case 'cancelado': return 'badge bg-danger';
       default: return 'badge bg-secondary';
     }
+  }
+
+  // ----- Chatbot avanzado -----
+  @ViewChild("messagesContainer") private messagesContainer!: ElementRef;
+  mostrarChat = false;
+  messages: Message[] = [];
+  chatForm: FormGroup;
+  showQuickQuestions = true;
+  quickQuestions: QuickQuestion[] = [];
+  consultorioInfo: ConsultorioInfo;
+
+  private addWelcomeMessage(): void {
+    this.messages.push(
+      this.chatService.createMessage("assistant", this.dataService.getWelcomeMessage())
+    );
+  }
+
+  onSubmit(): void {
+    if (this.chatForm.valid && !this.isLoading) {
+      const messageText = this.chatForm.get("message")?.value.trim();
+      if (messageText) {
+        this.handleHybridChat(messageText);
+      }
+    }
+  }
+
+  onQuickQuestion(question: string): void {
+    this.handleHybridChat(question);
+    this.showQuickQuestions = false;
+  }
+
+  /**
+   * Lógica híbrida: primero intenta respuesta local, si no hay o es genérica, consulta la API.
+   */
+  private handleHybridChat(content: string): void {
+    // Mensaje del usuario
+    this.messages.push({
+      id: Date.now().toString(),
+      role: 'user',
+      content,
+      timestamp: new Date()
+    });
+    this.chatForm.reset();
+    this.showQuickQuestions = false;
+    this.isLoading = true;
+
+    // 1. Intenta respuesta local
+    const localResponse = this.chatService.generateResponse(content);
+
+    // Si la respuesta local es vacía o genérica, consulta la API
+    if (localResponse && localResponse.trim() !== '' && !this.isGenericResponse(localResponse)) {
+      setTimeout(() => {
+        this.isLoading = false;
+        this.messages.push({
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: localResponse,
+          timestamp: new Date()
+        });
+        this.scrollToBottom();
+      }, 600); // respuesta rápida local
+    } else {
+      // 2. Si no hay respuesta local específica, consulta la API
+      this.chatbotService.sendMessage(content).subscribe(res => {
+        this.isLoading = false;
+        this.messages.push({
+          id: (Date.now() + 2).toString(),
+          role: 'assistant',
+          content: res.message || 'Sin respuesta del bot',
+          timestamp: new Date()
+        });
+        this.scrollToBottom();
+      });
+    }
+  }
+
+  /**
+   * Detecta si la respuesta local es genérica (ajusta según tu lógica real).
+   */
+  private isGenericResponse(response: string): boolean {
+    // Cambia este texto por el de tu respuesta genérica real
+    return response.startsWith('Gracias por tu consulta. Soy DentalBot');
+  }
+
+  private scrollToBottom(): void {
+    setTimeout(() => {
+      if (this.messagesContainer) {
+        this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
+      }
+    }, 100);
   }
 }

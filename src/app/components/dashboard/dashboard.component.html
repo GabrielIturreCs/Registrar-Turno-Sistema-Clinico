@@ -1,6 +1,13 @@
 <!-- Dashboard Principal -->
 <div class="container-fluid">
     <!-- Header -->
+     <button
+  *ngIf="user?.tipoUsuario === 'administrador'"
+  type="button"
+  class="btn btn-outline-dark"
+  (click)="navigateToBoot()">
+  <i class="fas fa-robot"></i> Boot
+</button>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
       <div class="container-fluid">
         <span class="navbar-brand">
