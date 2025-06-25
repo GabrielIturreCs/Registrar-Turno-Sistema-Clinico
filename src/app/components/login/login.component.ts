@@ -118,7 +118,7 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/agenda']);
         break;
       case 'paciente':
-        this.router.navigate(['/misTurnos']);
+        this.router.navigate(['/dashboard']); // Redirigir a dashboard de paciente
         break;
       default:
         this.router.navigate(['/']);
