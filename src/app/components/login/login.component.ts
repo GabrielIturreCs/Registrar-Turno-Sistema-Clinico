@@ -105,8 +105,17 @@ export class LoginComponent implements OnInit {
         );
     }
 
+  // Método placeholder para el login con Google (solo vista)
+  loginWithGoogle() {
+    // Solo placeholder visual, la funcionalidad será implementada por el equipo de backend
+  }
+
   navigateToRegister(): void {
     this.router.navigate(['/registro']);
+  }
+
+  navigateToHome(): void {
+    this.router.navigate(['/']);
   }
 
   private redirectByUserType(tipoUsuario: string): void {
