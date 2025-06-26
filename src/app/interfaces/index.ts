@@ -1,7 +1,7 @@
 // Interfaces compartidas para toda la aplicación
 
 export interface User {
-  id: number;
+  id: string;
   nombreUsuario: string;
   nombre: string;
   apellido: string;
@@ -10,6 +10,7 @@ export interface User {
   telefono?: string;
   direccion?: string;
   obraSocial?: string;
+  email?: string;
 }
 
 export interface Turno {
@@ -48,6 +49,7 @@ export interface Paciente {
 export interface LoginForm {
   nombreUsuario: string;
   password: string;
+  email: string;
 }
 
 export interface RegisterForm {
@@ -61,6 +63,7 @@ export interface RegisterForm {
   dni: string;
   tipoUsuario: string;
   obraSocial: string;
+  email: string;
 }
 
 export interface TurnoForm {
