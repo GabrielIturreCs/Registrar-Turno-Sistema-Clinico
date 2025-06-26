@@ -8,10 +8,9 @@ import { Observable } from 'rxjs';
 })
 export class RegisterService {
 
-
   hostBase: string;
   constructor(private _http: HttpClient) { 
-    this.hostBase = "http://localhost:3000/api/usuario/";
+    this.hostBase = "http://localhost:3000/api/auth/"; 
   }
 
   //crearUsuario
@@ -22,7 +21,7 @@ export class RegisterService {
       })
     }
     let body:any = JSON.stringify(usuario)
-    return this._http.post(this.hostBase,body,httpOptions);
+     return this._http.post(this.hostBase + 'register', body, httpOptions);
   }
 
 
