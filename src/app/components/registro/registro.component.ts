@@ -9,13 +9,13 @@ import { RegisterService } from '../../services/register.service';
   selector: 'app-registro',
   imports: [CommonModule, FormsModule],
   templateUrl: './registro.component.html',
-  styleUrl: './registro.component.css'
+  styleUrl: './registro.component.css',
 })
-export class RegistroComponent{
+export class RegistroComponent {
   currentView: string = 'register';
   isLoading: boolean = false;
-  
-  registerForm : RegisterForm = {
+
+  registerForm: RegisterForm = {
     nombreUsuario: '',
     password: '',
     confirmPassword: '',
@@ -25,13 +25,14 @@ export class RegistroComponent{
     direccion: '',
     dni: '',
     tipoUsuario: 'paciente',
-    obraSocial: ''
+    obraSocial: '',
+    email: '',
   };
 
-  constructor(private router: Router,
-              private registerService: RegisterService) {
-
-  }
+  constructor(
+    private router: Router,
+    private registerService: RegisterService
+  ) {}
 
   //ngOnInit(): void {}
 
@@ -43,26 +44,22 @@ export class RegistroComponent{
       return;
     }
 
-    if (this.registerForm.tipoUsuario === 'paciente' && !this.registerForm.obraSocial) {
+    if (
+      this.registerForm.tipoUsuario === 'paciente' &&
+      !this.registerForm.obraSocial
+    ) {
       alert('Los pacientes deben seleccionar una obra social.');
+      return;
+    }
+
+    if (!this.isEmailValid()) {
+      alert('El formato del correo no es válido.');
       return;
     }
 
     this.isLoading = true;
 
-    // Simular registro
-    /*setTimeout(() => {
-      // Aquí normalmente harías una llamada al backend
-      console.log('Usuario registrado:', this.registerForm);
-      
-      alert('¡Usuario registrado exitosamente!');
-      this.router.navigate(['/login']);
-      
-      this.isLoading = false;
-    }, 1000);
-  }*/
-
-       this.registerService.addUsuario(this.registerForm).subscribe(
+    this.registerService.addUsuario(this.registerForm).subscribe(
       (result: any) => {
         console.log(result);
         alert('¡Usuario registrado exitosamente!');
@@ -82,13 +79,24 @@ export class RegistroComponent{
   }
 
   get canRegister(): boolean {
-    return this.registerForm.nombreUsuario.trim() !== '' &&
-           this.registerForm.password.trim() !== '' &&
-           this.registerForm.confirmPassword.trim() !== '' &&
-           this.registerForm.nombre.trim() !== '' &&
-           this.registerForm.apellido.trim() !== '' &&
-           this.registerForm.dni.trim() !== '' &&
-           this.registerForm.password === this.registerForm.confirmPassword &&
-           (this.registerForm.tipoUsuario !== 'paciente' || this.registerForm.obraSocial.trim() !== '');
+    return (
+      this.registerForm.nombreUsuario.trim() !== '' &&
+      this.registerForm.password.trim() !== '' &&
+      this.registerForm.confirmPassword.trim() !== '' &&
+      this.registerForm.nombre.trim() !== '' &&
+      this.registerForm.apellido.trim() !== '' &&
+      this.registerForm.dni.trim() !== '' &&
+      this.registerForm.email.trim() !== '' &&
+      this.isEmailValid() &&
+      this.registerForm.password === this.registerForm.confirmPassword &&
+      (this.registerForm.tipoUsuario !== 'paciente' ||
+        this.registerForm.obraSocial.trim() !== '')
+    );
+  }
+
+  isEmailValid(): boolean {
+    const email = this.registerForm.email.trim();
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
   }
 }
