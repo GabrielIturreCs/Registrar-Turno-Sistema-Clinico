@@ -18,11 +18,11 @@ export class ChatbotService {
     const body = {
       bot_id: 'OEXJ8qFp5E5AwRwymfPts90vrHnmr8yZgNE171101852010w2S0bCtN3THp448W7kDSfyTf3OpW5TUVefz',
       messages: [{ role: 'user', content: message }],
-      user_id: 'gabriel', // debe tener valor no vacío
-      temperature: 0.9,
+      user_id: 'gabriel', 
+      temperature: 0.3,
       top_k: 5,
       top_p: 0.9,
-      max_tokens: 256,
+      max_tokens: 50,
       model: 'gpt 3.5'
     };
 
