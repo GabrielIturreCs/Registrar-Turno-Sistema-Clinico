@@ -53,7 +53,8 @@ export class EstadisticaComponent implements OnInit {
   //aca se carga el usuario actual
   loadUserData(): void {
     this.user = this.authService.getCurrentUser();
-    if (!this.user) {
+    // Permitir acceso a administrador y dentista
+    if (!this.user || (this.user.tipoUsuario !== 'administrador' && this.user.tipoUsuario !== 'dentista')) {
       this.router.navigate(['/login']);
     }
   }
@@ -153,4 +154,3 @@ export class EstadisticaComponent implements OnInit {
 
 
 }
- 
