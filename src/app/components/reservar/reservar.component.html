@@ -1,81 +1,84 @@
 <!-- Vista Registrar Turno -->
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-plus"></i> Registrar Nuevo Turno</h5>
-        </div>
-        <div class="card-body">
-          <form #turnoFormRef="ngForm" (ngSubmit)="registrarTurno()">
-            <!-- Selección de paciente (solo para dentista/admin) -->
-            <div *ngIf="user?.tipoUsuario !== 'paciente'" class="mb-3">
-              <label for="turnoSelectPaciente" class="form-label">Paciente</label>
-              <select 
-                class="form-select" 
-                id="turnoSelectPaciente"
-                [(ngModel)]="turnoForm.pacienteId" 
-                name="pacienteId"
-                required>
-                <option value="">Selecciona un paciente</option>
-                <option *ngFor="let paciente of pacientes" [value]="paciente.id">
-                  {{ paciente.nombre }} {{ paciente.apellido }} - {{ paciente.dni }}
-                </option>
-              </select>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="turnoFecha" class="form-label">Fecha</label>
-                <input 
-                  type="date" 
-                  class="form-control" 
-                  id="turnoFecha"
-                  [(ngModel)]="turnoForm.fecha" 
-                  name="fecha"
-                  [min]="getCurrentDate()"
+<div class="main-registrar-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header">
+            <h5><i class="fas fa-plus"></i> Registrar Nuevo Turno</h5>
+          </div>
+          <div class="card-body">
+            <form #turnoFormRef="ngForm" (ngSubmit)="registrarTurno()">
+              <!-- Selección de paciente (solo para dentista/admin) -->
+              <div *ngIf="user?.tipoUsuario !== 'paciente'" class="mb-3">
+                <label for="turnoSelectPaciente" class="form-label">Paciente</label>
+                <select 
+                  class="form-select" 
+                  id="turnoSelectPaciente"
+                  [(ngModel)]="turnoForm.pacienteId" 
+                  name="pacienteId"
                   required>
+                  <option value="">Selecciona un paciente</option>
+                  <option *ngFor="let paciente of pacientes" [value]="paciente.id">
+                    {{ paciente.nombre }} {{ paciente.apellido }} - {{ paciente.dni }}
+                  </option>
+                </select>
               </div>
-              <div class="col-md-6 mb-3">
-                <label for="turnoHora" class="form-label">Hora</label>
-                <input 
-                  type="time" 
-                  class="form-control" 
-                  id="turnoHora"
-                  [(ngModel)]="turnoForm.hora" 
-                  name="hora"
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="turnoFecha" class="form-label">Fecha</label>
+                  <input 
+                    type="date" 
+                    class="form-control" 
+                    id="turnoFecha"
+                    [(ngModel)]="turnoForm.fecha" 
+                    name="fecha"
+                    [min]="getCurrentDate()"
+                    required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="turnoHora" class="form-label">Hora</label>
+                  <input 
+                    type="time" 
+                    class="form-control" 
+                    id="turnoHora"
+                    [(ngModel)]="turnoForm.hora" 
+                    name="hora"
+                    required>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="turnoTratamiento" class="form-label">Tratamiento</label>
+                <select 
+                  class="form-select" 
+                  id="turnoTratamiento"
+                  [(ngModel)]="turnoForm.tratamientoId" 
+                  name="tratamientoId"
                   required>
+                >
+                  <option value="">Selecciona un tratamiento</option>
+                  <option *ngFor="let tratamiento of tratamientos" [value]="tratamiento.id">
+                    {{ tratamiento.descripcion }} - ${{ tratamiento.precio }} ({{ tratamiento.duracion }} min)
+                  </option>
+                </select>
               </div>
-            </div>
 
-            <div class="mb-3">
-              <label for="turnoTratamiento" class="form-label">Tratamiento</label>
-              <select 
-                class="form-select" 
-                id="turnoTratamiento"
-                [(ngModel)]="turnoForm.tratamientoId" 
-                name="tratamientoId"
-                required>
-                <option value="">Selecciona un tratamiento</option>
-                <option *ngFor="let tratamiento of tratamientos" [value]="tratamiento.id">
-                  {{ tratamiento.descripcion }} - ${{ tratamiento.precio }} ({{ tratamiento.duracion }} min)
-                </option>
-              </select>
-            </div>
-
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-              <button type="button" class="btn btn-secondary me-md-2" (click)="navigateToDashboard()">
-                Cancelar
-              </button>
-              <button 
-                type="submit" 
-                class="btn btn-primary"
-                [disabled]="!canRegisterTurno || isLoading">
-                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ isLoading ? 'Registrando...' : 'Registrar Turno' }}
-              </button>
-            </div>
-          </form>
+              <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-secondary me-md-2" (click)="navigateToDashboard()">
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  class="btn btn-primary"
+                  [disabled]="!canRegisterTurno || isLoading">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                  {{ isLoading ? 'Registrando...' : 'Registrar Turno' }}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>

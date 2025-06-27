@@ -1,0 +1,103 @@
+body {
+  background: linear-gradient(120deg, #e3f0ff 0%, #fbeee6 60%, #e3f0ff 100%);
+  overflow-x: hidden;
+}
+
+.main-registrar-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(120deg, #e3f0ff 0%, #fbeee6 60%, #e3f0ff 100%);
+}
+
+.card {
+  border: none;
+  border-radius: 18px;
+  box-shadow: 0 12px 36px rgba(0, 191, 255, 0.13);
+  background: rgba(255,255,255,0.92);
+  transition: all 0.3s ease;
+}
+.card-header {
+  background: linear-gradient(90deg, #00bfff 40%, #7ff6ff 100%) !important;
+  color: #fff !important;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 2px 8px rgba(0, 191, 255, 0.08);
+}
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.btn {
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+}
+.btn-outline-primary {
+  border: 2px solid #00bfff;
+  color: #00bfff;
+  background: #fff;
+}
+.btn-outline-primary:hover {
+  background: linear-gradient(90deg, #00bfff 0%, #7ff6ff 100%);
+  color: #fff;
+  border-color: #00bfff;
+  transform: translateY(-2px);
+}
+.btn-primary {
+  background: linear-gradient(90deg, #00bfff 0%, #7ff6ff 100%);
+  color: #fff !important;
+  border: none;
+  box-shadow: 0 2px 8px #b3eaff;
+}
+.btn-primary:hover {
+  background: linear-gradient(90deg, #7ff6ff 0%, #00bfff 100%);
+  color: #fff !important;
+  box-shadow: 0 6px 18px #7ff6ff;
+}
+.btn-secondary {
+  background: #888;
+  color: #fff;
+  border-radius: 10px;
+  font-weight: 600;
+  border: none;
+  margin-left: 8px;
+  transition: background 0.3s;
+}
+.btn-secondary:hover {
+  background: #555;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #00bfff;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
+.form-control, .form-select {
+  border-radius: 12px;
+  border: 2px solid #b3eaff;
+  padding: 0.85rem 1.1rem;
+  font-size: 1.08rem;
+  background: #f8f9fa;
+  transition: all 0.3s cubic-bezier(.4,2,.6,1);
+}
+.form-control:focus, .form-select:focus {
+  border-color: #00bfff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 191, 255, 0.18);
+  background: #fff;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (max-width: 900px) {
+  .card {
+    border-radius: 10px;
+  }
+}
