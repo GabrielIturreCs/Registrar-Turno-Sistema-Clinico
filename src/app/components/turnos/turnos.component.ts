@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { User, Turno, Tratamiento, Paciente } from '../../interfaces';
+import { ChatbotService } from '../../services/ChatBot.service';
+import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
 
 @Component({
   selector: 'app-turnos',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './turnos.component.html',
   styleUrl: './turnos.component.css'
 })
@@ -17,6 +19,19 @@ export class TurnosComponent implements OnInit {
   searchTerm: string = '';
   filterEstado: string = 'todos';
   isLoading: boolean = false;
+  
+  // Chatbot properties
+  @ViewChild('chatMessages') chatMessages!: ElementRef;
+  chatOpen = false;
+  messages: ChatMessage[] = [];
+  chatForm: FormGroup;
+  isTyping = false;
+  quickQuestions: QuickQuestion[] = [
+    { text: '¿Cuáles son los horarios?', action: 'horarios' },
+    { text: '¿Qué tratamientos ofrecen?', action: 'tratamientos' },
+    { text: '¿Cómo reservo un turno?', action: 'reservar' },
+    { text: '¿Cómo cancelo un turno?', action: 'cancelar' }
+  ];
   
   // Formulario de turno
   turnoForm = {
@@ -50,7 +65,15 @@ export class TurnosComponent implements OnInit {
     ]
   };
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private fb: FormBuilder,
+    private chatbotService: ChatbotService
+  ) {
+    this.chatForm = this.fb.group({
+      message: ['', [Validators.required, Validators.minLength(1)]]
+    });
+  }
 
   ngOnInit(): void {
     this.loadUserData();
@@ -59,15 +82,149 @@ export class TurnosComponent implements OnInit {
     if (this.user?.tipoUsuario === 'paciente') {
       this.currentView = 'mis-turnos';
       this.turnoForm.pacienteId = this.user.id.toString();
+      // Agregar mensaje de bienvenida del chatbot solo para pacientes en "Mis Turnos"
+      this.addWelcomeMessage();
     }
   }
 
-  loadUserData(): void {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      this.user = JSON.parse(userStr);
+  // Chatbot methods
+  addWelcomeMessage(): void {
+    const welcomeMessage: ChatMessage = {
+      text: '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte con tus turnos?',
+      isUser: false,
+      timestamp: new Date()
+    };
+    this.messages.push(welcomeMessage);
+  }
+
+  toggleChat(): void {
+    this.chatOpen = !this.chatOpen;
+    if (this.chatOpen && this.messages.length === 0) {
+      this.addWelcomeMessage();
+    }
+  }
+
+  onSubmit(): void {
+    if (this.chatForm.valid && this.chatForm.value.message.trim()) {
+      const userMessage: ChatMessage = {
+        text: this.chatForm.value.message,
+        isUser: true,
+        timestamp: new Date()
+      };
+      
+      this.messages.push(userMessage);
+      this.handleHybridChat(userMessage.text);
+      this.chatForm.patchValue({ message: '' });
+      this.scrollToBottom();
+    }
+  }
+
+  handleQuickQuestion(question: QuickQuestion): void {
+    const userMessage: ChatMessage = {
+      text: question.text,
+      isUser: true,
+      timestamp: new Date()
+    };
+    
+    this.messages.push(userMessage);
+    this.handleHybridChat(question.action);
+    this.scrollToBottom();
+  }
+
+  private handleHybridChat(message: string): void {
+    this.isTyping = true;
+    
+    // Intentar respuesta local primero
+    const localResponse = this.getLocalResponse(message);
+    
+    if (localResponse) {
+      setTimeout(() => {
+        const botMessage: ChatMessage = {
+          text: localResponse,
+          isUser: false,
+          timestamp: new Date()
+        };
+        this.messages.push(botMessage);
+        this.isTyping = false;
+        this.scrollToBottom();
+      }, 800);
     } else {
-      this.router.navigate(['/login']);
+      // Si no hay respuesta local, usar API externa
+      this.chatbotService.sendMessage(message).subscribe({
+        next: (response) => {
+          const botMessage: ChatMessage = {
+            text: response.success ? response.message : 'Lo siento, no pude procesar tu consulta en este momento.',
+            isUser: false,
+            timestamp: new Date()
+          };
+          this.messages.push(botMessage);
+          this.isTyping = false;
+          this.scrollToBottom();
+        },
+        error: () => {
+          const errorMessage: ChatMessage = {
+            text: 'Disculpa, estoy teniendo problemas de conexión. ¿Puedes intentar más tarde?',
+            isUser: false,
+            timestamp: new Date()
+          };
+          this.messages.push(errorMessage);
+          this.isTyping = false;
+          this.scrollToBottom();
+        }
+      });
+    }
+  }
+
+  private getLocalResponse(message: string): string | null {
+    const msg = message.toLowerCase();
+    
+    const localResponses: { [key: string]: string } = {
+      'hola': '¡Hola! ¿En qué puedo ayudarte hoy?',
+      'turnos': 'Puedo ayudarte con información sobre tus turnos. ¿Quieres ver tus turnos próximos o necesitas agendar uno nuevo?',
+      'reservar': 'Para reservar un turno, puedes hacer clic en "Nuevo Turno" o decirme qué tipo de consulta necesitas.',
+      'cancelar': 'Si necesitas cancelar un turno, puedes hacerlo desde la tabla de turnos usando el botón rojo con una X.',
+      'horarios': 'Nuestros horarios de atención son de lunes a viernes de 8:00 a 18:00 y sábados de 9:00 a 13:00.',
+      'precios': 'Los precios varían según el tratamiento. Una consulta general cuesta $5000, limpieza dental $8000.',
+      'tratamientos': 'Ofrecemos: Consulta General ($5000), Limpieza Dental ($8000), Empastes ($12000), Extracciones ($15000), y Ortodoncia.',
+      'gracias': '¡De nada! ¿Hay algo más en lo que pueda ayudarte?',
+      'ayuda': 'Puedo ayudarte con: ver turnos, reservar turnos, cancelar turnos, información sobre tratamientos y precios.'
+    };
+
+    // Buscar palabras clave en el mensaje
+    for (const key in localResponses) {
+      if (msg.includes(key)) {
+        return localResponses[key];
+      }
+    }
+
+    // Respuestas contextuales más avanzadas
+    if (msg.includes('cuando') || msg.includes('cuándo')) {
+      return 'Nuestros horarios son de lunes a viernes de 8:00 a 18:00, y sábados de 9:00 a 13:00.';
+    }
+    
+    if (msg.includes('cuanto') || msg.includes('cuesta') || msg.includes('precio')) {
+      return 'Los precios varían por tratamiento: Consulta ($5000), Limpieza ($8000), Empaste ($12000), Extracción ($15000). ¿Te interesa alguno en particular?';
+    }
+
+    return null; // No hay respuesta local, usar API
+  }
+
+  private scrollToBottom(): void {
+    setTimeout(() => {
+      if (this.chatMessages) {
+        this.chatMessages.nativeElement.scrollTop = this.chatMessages.nativeElement.scrollHeight;
+      }
+    }, 100);
+  }
+
+  loadUserData(): void {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        this.user = JSON.parse(userStr);
+      } else {
+        this.router.navigate(['/login']);
+      }
     }
   }
 
