@@ -2,6 +2,7 @@ import { Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { User, Turno, Paciente } from '../../interfaces';
+// import { ReservarComponent } from '../reservar/reservar.component';
 @Component({
   selector: 'app-dashboard',
   imports: [CommonModule],
@@ -100,11 +101,19 @@ export class DashboardComponent implements OnInit {
   }
 
   navigateToEstadisticas(): void {
-    this.router.navigate(['/estadisticas']);
+    this.router.navigate(['/estadistica']);
   }
 
   navigateToPacientes(): void {
     this.router.navigate(['/pacientes']);
+  }
+
+  navigateToDentistas(): void {
+    this.router.navigate(['/dentista']);
+  }
+
+  navigateToAgenda(): void {
+    this.router.navigate(['/agenda']);
   }
 
   volverAPacientes(): void {

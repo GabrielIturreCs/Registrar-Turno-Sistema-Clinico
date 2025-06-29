@@ -45,47 +45,77 @@
   <div class="row mb-4">
     <div class="col-12">
       <div class="btn-group w-100 shadow-sm rounded-3 overflow-hidden" role="group">
-        <button 
-          type="button" 
-          class="btn btn-outline-primary py-3"
-          [class.active]="true"
-          (click)="navigateToDashboard()">
-          <i class="fas fa-home"></i> Dashboard
-        </button>
-        <button 
-          type="button" 
-          class="btn btn-outline-primary py-3"
-          (click)="navigateToReservar()">
-          <i class="fas fa-plus"></i> Registrar Turno
-        </button>
-        <button 
-          *ngIf="user?.tipoUsuario !== 'dentista'" 
-          type="button" 
-          class="btn btn-outline-primary py-3"
-          (click)="navigateToTurnos()">
-          <i class="fas fa-calendar"></i> Mis Turnos
-        </button>
-        <button 
-          *ngIf="user?.tipoUsuario === 'dentista'" 
-          type="button" 
-          class="btn btn-outline-primary py-3"
-          (click)="navigateToPacientes()">
-          <i class="bi bi-people"></i> Pacientes
-        </button>
-        <button 
-          *ngIf="user?.tipoUsuario === 'administrador' || user?.tipoUsuario === 'dentista'" 
-          type="button" 
-          class="btn btn-outline-info py-3"
-          (click)="navigateToEstadisticas()">
-          <i class="fas fa-chart-bar"></i> Estadísticas
-        </button>
-        <button 
-          *ngIf="user?.tipoUsuario === 'administrador'" 
-          type="button" 
-          class="btn btn-outline-danger py-3"
-          (click)="navigateToAdmin()">
-          <i class="fas fa-cog"></i> Administración
-        </button>
+        <ng-container *ngIf="user?.tipoUsuario === 'administrador'; else noAdminMenu">
+          <button 
+            type="button" 
+            class="btn btn-outline-primary py-3"
+            [class.active]="true"
+            (click)="navigateToDashboard()">
+            <i class="fas fa-home"></i> Dashboard
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-outline-primary py-3"
+            (click)="navigateToDentistas()">
+            <i class="bi bi-person-badge"></i> Dentistas
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-outline-danger py-3"
+            (click)="navigateToAdmin()">
+            <i class="fas fa-cog"></i> Administración
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-outline-info py-3"
+            (click)="navigateToEstadisticas()">
+            <i class="fas fa-chart-bar"></i> Estadísticas
+          </button>
+        </ng-container>
+        <ng-template #noAdminMenu>
+          <button 
+            type="button" 
+            class="btn btn-outline-primary py-3"
+            [class.active]="true"
+            (click)="navigateToDashboard()">
+            <i class="fas fa-home"></i> Dashboard
+          </button>
+          <button 
+            *ngIf="user?.tipoUsuario === 'dentista' || user?.tipoUsuario === 'paciente'"
+            type="button" 
+            class="btn btn-outline-primary py-3"
+            (click)="navigateToReservar()">
+            <i class="fas fa-plus"></i> {{ user?.tipoUsuario === 'paciente' ? 'Reservar Turno' : 'Registrar Turno' }}
+          </button>
+          <button 
+            *ngIf="user?.tipoUsuario === 'dentista'"
+            type="button" 
+            class="btn btn-outline-info py-3"
+            (click)="navigateToAgenda()">
+            <i class="fas fa-calendar-alt"></i> Agenda
+          </button>
+          <button 
+            *ngIf="user?.tipoUsuario !== 'dentista'" 
+            type="button" 
+            class="btn btn-outline-primary py-3"
+            (click)="navigateToTurnos()">
+            <i class="fas fa-calendar"></i> Mis Turnos
+          </button>
+          <button 
+            *ngIf="user?.tipoUsuario === 'dentista'" 
+            type="button" 
+            class="btn btn-outline-primary py-3"
+            (click)="navigateToPacientes()">
+            <i class="bi bi-people"></i> Pacientes
+          </button>
+          <button 
+            *ngIf="user?.tipoUsuario === 'administrador'" 
+            type="button" 
+            class="btn btn-outline-danger py-3"
+            (click)="navigateToAdmin()">
+            <i class="fas fa-cog"></i> Administración
+          </button>
+        </ng-template>
       </div>
     </div>
   </div>
