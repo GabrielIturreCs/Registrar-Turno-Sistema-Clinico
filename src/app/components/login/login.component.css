@@ -1,67 +1,122 @@
 /* Estilos para login */
 .card {
   border: none;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 18px;
+  box-shadow: 0 12px 36px rgba(0, 191, 255, 0.13);
+  background: #fff;
 }
 
 .card-header {
-  border-radius: 15px 15px 0 0 !important;
+  border-radius: 18px 18px 0 0 !important;
   border-bottom: none;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem 1rem 1.5rem;
+  background: linear-gradient(90deg, #00bfff 40%, #7ff6ff 100%);
+  box-shadow: 0 2px 8px rgba(0, 191, 255, 0.08);
+}
+
+.card-header h3 {
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 0.25rem;
+  color: #ffffff;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.card-header p {
+  font-size: 1rem;
+  opacity: 0.9;
+  color: #fff;
+  text-shadow: 0 0 5px rgba(0, 191, 255, 0.3);
 }
 
 .card-body {
-  padding: 2rem;
+  padding: 2.2rem 2rem 2rem 2rem;
 }
 
 /* Estilos para formularios */
 .form-control {
-  border-radius: 10px;
-  border: 2px solid #e9ecef;
-  padding: 0.75rem 1rem;
-  transition: all 0.3s ease;
+  border-radius: 12px;
+  border: 2px solid #b3eaff;
+  padding: 0.85rem 1.1rem;
+  font-size: 1.08rem;
+  background: #f8f9fa;
+  transition: all 0.3s cubic-bezier(.4,2,.6,1);
 }
 
 .form-control:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  border-color: #00bfff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 191, 255, 0.18);
+  background: #fff;
 }
 
 .form-label {
   font-weight: 600;
-  color: #495057;
+  color: #00bfff;
   margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
 }
 
 /* Botones */
 .btn {
-  border-radius: 10px;
-  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  padding: 0.85rem 1.5rem;
   font-weight: 600;
-  transition: all 0.3s ease;
+  font-size: 1.08rem;
+  transition: all 0.3s cubic-bezier(.4,2,.6,1);
   border: none;
 }
 
 .btn-primary {
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, #00bfff 0%, #7ff6ff 100%);
   border: none;
+  box-shadow: 0 2px 8px #b3eaff;
+  color: #fff !important;
 }
 
-.btn-primary:hover {
-  background: linear-gradient(45deg, #5a6fd8, #6a4190);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+.btn-primary:hover, .btn-primary:focus {
+  background: linear-gradient(90deg, #7ff6ff 0%, #00bfff 100%);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 18px #7ff6ff;
+  color: #fff !important;
 }
 
 .btn-link {
-  color: #667eea;
+  color: #00bfff;
   text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
 }
 
 .btn-link:hover {
-  color: #5a6fd8;
+  color: #7ff6ff;
   text-decoration: underline;
+}
+
+.btn-outline-danger {
+  border: 2px solid #ea4335;
+  color: #ea4335;
+  background: #fff;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(.4,2,.6,1);
+}
+
+.btn-outline-danger:hover, .btn-outline-danger:focus {
+  background: #ea4335;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(234, 67, 53, 0.15);
+  border-color: #ea4335;
+}
+
+.btn .spinner-border-sm {
+  margin-right: 0.5rem;
+}
+
+/* Google logo en el botón */
+.btn-outline-danger img {
+  margin-right: 10px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
 /* Spinner */
@@ -70,13 +125,72 @@
   height: 1rem;
 }
 
+/* Mensaje de error */
+.alert-danger {
+  border-radius: 8px;
+  font-size: 0.98rem;
+  margin-bottom: 1rem;
+}
+
+/* Botón volver con gradiente celeste */
+.btn-back {
+  background: linear-gradient(90deg, #00bfff 0%, #7ff6ff 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px #b3eaff;
+  border-radius: 50%;
+  transition: background 0.3s, box-shadow 0.3s, color 0.3s;
+}
+.btn-back:hover, .btn-back:focus {
+  background: linear-gradient(90deg, #7ff6ff 0%, #00bfff 100%);
+  color: #fff;
+  box-shadow: 0 6px 18px #7ff6ff;
+}
+.btn-back i {
+  color: #fff;
+  margin: 0;
+}
+
+/* Animación de entrada fadeInUp igual que home */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-animate {
+  animation: fadeInUp 1.1s cubic-bezier(.4,2,.6,1) both;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .card-body {
-    padding: 1.5rem;
+    padding: 1.2rem;
   }
-  
   .btn {
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
   }
+  .card-header {
+    padding: 1.2rem 1rem 0.8rem 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .card {
+    border-radius: 8px;
+  }
+  .card-header {
+    border-radius: 8px 8px 0 0 !important;
+  }
+}
+
+body {
+  background: linear-gradient(120deg, #e3f0ff 0%, #fbeee6 60%, #e3f0ff 100%);
+  overflow-x: hidden;
 }

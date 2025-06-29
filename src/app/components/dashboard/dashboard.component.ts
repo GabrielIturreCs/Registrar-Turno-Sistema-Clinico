@@ -1,7 +1,8 @@
 import { Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { User, Turno } from '../../interfaces';
+import { Router, ActivatedRoute } from '@angular/router';
+import { User, Turno, Paciente } from '../../interfaces';
+// import { ReservarComponent } from '../reservar/reservar.component';
 @Component({
   selector: 'app-dashboard',
   imports: [CommonModule],
@@ -11,6 +12,8 @@ import { User, Turno } from '../../interfaces';
 export class DashboardComponent implements OnInit {
   user: User | null = null;
   turnos: Turno[] = [];
+  selectedPaciente: Paciente | null = null;
+  isPacienteView: boolean = false;
 
     // Datos de prueba
     testData = {
@@ -20,12 +23,14 @@ export class DashboardComponent implements OnInit {
       { id: 3, nroTurno: 'T003', fecha: '2024-01-22', hora: '14:00', estado: 'completado', tratamiento: 'Empaste', precioFinal: 12000, nombre: 'Carlos', apellido: 'López', pacienteId: 3, tratamientoId: 3 }
     ]
   };
-  constructor(private router: Router) {}
+  constructor(private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.loadUserData();
+    this.checkPacienteView();
     this.loadTurnosData();
   }
+
   loadUserData(): void {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -35,8 +40,43 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  checkPacienteView(): void {
+    // Verificar si hay un paciente seleccionado (viene desde la vista de pacientes)
+    const selectedPacienteStr = localStorage.getItem('selectedPaciente');
+    if (selectedPacienteStr) {
+      this.selectedPaciente = JSON.parse(selectedPacienteStr);
+      this.isPacienteView = true;
+      
+      // Limpiar el localStorage después de obtener el paciente
+      localStorage.removeItem('selectedPaciente');
+    }
+
+    // También verificar si viene por query params
+    this.route.queryParams.subscribe(params => {
+      if (params['pacienteId'] && !this.selectedPaciente) {
+        // Buscar el paciente por ID en los datos de prueba
+        const pacienteId = parseInt(params['pacienteId']);
+        // Aquí podrías hacer una llamada al servicio para obtener el paciente
+        // Por ahora usamos datos de prueba
+        this.selectedPaciente = {
+          id: pacienteId,
+          nombre: 'Paciente',
+          apellido: 'Ejemplo',
+          dni: '12345678',
+          obraSocial: 'OSDE'
+        };
+        this.isPacienteView = true;
+      }
+    });
+  }
+
   loadTurnosData(): void {
     this.turnos = this.testData.turnos;
+    
+    // Si estamos viendo un paciente específico, filtrar sus turnos
+    if (this.selectedPaciente) {
+      this.turnos = this.turnos.filter(turno => turno.pacienteId === this.selectedPaciente!.id);
+    }
   }
 
   logout(): void {
@@ -47,6 +87,7 @@ export class DashboardComponent implements OnInit {
   navigateToDashboard(): void {
     this.router.navigate(['/dashboard']);
   }
+
   navigateToReservar(): void {
     this.router.navigate(['/reservarTurno']);
   }
@@ -60,8 +101,25 @@ export class DashboardComponent implements OnInit {
   }
 
   navigateToEstadisticas(): void {
-    this.router.navigate(['/estadisticas']);
+    this.router.navigate(['/estadistica']);
   }
+
+  navigateToPacientes(): void {
+    this.router.navigate(['/pacientes']);
+  }
+
+  navigateToDentistas(): void {
+    this.router.navigate(['/dentista']);
+  }
+
+  navigateToAgenda(): void {
+    this.router.navigate(['/agenda']);
+  }
+
+  volverAPacientes(): void {
+    this.router.navigate(['/pacientes']);
+  }
+
   cancelarTurno(turno: Turno): void {
     if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
       turno.estado = 'cancelado';
@@ -76,6 +134,7 @@ export class DashboardComponent implements OnInit {
   get totalTurnos(): number {
     return this.turnos.length;
   }
+
   get turnosHoy(): number {
     const today = new Date().toISOString().split('T')[0];
     return this.turnos.filter(turno => turno.fecha === today).length;
@@ -104,6 +163,15 @@ export class DashboardComponent implements OnInit {
       case 'administrador': return 'badge bg-danger';
       case 'dentista': return 'badge bg-primary';
       case 'paciente': return 'badge bg-success';
+      default: return 'badge bg-secondary';
+    }
+  }
+
+  getObraSocialClass(obraSocial: string): string {
+    switch (obraSocial.toLowerCase()) {
+      case 'osde': return 'badge bg-primary';
+      case 'swiss medical': return 'badge bg-success';
+      case 'galeno': return 'badge bg-warning';
       default: return 'badge bg-secondary';
     }
   }

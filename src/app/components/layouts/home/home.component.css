@@ -120,7 +120,6 @@
 .section-title {
   font-size: 2.5rem;
   margin-bottom: 40px;
-  /* Color degradado igual que el hero */
   background: linear-gradient(90deg, #00bfff 40%, #7ff6ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -128,7 +127,7 @@
   color: #00bfff; /* fallback */
   text-align: center;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-  text-shadow: 0 2px 8px #ffffff, 0 0 5px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 8px #b3eaff, 0 0 5px rgba(0, 191, 255, 0.13);
 }
 
 .feature-cards {
@@ -145,8 +144,8 @@
   width: 100%;
   max-width: 340px;
   min-width: 0;
-  box-shadow: 0 8px 24px rgba(0, 123, 255, 0.10), 0 2px 8px rgba(0,0,0,0.08);
-  border: 1.5px solid #b3d8ff;
+  box-shadow: 0 12px 36px rgba(0, 191, 255, 0.13), 0 2px 8px rgba(0,0,0,0.08);
+  border: 2px solid #b3eaff;
   transition: transform 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.3s;
   display: flex;
   flex-direction: column;
@@ -159,17 +158,8 @@
 
 .feature-card:hover {
   transform: translateY(-10px) scale(1.03);
-  box-shadow: 0 16px 32px rgba(0, 123, 255, 0.18), 0 4px 16px rgba(0,0,0,0.10);
-}
-
-.feature-card:nth-child(2) {
-  animation-delay: 0.5s;
-}
-.feature-card:nth-child(3) {
-  animation-delay: 0.7s;
-}
-.feature-card:nth-child(4) {
-  animation-delay: 0.9s;
+  box-shadow: 0 16px 32px rgba(0, 191, 255, 0.18), 0 4px 16px rgba(0,0,0,0.10);
+  border-color: #7ff6ff;
 }
 
 .feature-card h3 {
@@ -178,7 +168,6 @@
   font-weight: 700;
   letter-spacing: 0.5px;
   text-shadow: 0 2px 8px #e3f0ff;
-  /* Color degradado igual que el hero */
   background: linear-gradient(90deg, #00bfff 40%, #7ff6ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -203,21 +192,18 @@
   object-fit: cover;
   border-radius: 12px;
   margin-bottom: 22px;
-  border: 2px solid #b3d8ff;
-  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.10);
-}
-
-.image-placeholder {
-  height: 150px;
-  width: 100%;
-  background: #ddd;
-  border-radius: 10px;
-  margin-bottom: 20px;
+  border: 2px solid #b3eaff;
+  box-shadow: 0 4px 16px rgba(0, 191, 255, 0.10);
 }
 
 .icon {
   font-size: 2rem;
-  color: #007bff;
+  color: #00bfff !important;
+  background: linear-gradient(90deg, #00bfff 0%, #7ff6ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
 }
 
 .contact {

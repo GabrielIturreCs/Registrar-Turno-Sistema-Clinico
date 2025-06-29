@@ -105,8 +105,17 @@ export class LoginComponent implements OnInit {
         );
     }
 
+  // Método placeholder para el login con Google (solo vista)
+  loginWithGoogle() {
+    // Solo placeholder visual, la funcionalidad será implementada por el equipo de backend
+  }
+
   navigateToRegister(): void {
     this.router.navigate(['/registro']);
+  }
+
+  navigateToHome(): void {
+    this.router.navigate(['/']);
   }
 
   private redirectByUserType(tipoUsuario: string): void {
@@ -115,7 +124,7 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/dashboard']);
         break;
       case 'dentista':
-        this.router.navigate(['/agenda']);
+        this.router.navigate(['/dashboard']);
         break;
       case 'paciente':
         this.router.navigate(['/dashboard']); // Redirigir a dashboard de paciente

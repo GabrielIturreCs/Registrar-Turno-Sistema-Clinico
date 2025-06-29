@@ -159,7 +159,7 @@ export class AuthService {
         this.router.navigate(['/dashboard']);
         break;
       case 'dentista':
-        this.router.navigate(['/agenda']);
+        this.router.navigate(['/dashboard']);
         break;
       case 'paciente':
         this.router.navigate(['/misTurnos']);

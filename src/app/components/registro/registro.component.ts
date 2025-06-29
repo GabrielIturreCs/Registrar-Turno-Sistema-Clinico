@@ -81,6 +81,10 @@ export class RegistroComponent{
     this.router.navigate(['/login']);
   }
 
+  navigateToHome(): void {
+    this.router.navigate(['/']);
+  }
+
   get canRegister(): boolean {
     return this.registerForm.nombreUsuario.trim() !== '' &&
            this.registerForm.password.trim() !== '' &&

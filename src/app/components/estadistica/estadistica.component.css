@@ -1,0 +1,115 @@
+body {
+  background: linear-gradient(120deg, #e3f0ff 0%, #fbeee6 60%, #e3f0ff 100%);
+  overflow-x: hidden;
+}
+
+.card {
+  border: none;
+  border-radius: 18px;
+  box-shadow: 0 12px 36px rgba(0, 191, 255, 0.13);
+  background: #fff;
+  transition: all 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+.card-header {
+  background: linear-gradient(90deg, #00bfff 40%, #7ff6ff 100%) !important;
+  color: #fff !important;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 2px 8px rgba(0, 191, 255, 0.08);
+}
+
+.bg-primary {
+  background: linear-gradient(90deg, #00bfff 0%, #7ff6ff 100%) !important;
+}
+.bg-success {
+  background: linear-gradient(90deg, #28a745 0%, #20c997) !important;
+}
+.bg-info {
+  background: linear-gradient(90deg, #7ff6ff 0%, #00bfff) !important;
+}
+.bg-warning {
+  background: linear-gradient(90deg, #ffc107 0%, #fd7e14) !important;
+}
+
+.btn {
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+}
+.btn-outline-primary {
+  border: 2px solid #00bfff;
+  color: #00bfff;
+  background: #fff;
+}
+.btn-outline-primary:hover {
+  background: linear-gradient(90deg, #00bfff 0%, #7ff6ff 100%);
+  color: #fff;
+  border-color: #00bfff;
+  transform: translateY(-2px);
+}
+.btn-primary {
+  background: linear-gradient(90deg, #00bfff 0%, #7ff6ff 100%);
+  color: #fff !important;
+  border: none;
+  box-shadow: 0 2px 8px #b3eaff;
+}
+.btn-primary:hover {
+  background: linear-gradient(90deg, #7ff6ff 0%, #00bfff 100%);
+  color: #fff !important;
+  box-shadow: 0 6px 18px #7ff6ff;
+}
+.btn-secondary {
+  background: #888;
+  color: #fff;
+  border-radius: 10px;
+  font-weight: 600;
+  border: none;
+  margin-left: 8px;
+  transition: background 0.3s;
+}
+.btn-secondary:hover {
+  background: #555;
+}
+
+.table {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+}
+.table thead th {
+  background: linear-gradient(45deg, #00bfff, #7ff6ff);
+  color: white;
+  border: none;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+.table tbody tr {
+  transition: all 0.3s ease;
+}
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.01);
+}
+.table td {
+  vertical-align: middle;
+  border-color: #e9ecef;
+}
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #f3fafd;
+}
+.table-striped > tbody > tr:nth-of-type(even) {
+  background-color: #fff;
+}
+
+@media (max-width: 900px) {
+  .card {
+    border-radius: 10px;
+  }
+}
