@@ -102,6 +102,16 @@
   color: white;
 }
 
+.btn-secondary {
+  background: #6c757d;
+  color: #fff;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
 /* Dashboard */
 .navbar {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);

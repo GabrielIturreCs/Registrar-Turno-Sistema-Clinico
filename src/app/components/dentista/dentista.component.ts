@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { User, Turno, Tratamiento, Paciente, Estadisticas, TipoAlerta } from '../../interfaces';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dentista',
@@ -74,7 +75,7 @@ export class DentistaComponent implements OnInit {
     ] as Turno[]
   };
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
     this.loadTestData();
@@ -287,5 +288,9 @@ export class DentistaComponent implements OnInit {
       case 'paciente': return 'badge bg-success';
       default: return 'badge bg-secondary';
     }
+  }
+
+  volverAlDashboardAdmin(): void {
+    this.router.navigate(['/dashboard']);
   }
 } 
