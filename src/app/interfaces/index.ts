@@ -1,18 +1,3 @@
-// Interfaces compartidas para toda la aplicación
-
-export interface User {
-  id: number;
-  nombreUsuario: string;
-  nombre: string;
-  apellido: string;
-  tipoUsuario: string;
-  dni?: string;
-  telefono?: string;
-  direccion?: string;
-  obraSocial?: string;
-  email?: string;
-}
-
 export interface Usuario {
   id: string;
   nombreUsuario: string;
@@ -25,6 +10,9 @@ export interface Usuario {
   obraSocial?: string;
   email?: string;
 }
+
+// Alias for Usuario to maintain compatibility with existing code
+export interface User extends Usuario {}
 
 export interface Turno {
   id: number;
@@ -62,7 +50,7 @@ export interface Paciente {
 export interface LoginForm {
   nombreUsuario: string;
   password: string;
-  email?: string;
+  email: string;
 }
 
 export interface RegisterForm {
@@ -76,7 +64,7 @@ export interface RegisterForm {
   dni: string;
   tipoUsuario: string;
   obraSocial: string;
-  email?: string;
+  email: string;
 }
 
 export interface TurnoForm {
