@@ -1,4 +1,6 @@
-export interface Usuario {
+// Interfaces compartidas para toda la aplicación
+
+export interface User {
   id: string;
   nombreUsuario: string;
   nombre: string;
@@ -10,9 +12,6 @@ export interface Usuario {
   obraSocial?: string;
   email?: string;
 }
-
-// Alias for Usuario to maintain compatibility with existing code
-export interface User extends Usuario {}
 
 export interface Turno {
   id: number;
