@@ -16,9 +16,9 @@ export class AdministradorComponent implements OnInit{
   filterTipo: string = 'todos';
 
   usuarios: User[] = [
-    { id: 1, nombreUsuario: 'admin', nombre: 'Administrador', apellido: 'Sistema', tipoUsuario: 'administrador', dni: '12345678', telefono: '111111111' },
-    { id: 2, nombreUsuario: 'dr.garcia', nombre: 'María', apellido: 'García', tipoUsuario: 'dentista', dni: '87654321', telefono: '222222222' },
-    { id: 3, nombreUsuario: 'juan.perez', nombre: 'Juan', apellido: 'Pérez', tipoUsuario: 'paciente', dni: '11223344', telefono: '333333333', obraSocial: 'OSDE' }
+    { id: '1', nombreUsuario: 'admin', nombre: 'Administrador', apellido: 'Sistema', tipoUsuario: 'administrador', dni: '12345678', telefono: '111111111' },
+    { id: '2', nombreUsuario: 'dr.garcia', nombre: 'María', apellido: 'García', tipoUsuario: 'dentista', dni: '87654321', telefono: '222222222' },
+    { id: '3', nombreUsuario: 'juan.perez', nombre: 'Juan', apellido: 'Pérez', tipoUsuario: 'paciente', dni: '11223344', telefono: '333333333', obraSocial: 'OSDE' }
   ];
 
   constructor(private router: Router) {}

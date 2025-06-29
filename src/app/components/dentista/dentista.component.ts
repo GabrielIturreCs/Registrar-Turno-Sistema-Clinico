@@ -45,11 +45,11 @@ export class DentistaComponent implements OnInit {
   // Datos de prueba para dentistas
   testData = {
     usuarios: [
-      { id: 1, nombreUsuario: 'admin', password: 'password', nombre: 'Admin', apellido: 'Sistema', tipoUsuario: 'administrador', dni: '00000000', telefono: '1100000000' },
-      { id: 2, nombreUsuario: 'dentista1', password: 'password', nombre: 'Dr. María', apellido: 'González', tipoUsuario: 'dentista', dni: '12345678', telefono: '123456789' },
-      { id: 3, nombreUsuario: 'dentista2', password: 'password', nombre: 'Dr. Carlos', apellido: 'López', tipoUsuario: 'dentista', dni: '23456789', telefono: '234567890' },
-      { id: 4, nombreUsuario: 'dentista3', password: 'password', nombre: 'Dra. Ana', apellido: 'Martínez', tipoUsuario: 'dentista', dni: '34567890', telefono: '345678901' },
-      { id: 5, nombreUsuario: 'paciente1', password: 'password', nombre: 'Juan', apellido: 'Pérez', tipoUsuario: 'paciente', dni: '87654321', telefono: '987654321', obraSocial: 'OSDE' }
+      { id: '1', nombreUsuario: 'admin', password: 'password', nombre: 'Admin', apellido: 'Sistema', tipoUsuario: 'administrador', dni: '00000000', telefono: '1100000000' },
+      { id: '2', nombreUsuario: 'dentista1', password: 'password', nombre: 'Dr. María', apellido: 'González', tipoUsuario: 'dentista', dni: '12345678', telefono: '123456789' },
+      { id: '3', nombreUsuario: 'dentista2', password: 'password', nombre: 'Dr. Carlos', apellido: 'López', tipoUsuario: 'dentista', dni: '23456789', telefono: '234567890' },
+      { id: '4', nombreUsuario: 'dentista3', password: 'password', nombre: 'Dra. Ana', apellido: 'Martínez', tipoUsuario: 'dentista', dni: '34567890', telefono: '345678901' },
+      { id: '5', nombreUsuario: 'paciente1', password: 'password', nombre: 'Juan', apellido: 'Pérez', tipoUsuario: 'paciente', dni: '87654321', telefono: '987654321', obraSocial: 'OSDE' }
     ],
     tratamientos: [
       { id: 1, descripcion: 'Consulta General', precio: 5000, duracion: 30 },
@@ -81,7 +81,7 @@ export class DentistaComponent implements OnInit {
     this.loadTestData();
     // Simular usuario dentista logueado
     this.user = {
-      id: 2,
+      id: '2',
       nombreUsuario: 'dentista1',
       nombre: 'Dr. María',
       apellido: 'González',

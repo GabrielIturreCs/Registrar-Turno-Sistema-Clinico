@@ -25,7 +25,8 @@ export class RegistroComponent{
     direccion: '',
     dni: '',
     tipoUsuario: 'paciente',
-    obraSocial: ''
+    obraSocial: '',
+    email: ''
   };
 
   constructor(private router: Router,
