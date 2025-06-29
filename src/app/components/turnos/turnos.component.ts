@@ -55,11 +55,11 @@ export class TurnosComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserData();
     this.loadTurnosData();
-
-
-  if (this.user?.tipoUsuario === 'paciente') {
-    this.turnoForm.pacienteId = this.user.id.toString();
-  }
+    // Si el usuario es paciente, mostrar directamente "Mis Turnos"
+    if (this.user?.tipoUsuario === 'paciente') {
+      this.currentView = 'mis-turnos';
+      this.turnoForm.pacienteId = this.user.id.toString();
+    }
   }
 
   loadUserData(): void {
@@ -132,6 +132,7 @@ export class TurnosComponent implements OnInit {
   cancelarTurno(turno: Turno): void {
     if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
       turno.estado = 'cancelado';
+      // Mensaje de feedback visual
       alert('Turno cancelado exitosamente');
     }
   }
@@ -171,6 +172,7 @@ export class TurnosComponent implements OnInit {
   }
 
   getStatusClass(estado: string): string {
+    // Mejorar visualización de estados con badges de colores
     switch (estado) {
       case 'reservado': return 'badge bg-primary';
       case 'completado': return 'badge bg-success';

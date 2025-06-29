@@ -1,12 +1,12 @@
-<div *ngIf="currentView === 'register'" class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
-    <div class="card shadow-lg" style="max-width: 600px; width: 100%;">
+<div *ngIf="currentView === 'register'" class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light registro-animate px-2 px-md-0">
+    <div class="card shadow-lg w-100" style="max-width: 600px; min-width: 0;">
       <div class="card-header text-center bg-success text-white">
         <h3><i class="fas fa-user-plus"></i> Registro de Usuario</h3>
       </div>
       <div class="card-body">
-        <form #registerFormRef="ngForm" (ngSubmit)="register()">
-          <div class="row">
-            <div class="col-md-6 mb-3">
+        <form #registerFormRef="ngForm" (ngSubmit)="register()" autocomplete="off">
+          <div class="row g-2">
+            <div class="col-12 col-md-6 mb-3">
               <label for="regTipoUsuario" class="form-label">Tipo de Usuario</label>
               <select 
                 class="form-select" 
@@ -19,7 +19,7 @@
                 <option value="administrador">Administrador</option>
               </select>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-12 col-md-6 mb-3">
               <label for="regUsuario" class="form-label">Nombre de Usuario</label>
               <input 
                 type="text" 
@@ -32,8 +32,8 @@
             </div>
           </div>
 
-          <div class="row">
-            <div class="col-md-6 mb-3">
+          <div class="row g-2">
+            <div class="col-12 col-md-6 mb-3">
               <label for="regNombre" class="form-label">Nombre</label>
               <input 
                 type="text" 
@@ -44,7 +44,7 @@
                 required
                 placeholder="Tu nombre">
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-12 col-md-6 mb-3">
               <label for="regApellido" class="form-label">Apellido</label>
               <input 
                 type="text" 
@@ -57,8 +57,8 @@
             </div>
           </div>
 
-          <div class="row">
-            <div class="col-md-6 mb-3">
+          <div class="row g-2">
+            <div class="col-12 col-md-6 mb-3">
               <label for="regDni" class="form-label">DNI</label>
               <input 
                 type="text" 
@@ -69,7 +69,7 @@
                 required
                 placeholder="12345678">
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-12 col-md-6 mb-3">
               <label for="regTelefono" class="form-label">Teléfono</label>
               <input 
                 type="tel" 
@@ -110,8 +110,8 @@
               placeholder="Tu dirección completa">
           </div>
 
-          <div class="row">
-            <div class="col-md-6 mb-3">
+          <div class="row g-2">
+            <div class="col-12 col-md-6 mb-3">
               <label for="regPassword" class="form-label">Contraseña</label>
               <input 
                 type="password" 
@@ -122,7 +122,7 @@
                 required
                 placeholder="Contraseña segura">
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-12 col-md-6 mb-3">
               <label for="regConfirmPassword" class="form-label">Confirmar Contraseña</label>
               <input 
                 type="password" 
@@ -136,13 +136,13 @@
           </div>
 
           <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <button type="button" class="btn btn-secondary me-md-2" (click)="navigateToLogin()">
+            <button type="button" class="btn btn-secondary me-md-2" (click)="navigateToHome()">
               Cancelar
             </button>
             <button 
               type="submit" 
               class="btn btn-success"
-              [disabled]="!canRegister || isLoading">
+              [disabled]="!registerFormRef.form.valid || isLoading">
               <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
               {{ isLoading ? 'Registrando...' : 'Registrar' }}
             </button>

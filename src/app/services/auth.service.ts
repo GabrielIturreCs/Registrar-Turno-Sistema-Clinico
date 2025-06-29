@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { User } from '../interfaces';
 
-export interface User {
+/*export interface User {
   id: number;
   nombreUsuario: string;
   nombre: string;
@@ -12,7 +14,7 @@ export interface User {
   telefono?: string;
   direccion?: string;
   obraSocial?: string;
-}
+}*/
 
 @Injectable({
   providedIn: 'root'
@@ -22,15 +24,18 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   // Datos de prueba
-  private testData = {
+  /*private testData = {
     usuarios: [
       { id: 1, nombreUsuario: 'admin', password: 'password', nombre: 'Admin', apellido: 'Sistema', tipoUsuario: 'administrador', dni: '00000000', telefono: '1100000000' },
       { id: 2, nombreUsuario: 'dentista', password: 'password', nombre: 'Dr. María', apellido: 'González', tipoUsuario: 'dentista', dni: '12345678', telefono: '123456789' },
       { id: 3, nombreUsuario: 'paciente1', password: 'password', nombre: 'Juan', apellido: 'Pérez', tipoUsuario: 'paciente', dni: '87654321', telefono: '987654321', obraSocial: 'OSDE' }
     ]
-  };
+  };*/
 
-  constructor(private router: Router) {
+  hostBase: string;
+
+  constructor(private router: Router,private _http: HttpClient) {
+    this.hostBase = "http://localhost:3000/api/usuario/";
     this.loadUserFromStorage();
   }
 
@@ -42,7 +47,7 @@ export class AuthService {
     }
   }
 
-  login(nombreUsuario: string, password: string): Promise<boolean> {
+  /*login(nombreUsuario: string, password: string): Promise<boolean> {
     return new Promise((resolve) => {
       setTimeout(() => {
         const foundUser = this.testData.usuarios.find(u => 
@@ -73,9 +78,23 @@ export class AuthService {
         }
       }, 1000);
     });
+  }*/
+  public login(nombreUsuario: string, password: string):Observable<any> 
+  { 
+     const httpOption = { 
+       headers: new HttpHeaders({ 
+         'Content-Type': 'application/json' 
+       }) 
+     } 
+     let body = JSON.stringify({ 
+      nombreUsuario: nombreUsuario, 
+       password: password 
+     }); 
+     console.log(body); 
+     return this._http.post(this.hostBase + 'login', body, httpOption); 
   }
 
-  register(userData: any): Promise<boolean> {
+ /* register(userData: any): Promise<boolean> {
     return new Promise((resolve) => {
       setTimeout(() => {
         // Verificar si el usuario ya existe
@@ -107,7 +126,7 @@ export class AuthService {
         resolve(true);
       }, 1000);
     });
-  }
+  }*/
 
   logout(): void {
     localStorage.clear();
@@ -140,7 +159,7 @@ export class AuthService {
         this.router.navigate(['/dashboard']);
         break;
       case 'dentista':
-        this.router.navigate(['/agenda']);
+        this.router.navigate(['/dashboard']);
         break;
       case 'paciente':
         this.router.navigate(['/misTurnos']);
