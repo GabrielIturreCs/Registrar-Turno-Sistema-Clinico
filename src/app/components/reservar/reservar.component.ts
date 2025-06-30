@@ -4,6 +4,9 @@ import { FormsModule, FormBuilder, FormGroup, Validators, ReactiveFormsModule } 
 import { Router } from '@angular/router';
 import { ChatbotService } from '../../services/ChatBot.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
+import { TurnoService } from '../../services/turno.service';
+import { PacienteService } from '../../services/paciente.service';
+import { Tratamiento } from '../../interfaces';
 
 interface User {
   id: number;
@@ -11,13 +14,6 @@ interface User {
   nombre: string;
   apellido: string;
   tipoUsuario: string;
-}
-
-interface Tratamiento {
-  id: number;
-  descripcion: string;
-  precio: number;
-  duracion: number;
 }
 
 interface Paciente {
@@ -61,26 +57,12 @@ export class ReservarComponent implements OnInit {
   tratamientos: Tratamiento[] = [];
   pacientes: Paciente[] = [];
 
-  // Datos de prueba
-  testData = {
-    tratamientos: [
-      { id: 1, descripcion: 'Consulta General', precio: 5000, duracion: 30 },
-      { id: 2, descripcion: 'Limpieza Dental', precio: 8000, duracion: 45 },
-      { id: 3, descripcion: 'Empaste', precio: 12000, duracion: 60 },
-      { id: 4, descripcion: 'Extracción', precio: 15000, duracion: 30 },
-      { id: 5, descripcion: 'Ortodoncia - Consulta', precio: 10000, duracion: 45 }
-    ],
-    pacientes: [
-      { id: 1, nombre: 'Juan', apellido: 'Pérez', dni: '87654321', obraSocial: 'OSDE' },
-      { id: 2, nombre: 'María', apellido: 'García', dni: '20123456', obraSocial: 'Swiss Medical' },
-      { id: 3, nombre: 'Carlos', apellido: 'López', dni: '25789123', obraSocial: 'OSDE' }
-    ]
-  };
-
   constructor(
     private router: Router,
     private fb: FormBuilder,
-    private chatbotService: ChatbotService
+    private chatbotService: ChatbotService,
+    private turnoService: TurnoService,
+    private pacienteService: PacienteService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -89,7 +71,8 @@ export class ReservarComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUserData();
-    this.loadData();
+    this.loadPacientes();
+    this.loadTratamientos();
     this.addWelcomeMessage();
   }
 
@@ -239,43 +222,40 @@ export class ReservarComponent implements OnInit {
     }
   }
 
-  loadData(): void {
-    this.tratamientos = this.testData.tratamientos;
-    this.pacientes = this.testData.pacientes;
+  loadPacientes(): void {
+    this.pacienteService.getPacientes().subscribe({
+      next: (pacientes) => this.pacientes = pacientes,
+      error: () => this.pacientes = []
+    });
+  }
+
+  loadTratamientos(): void {
+    this.turnoService.getTratamientos().subscribe({
+      next: (tratamientos) => this.tratamientos = tratamientos,
+      error: () => this.tratamientos = []
+    });
   }
 
   registrarTurno(): void {
     if (!this.canRegisterTurno) return;
-
     this.isLoading = true;
-
-    // Simular registro de turno
-    setTimeout(() => {
-      const tratamiento = this.tratamientos.find(t => t.id === Number(this.turnoForm.tratamientoId));
-      const paciente = this.pacientes.find(p => p.id === Number(this.turnoForm.pacienteId));
-
-      if (tratamiento) {
-        const nuevoTurno = {
-          id: Date.now(),
-          nroTurno: 'T' + String(Date.now()).slice(-4),
-          fecha: this.turnoForm.fecha,
-          hora: this.turnoForm.hora,
-          estado: 'reservado',
-          tratamiento: tratamiento.descripcion,
-          precioFinal: tratamiento.precio,
-          nombre: paciente?.nombre || this.user?.nombre,
-          apellido: paciente?.apellido || this.user?.apellido,
-          pacienteId: Number(this.turnoForm.pacienteId) || this.user?.id,
-          tratamientoId: Number(this.turnoForm.tratamientoId)
-        };
-
-        console.log('Turno registrado:', nuevoTurno);
+    const turnoData = {
+      pacienteId: this.user?.tipoUsuario === 'paciente' ? this.user.id : parseInt(this.turnoForm.pacienteId),
+      fecha: this.turnoForm.fecha,
+      hora: this.turnoForm.hora,
+      tratamientoId: parseInt(this.turnoForm.tratamientoId)
+    };
+    this.turnoService.createTurno(turnoData).subscribe({
+      next: () => {
+        this.isLoading = false;
         alert('¡Turno registrado exitosamente!');
         this.router.navigate(['/dashboard']);
+      },
+      error: () => {
+        this.isLoading = false;
+        alert('Error al registrar el turno');
       }
-      
-      this.isLoading = false;
-    }, 1000);
+    });
   }
 
   navigateToDashboard(): void {

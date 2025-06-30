@@ -405,12 +405,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   loadTurnosData(): void {
-    this.turnos = this.testData.turnos;
-    
-    // Si estamos viendo un paciente específico, filtrar sus turnos
-    if (this.selectedPaciente) {
-      this.turnos = this.turnos.filter(turno => turno.pacienteId === this.selectedPaciente!.id);
-    }
+    this.turnoService.getTurnosFromAPI().subscribe({
+      next: (turnos) => {
+        if (this.selectedPaciente) {
+          this.turnos = turnos.filter(turno => turno.pacienteId === this.selectedPaciente!.id);
+        } else {
+          this.turnos = turnos;
+        }
+      },
+      error: () => {
+        this.turnos = [];
+      }
+    });
   }
 
   logout(): void {
@@ -456,8 +462,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   cancelarTurno(turno: Turno): void {
     if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
-      turno.estado = 'cancelado';
-      alert('Turno cancelado exitosamente');
+      this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'cancelado').subscribe({
+        next: () => {
+          this.loadTurnosData();
+          alert('Turno cancelado exitosamente');
+        },
+        error: () => alert('Error al cancelar el turno')
+      });
     }
   }
 

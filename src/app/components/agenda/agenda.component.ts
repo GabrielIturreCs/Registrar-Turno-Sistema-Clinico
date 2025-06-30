@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { User, Turno } from '../../interfaces';
+import { TurnoService } from '../../services/turno.service';
+import { PacienteService } from '../../services/paciente.service';
+import { Tratamiento } from '../../interfaces';
 
 @Component({
   selector: 'app-agenda',
@@ -17,82 +20,12 @@ export class AgendaComponent implements OnInit {
   searchTerm: string = '';
   filterEstado: string = 'todos';
 
-  // Datos de prueba
-  testData = {
-    turnos: [
-      { 
-        id: 1, 
-        nroTurno: 'T001', 
-        fecha: '2024-01-20', 
-        hora: '09:00', 
-        estado: 'reservado', 
-        tratamiento: 'Consulta General', 
-        precioFinal: 5000, 
-        nombre: 'Juan', 
-        apellido: 'Pérez', 
-        dni: '87654321',
-        telefono: '123456789',
-        duracion: 30,
-        pacienteId: 1, 
-        tratamientoId: 1 
-      },
-      { 
-        id: 2, 
-        nroTurno: 'T002', 
-        fecha: '2024-01-20', 
-        hora: '10:30', 
-        estado: 'reservado', 
-        tratamiento: 'Limpieza Dental', 
-        precioFinal: 8000, 
-        nombre: 'María', 
-        apellido: 'García', 
-        dni: '20123456',
-        telefono: '987654321',
-        duracion: 45,
-        pacienteId: 2, 
-        tratamientoId: 2 
-      },
-      { 
-        id: 3, 
-        nroTurno: 'T003', 
-        fecha: '2024-01-20', 
-        hora: '14:00', 
-        estado: 'completado', 
-        tratamiento: 'Empaste', 
-        precioFinal: 12000, 
-        nombre: 'Carlos', 
-        apellido: 'López', 
-        dni: '25789123',
-        telefono: '555666777',
-        duracion: 60,
-        pacienteId: 3, 
-        tratamientoId: 3 
-      },
-      { 
-        id: 4, 
-        nroTurno: 'T004', 
-        fecha: '2024-01-20', 
-        hora: '16:00', 
-        estado: 'cancelado', 
-        tratamiento: 'Extracción', 
-        precioFinal: 15000, 
-        nombre: 'Ana', 
-        apellido: 'Martínez', 
-        dni: '32165498',
-        telefono: '111222333',
-        duracion: 30,
-        pacienteId: 4, 
-        tratamientoId: 4 
-      }
-    ]
-  };
-
-  constructor(private router: Router) {}
+  constructor(private router: Router, private turnoService: TurnoService, private pacienteService: PacienteService) {}
 
   ngOnInit(): void {
     this.loadUserData();
-    this.loadTurnosData();
     this.selectedDate = new Date().toISOString().split('T')[0];
+    this.loadTurnosData();
   }
 
   loadUserData(): void {
@@ -108,12 +41,18 @@ export class AgendaComponent implements OnInit {
   }
 
   loadTurnosData(): void {
-    this.turnos = this.testData.turnos;
+    this.turnoService.getTurnosFromAPI().subscribe({
+      next: (turnos) => {
+        this.turnos = turnos.filter(t => t.fecha === this.selectedDate);
+      },
+      error: () => {
+        this.turnos = [];
+      }
+    });
   }
 
   onDateChange(): void {
-    // Aquí podrías cargar los turnos de la fecha seleccionada desde el backend
-    console.log('Fecha seleccionada:', this.selectedDate);
+    this.loadTurnosData();
   }
 
   navigateToDashboard(): void {
@@ -126,8 +65,13 @@ export class AgendaComponent implements OnInit {
 
   completarTurno(turno: Turno): void {
     if (confirm('¿Confirmar que el turno ha sido completado?')) {
-      turno.estado = 'completado';
-      alert('Turno marcado como completado');
+      this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'completado').subscribe({
+        next: () => {
+          this.loadTurnosData();
+          alert('Turno marcado como completado');
+        },
+        error: () => alert('Error al completar el turno')
+      });
     }
   }
 
@@ -138,8 +82,13 @@ export class AgendaComponent implements OnInit {
 
   cancelarTurno(turno: Turno): void {
     if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
-      turno.estado = 'cancelado';
-      alert('Turno cancelado exitosamente');
+      this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'cancelado').subscribe({
+        next: () => {
+          this.loadTurnosData();
+          alert('Turno cancelado exitosamente');
+        },
+        error: () => alert('Error al cancelar el turno')
+      });
     }
   }
 

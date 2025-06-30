@@ -40,16 +40,6 @@ export class PacientesComponent implements OnInit {
 
   loadPacientes(): void {
     this.isLoading = true;
-    
-    // Usar datos de prueba por ahora
-    setTimeout(() => {
-      this.pacientes = this.testData.pacientes;
-      this.pacientesFiltrados = this.pacientes;
-      this.isLoading = false;
-    }, 500);
-
-    // Cuando el backend esté listo, usar esto:
-    /*
     this.pacienteService.getPacientes().subscribe(
       (pacientes) => {
         this.pacientes = pacientes;
@@ -61,7 +51,6 @@ export class PacientesComponent implements OnInit {
         this.isLoading = false;
       }
     );
-    */
   }
 
   filterPacientes(): void {
@@ -105,5 +94,9 @@ export class PacientesComponent implements OnInit {
       case 'galeno': return 'badge bg-warning';
       default: return 'badge bg-secondary';
     }
+  }
+
+  navigateToTratamientos(): void {
+    this.router.navigate(['/tratamiento']);
   }
 }

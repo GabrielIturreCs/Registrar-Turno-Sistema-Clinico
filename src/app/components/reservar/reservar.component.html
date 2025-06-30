@@ -8,7 +8,11 @@
             <h5><i class="fas fa-plus"></i> Registrar Nuevo Turno</h5>
           </div>
           <div class="card-body">
-            <form #turnoFormRef="ngForm" (ngSubmit)="registrarTurno()">
+            <div *ngIf="isLoading" class="text-center py-4">
+              <span class="spinner-border text-primary" role="status"></span>
+              <div class="mt-2">Registrando turno...</div>
+            </div>
+            <form *ngIf="!isLoading" #turnoFormRef="ngForm" (ngSubmit)="registrarTurno()">
               <!-- Selección de paciente (solo para dentista/admin) -->
               <div *ngIf="user?.tipoUsuario !== 'paciente'" class="mb-3">
                 <label for="turnoSelectPaciente" class="form-label">Paciente</label>

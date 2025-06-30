@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { User, Turno, Tratamiento, Paciente } from '../../interfaces';
 import { ChatbotService } from '../../services/ChatBot.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
+import { TurnoService } from '../../services/turno.service';
+import { PacienteService } from '../../services/paciente.service';
 
 @Component({
   selector: 'app-turnos',
@@ -42,33 +44,16 @@ export class TurnosComponent implements OnInit {
   };
 
   // Datos de prueba
-  pacientes: Paciente[] = [
-    { id: 1, nombre: 'Juan', apellido: 'Pérez', dni: '87654321', obraSocial: 'OSDE', telefono: '123456789' },
-    { id: 2, nombre: 'María', apellido: 'García', dni: '20123456', obraSocial: 'Swiss Medical', telefono: '987654321' },
-    { id: 3, nombre: 'Carlos', apellido: 'López', dni: '25789123', obraSocial: 'OSDE', telefono: '555666777' }
-  ];
+  pacientes: Paciente[] = [];
 
-  tratamientos: Tratamiento[] = [
-    { id: 1, descripcion: 'Consulta General', precio: 5000, duracion: 30 },
-    { id: 2, descripcion: 'Limpieza Dental', precio: 8000, duracion: 45 },
-    { id: 3, descripcion: 'Empaste', precio: 12000, duracion: 60 },
-    { id: 4, descripcion: 'Extracción', precio: 15000, duracion: 30 },
-    { id: 5, descripcion: 'Ortodoncia - Consulta', precio: 10000, duracion: 45 }
-  ];
-
-  testData = {
-    turnos: [
-      { id: 1, nroTurno: 'T001', fecha: '2024-01-20', hora: '09:00', estado: 'reservado', tratamiento: 'Consulta General', precioFinal: 5000, nombre: 'Juan', apellido: 'Pérez', pacienteId: 1, tratamientoId: 1 },
-      { id: 2, nroTurno: 'T002', fecha: '2024-01-21', hora: '10:30', estado: 'reservado', tratamiento: 'Limpieza Dental', precioFinal: 8000, nombre: 'María', apellido: 'García', pacienteId: 2, tratamientoId: 2 },
-      { id: 3, nroTurno: 'T003', fecha: '2024-01-22', hora: '14:00', estado: 'completado', tratamiento: 'Empaste', precioFinal: 12000, nombre: 'Carlos', apellido: 'López', pacienteId: 3, tratamientoId: 3 },
-      { id: 4, nroTurno: 'T004', fecha: '2024-01-23', hora: '16:00', estado: 'cancelado', tratamiento: 'Extracción', precioFinal: 15000, nombre: 'Ana', apellido: 'Martínez', pacienteId: 4, tratamientoId: 4 }
-    ]
-  };
+  tratamientos: Tratamiento[] = [];
 
   constructor(
     private router: Router,
     private fb: FormBuilder,
-    private chatbotService: ChatbotService
+    private chatbotService: ChatbotService,
+    private turnoService: TurnoService,
+    private pacienteService: PacienteService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -78,11 +63,11 @@ export class TurnosComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserData();
     this.loadTurnosData();
-    // Si el usuario es paciente, mostrar directamente "Mis Turnos"
+    this.loadPacientes();
+    this.loadTratamientos();
     if (this.user?.tipoUsuario === 'paciente') {
       this.currentView = 'mis-turnos';
       this.turnoForm.pacienteId = this.user.id.toString();
-      // Agregar mensaje de bienvenida del chatbot solo para pacientes en "Mis Turnos"
       this.addWelcomeMessage();
     }
   }
@@ -229,7 +214,31 @@ export class TurnosComponent implements OnInit {
   }
 
   loadTurnosData(): void {
-    this.turnos = this.testData.turnos;
+    this.isLoading = true;
+    this.turnoService.getTurnosFromAPI().subscribe({
+      next: (turnos) => {
+        this.turnos = turnos;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.turnos = [];
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadPacientes(): void {
+    this.pacienteService.getPacientes().subscribe({
+      next: (pacientes) => this.pacientes = pacientes,
+      error: () => this.pacientes = []
+    });
+  }
+
+  loadTratamientos(): void {
+    this.turnoService.getTratamientos().subscribe({
+      next: (tratamientos) => this.tratamientos = tratamientos,
+      error: () => this.tratamientos = []
+    });
   }
 
   navigateToDashboard(): void {
@@ -246,37 +255,26 @@ export class TurnosComponent implements OnInit {
 
   registrarTurno(): void {
     if (!this.canRegisterTurno) return;
-
     this.isLoading = true;
-
-    // Simular registro de turno
-    setTimeout(() => {
-      const newTurno: Turno = {
-        id: this.turnos.length + 1,
-        nroTurno: 'T' + String(this.turnos.length + 1).padStart(3, '0'),
-        fecha: this.turnoForm.fecha,
-        hora: this.turnoForm.hora,
-        estado: 'reservado',
-        tratamiento: this.tratamientos.find(t => t.id === parseInt(this.turnoForm.tratamientoId))?.descripcion || '',
-        precioFinal: this.tratamientos.find(t => t.id === parseInt(this.turnoForm.tratamientoId))?.precio || 0,
-        pacienteId: parseInt(this.turnoForm.pacienteId),
-        tratamientoId: parseInt(this.turnoForm.tratamientoId)
-      };
-
-      this.turnos.push(newTurno);
-      
-      // Limpiar formulario
-      this.turnoForm = {
-        pacienteId: '',
-        fecha: '',
-        hora: '',
-        tratamientoId: ''
-      };
-
-      this.currentView = 'turnos';
-      this.isLoading = false;
-      alert('Turno registrado exitosamente');
-    }, 1000);
+    const turnoData = {
+      pacienteId: parseInt(this.turnoForm.pacienteId),
+      fecha: this.turnoForm.fecha,
+      hora: this.turnoForm.hora,
+      tratamientoId: parseInt(this.turnoForm.tratamientoId)
+    };
+    this.turnoService.createTurno(turnoData).subscribe({
+      next: () => {
+        this.loadTurnosData();
+        this.turnoForm = { pacienteId: '', fecha: '', hora: '', tratamientoId: '' };
+        this.currentView = 'turnos';
+        this.isLoading = false;
+        alert('Turno registrado exitosamente');
+      },
+      error: () => {
+        this.isLoading = false;
+        alert('Error al registrar el turno');
+      }
+    });
   }
 
   get canRegisterTurno(): boolean {
@@ -288,16 +286,25 @@ export class TurnosComponent implements OnInit {
 
   cancelarTurno(turno: Turno): void {
     if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
-      turno.estado = 'cancelado';
-      // Mensaje de feedback visual
-      alert('Turno cancelado exitosamente');
+      this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'cancelado').subscribe({
+        next: () => {
+          this.loadTurnosData();
+          alert('Turno cancelado exitosamente');
+        },
+        error: () => alert('Error al cancelar el turno')
+      });
     }
   }
 
   completarTurno(turno: Turno): void {
     if (confirm('¿Confirmar que el turno ha sido completado?')) {
-      turno.estado = 'completado';
-      alert('Turno marcado como completado');
+      this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'completado').subscribe({
+        next: () => {
+          this.loadTurnosData();
+          alert('Turno marcado como completado');
+        },
+        error: () => alert('Error al completar el turno')
+      });
     }
   }
 

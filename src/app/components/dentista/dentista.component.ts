@@ -4,6 +4,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { User, Turno, Tratamiento, Paciente, Estadisticas, TipoAlerta } from '../../interfaces';
 import { Router } from '@angular/router';
+import { TurnoService } from '../../services/turno.service';
+import { PacienteService } from '../../services/paciente.service';
 
 @Component({
   selector: 'app-dentista',
@@ -52,13 +54,13 @@ export class DentistaComponent implements OnInit {
       { id: '5', nombreUsuario: 'paciente1', password: 'password', nombre: 'Juan', apellido: 'Pérez', tipoUsuario: 'paciente', dni: '87654321', telefono: '987654321', obraSocial: 'OSDE' }
     ],
     tratamientos: [
-      { id: 1, descripcion: 'Consulta General', precio: 5000, duracion: 30 },
-      { id: 2, descripcion: 'Limpieza Dental', precio: 8000, duracion: 45 },
-      { id: 3, descripcion: 'Empaste', precio: 12000, duracion: 60 },
-      { id: 4, descripcion: 'Extracción', precio: 15000, duracion: 30 },
-      { id: 5, descripcion: 'Ortodoncia - Consulta', precio: 10000, duracion: 45 },
-      { id: 6, descripcion: 'Blanqueamiento', precio: 20000, duracion: 90 },
-      { id: 7, descripcion: 'Endodoncia', precio: 25000, duracion: 120 }
+      { id: 1, nroTratamiento: 1, descripcion: 'Consulta General', precio: 5000, duracion: '30', historial: 'N/A' },
+      { id: 2, nroTratamiento: 2, descripcion: 'Limpieza Dental', precio: 8000, duracion: '45', historial: 'N/A' },
+      { id: 3, nroTratamiento: 3, descripcion: 'Empaste', precio: 12000, duracion: '60', historial: 'N/A' },
+      { id: 4, nroTratamiento: 4, descripcion: 'Extracción', precio: 15000, duracion: '30', historial: 'N/A' },
+      { id: 5, nroTratamiento: 5, descripcion: 'Ortodoncia - Consulta', precio: 10000, duracion: '45', historial: 'N/A' },
+      { id: 6, nroTratamiento: 6, descripcion: 'Blanqueamiento', precio: 20000, duracion: '90', historial: 'N/A' },
+      { id: 7, nroTratamiento: 7, descripcion: 'Endodoncia', precio: 25000, duracion: '120', historial: 'N/A' }
     ],
     pacientes: [
       { id: 1, nombre: 'Juan', apellido: 'Pérez', dni: '87654321', obraSocial: 'OSDE', telefono: '987654321' },
@@ -75,11 +77,10 @@ export class DentistaComponent implements OnInit {
     ] as Turno[]
   };
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private turnoService: TurnoService, private pacienteService: PacienteService) {}
 
   ngOnInit(): void {
     this.loadTestData();
-    // Simular usuario dentista logueado
     this.user = {
       id: '2',
       nombreUsuario: 'dentista1',
@@ -89,6 +90,9 @@ export class DentistaComponent implements OnInit {
       dni: '12345678',
       telefono: '123456789'
     };
+    this.loadTurnos();
+    this.loadPacientes();
+    this.loadTratamientos();
   }
 
   // Métodos de navegación
@@ -97,62 +101,53 @@ export class DentistaComponent implements OnInit {
     this.clearForms();
   }
 
+  navigateToTratamientos(): void {
+    this.currentView = 'tratamientos';
+  }
+
   // Métodos de turnos
   registrarTurno(): void {
     if (!this.canRegisterTurno) return;
-
     this.isLoading = true;
-
-    setTimeout(() => {
-      const newId = Math.max(...this.testData.turnos.map(t => t.id)) + 1;
-      const tratamiento = this.tratamientos.find(t => t.id === Number(this.turnoForm.tratamientoId));
-      const paciente = this.pacientes.find(p => p.id === Number(this.turnoForm.pacienteId));
-
-      if (!tratamiento) {
-        this.showAlert('Error: Tratamiento no encontrado.', 'danger');
+    const turnoData = {
+      pacienteId: parseInt(this.turnoForm.pacienteId),
+      fecha: this.turnoForm.fecha,
+      hora: this.turnoForm.hora,
+      tratamientoId: parseInt(this.turnoForm.tratamientoId)
+    };
+    this.turnoService.createTurno(turnoData).subscribe({
+      next: () => {
+        this.loadTurnos();
+        this.clearForms();
+        this.navigateTo('dashboard');
         this.isLoading = false;
-        return;
-      }
-
-      if (!paciente) {
-        this.showAlert('Error: Paciente no encontrado.', 'danger');
+        this.showAlert('¡Turno registrado exitosamente!', 'success');
+      },
+      error: () => {
         this.isLoading = false;
-        return;
+        this.showAlert('Error al registrar el turno', 'danger');
       }
-
-      const newTurno: Turno = {
-        id: newId,
-        nroTurno: `T${newId.toString().padStart(3, '0')}`,
-        fecha: this.turnoForm.fecha,
-        hora: this.turnoForm.hora,
-        estado: 'reservado',
-        tratamiento: tratamiento.descripcion,
-        precioFinal: tratamiento.precio,
-        nombre: paciente.nombre,
-        apellido: paciente.apellido,
-        dni: paciente.dni,
-        telefono: paciente.telefono || undefined,
-        duracion: tratamiento.duracion,
-        pacienteId: paciente.id,
-        tratamientoId: tratamiento.id
-      };
-
-      this.testData.turnos.push(newTurno);
-      this.turnos = [...this.testData.turnos];
-      this.showAlert('¡Turno registrado exitosamente!', 'success');
-      this.navigateTo('dashboard');
-      this.isLoading = false;
-    }, 1000);
+    });
   }
 
   cancelarTurno(turno: Turno): void {
-    turno.estado = 'cancelado';
-    this.showAlert('Turno cancelado exitosamente.', 'warning');
+    this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'cancelado').subscribe({
+      next: () => {
+        this.loadTurnos();
+        this.showAlert('Turno cancelado exitosamente.', 'warning');
+      },
+      error: () => this.showAlert('Error al cancelar el turno', 'danger')
+    });
   }
 
   completarTurno(turno: Turno): void {
-    turno.estado = 'completado';
-    this.showAlert('Turno completado exitosamente.', 'success');
+    this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'completado').subscribe({
+      next: () => {
+        this.loadTurnos();
+        this.showAlert('Turno completado exitosamente.', 'success');
+      },
+      error: () => this.showAlert('Error al completar el turno', 'danger')
+    });
   }
 
   eliminarUsuario(usuario: User): void {
@@ -292,5 +287,26 @@ export class DentistaComponent implements OnInit {
 
   volverAlDashboardAdmin(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  loadTurnos(): void {
+    this.turnoService.getTurnosFromAPI().subscribe({
+      next: (turnos) => this.turnos = turnos,
+      error: () => this.turnos = []
+    });
+  }
+
+  loadPacientes(): void {
+    this.pacienteService.getPacientes().subscribe({
+      next: (pacientes) => this.pacientes = pacientes,
+      error: () => this.pacientes = []
+    });
+  }
+
+  loadTratamientos(): void {
+    this.turnoService.getTratamientos().subscribe({
+      next: (tratamientos) => this.tratamientos = tratamientos,
+      error: () => this.tratamientos = []
+    });
   }
 } 
