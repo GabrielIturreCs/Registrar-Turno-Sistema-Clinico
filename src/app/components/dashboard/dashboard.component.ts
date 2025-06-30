@@ -1,10 +1,13 @@
-import { Component, OnInit, ViewChild, ElementRef} from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { User, Turno, Paciente } from '../../interfaces';
 import { ChatbotService } from '../../services/ChatBot.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
+import { TurnoService } from '../../services/turno.service';
+import { PacienteService } from '../../services/paciente.service';
+import { interval, Subscription } from 'rxjs';
 // import { ReservarComponent } from '../reservar/reservar.component';
 
 interface AdminStats {
@@ -40,7 +43,7 @@ interface AdminStats {
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   user: User | null = null;
   turnos: Turno[] = [];
   selectedPaciente: Paciente | null = null;
@@ -81,11 +84,24 @@ export class DashboardComponent implements OnInit {
       { id: 3, nroTurno: 'T003', fecha: '2024-01-22', hora: '14:00', estado: 'completado', tratamiento: 'Empaste', precioFinal: 12000, nombre: 'Carlos', apellido: 'López', pacienteId: 3, tratamientoId: 3 }
     ]
   };
+
+  // NUEVO: Variables para rendimiento del sistema (solo admin)
+  rendimiento = {
+    ocupacion: 0, // % de turnos completados sobre el total
+    usuarios: 0   // cantidad real de usuarios registrados (pacientes)
+  };
+
+  alertas: any[] = [];
+  private alertaInterval?: Subscription;
+  cargandoAlertas = false;
+
   constructor(
     private router: Router, 
     private route: ActivatedRoute,
     private fb: FormBuilder,
-    private chatbotService: ChatbotService
+    private chatbotService: ChatbotService,
+    private turnoService: TurnoService,
+    private pacienteService: PacienteService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -98,6 +114,17 @@ export class DashboardComponent implements OnInit {
     this.loadTurnosData();
     this.loadAdminStats();
     this.addWelcomeMessage();
+    if (this.user?.tipoUsuario === 'administrador') {
+      this.cargarRendimientoSistema();
+      this.generarAlertasSistema();
+      this.alertaInterval = interval(600000).subscribe(() => { // cada 10 minutos
+        this.generarAlertasSistema();
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.alertaInterval?.unsubscribe();
   }
 
   // Admin dashboard methods
@@ -481,5 +508,47 @@ export class DashboardComponent implements OnInit {
       case 'galeno': return 'badge bg-warning';
       default: return 'badge bg-secondary';
     }
+  }
+
+  cargarRendimientoSistema(): void {
+    // Obtener turnos y pacientes en paralelo
+    this.turnoService.getTurnosFromAPI().subscribe((turnos: any[]) => {
+      const total = turnos.length;
+      const completados = turnos.filter((t: any) => t.estado === 'completado').length;
+      this.rendimiento.ocupacion = total ? Math.round((completados / total) * 100) : 0;
+    });
+    this.pacienteService.getPacientes().subscribe((pacientes: any[]) => {
+      this.rendimiento.usuarios = pacientes.length;
+    });
+  }
+
+  generarAlertasSistema(): void {
+    this.cargandoAlertas = true;
+    this.turnoService.getTurnosFromAPI().subscribe((turnos: any[]) => {
+      const recientes = turnos
+        .slice(-5)
+        .reverse()
+        .map((t: any) => ({
+          tipo: t.estado === 'completado' ? 'success' : t.estado === 'cancelado' ? 'warning' : 'info',
+          titulo: t.estado === 'completado' ? 'Turno Completado' : t.estado === 'cancelado' ? 'Turno Cancelado' : 'Nuevo Turno',
+          descripcion: `Turno #${t.nroTurno} para ${t.nombre} ${t.apellido}`,
+          tiempo: t.fecha
+        }));
+
+      this.pacienteService.getPacientes().subscribe((pacientes: any[]) => {
+        const nuevosPacientes = pacientes
+          .slice(-5)
+          .reverse()
+          .map((p: any) => ({
+            tipo: 'info',
+            titulo: 'Nuevo Paciente Registrado',
+            descripcion: `${p.nombre} ${p.apellido} se registró en el sistema`,
+            tiempo: ''
+          }));
+
+        this.alertas = [...recientes, ...nuevosPacientes];
+        this.cargandoAlertas = false;
+      }, () => this.cargandoAlertas = false);
+    }, () => this.cargandoAlertas = false);
   }
 }

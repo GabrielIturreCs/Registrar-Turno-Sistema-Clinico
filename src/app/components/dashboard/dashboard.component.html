@@ -189,31 +189,24 @@
         <div class="card shadow-sm h-100">
           <div class="card-header">
             <h5 class="mb-0">
-              <i class="fas fa-chart-line"></i> Rendimiento del Sistema
+              <i class="bi bi-graph-up"></i> Rendimiento del Sistema
             </h5>
           </div>
           <div class="card-body">
             <div class="performance-metrics">
               <div class="metric-item">
-                <div class="metric-label">Ocupación de Turnos</div>
+                <div class="metric-label">Ocupación de Turnos (Completados)</div>
                 <div class="metric-bar">
-                  <div class="metric-fill" [style.width.%]="adminStats.ocupacionTurnos"></div>
+                  <div class="metric-fill" [style.width.%]="rendimiento.ocupacion"></div>
                 </div>
-                <div class="metric-value">{{ adminStats.ocupacionTurnos }}%</div>
+                <div class="metric-value">{{ rendimiento.ocupacion }}%</div>
               </div>
               <div class="metric-item">
-                <div class="metric-label">Satisfacción Pacientes</div>
+                <div class="metric-label">Usuarios Registrados</div>
                 <div class="metric-bar">
-                  <div class="metric-fill satisfaction" [style.width.%]="adminStats.satisfaccionPacientes"></div>
+                  <div class="metric-fill satisfaction" [style.width.%]="rendimiento.usuarios > 100 ? 100 : rendimiento.usuarios"></div>
                 </div>
-                <div class="metric-value">{{ adminStats.satisfaccionPacientes }}%</div>
-              </div>
-              <div class="metric-item">
-                <div class="metric-label">Eficiencia del Sistema</div>
-                <div class="metric-bar">
-                  <div class="metric-fill efficiency" [style.width.%]="adminStats.eficienciaSistema"></div>
-                </div>
-                <div class="metric-value">{{ adminStats.eficienciaSistema }}%</div>
+                <div class="metric-value">{{ rendimiento.usuarios }}</div>
               </div>
             </div>
           </div>
@@ -221,21 +214,22 @@
       </div>
       <div class="col-md-6">
         <div class="card shadow-sm h-100">
-          <div class="card-header">
+          <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">
-              <i class="fas fa-exclamation-triangle"></i> Alertas del Sistema
+              <i class="bi bi-exclamation-triangle-fill"></i> Alertas del Sistema
             </h5>
+            <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2"
+                    (click)="generarAlertasSistema()" [disabled]="cargandoAlertas">
+              <span *ngIf="cargandoAlertas" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <i class="bi bi-arrow-clockwise" *ngIf="!cargandoAlertas"></i>
+              <span>Refrescar</span>
+            </button>
           </div>
           <div class="card-body">
             <div class="alerts-list">
-              <div *ngFor="let alerta of adminStats.alertas" class="alert-item" [class]="'alert-' + alerta.tipo">
-                <div class="alert-icon">
-                  <i [class]="getAlertIcon(alerta.tipo)"></i>
-                </div>
-                <div class="alert-content">
-                  <div class="alert-title">{{ alerta.titulo }}</div>
-                  <div class="alert-description">{{ alerta.descripcion }}</div>
-                </div>
+              <div *ngFor="let alerta of alertas" class="alert-item" [ngClass]="alerta.tipo">
+                <div class="alert-title">{{ alerta.titulo }}</div>
+                <div class="alert-description">{{ alerta.descripcion }}</div>
                 <div class="alert-time">{{ alerta.tiempo }}</div>
               </div>
             </div>
