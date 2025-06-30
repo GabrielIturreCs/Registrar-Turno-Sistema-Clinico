@@ -7,7 +7,7 @@ import { HomeComponent } from './components/layouts/home/home.component';
 import { AgendaComponent } from './components/agenda/agenda.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { EstadisticaComponent } from './components/estadistica/estadistica.component';
-import { AdministradorComponent } from './components/administrador/administrador.component';
+import { AdminComponent } from './components/administrador/administrador.component';
 import { PacientesComponent } from './components/pacientes/pacientes.component';
 import { DentistaComponent } from './components/dentista/dentista.component';
 
@@ -24,7 +24,7 @@ export const routes: Routes = [
   { path: 'agenda', component: AgendaComponent, canActivate: [authGuard('dentista')] },
   { path: 'reprogramar', component: ReprogramarComponent, canActivate: [authGuard('dentista')] },
   { path: 'estadistica', component: EstadisticaComponent, canActivate: [authGuard('administrador')] },
-  { path: 'admin', component: AdministradorComponent, canActivate: [authGuard('administrador')] },
+  { path: 'admin', component: AdminComponent, canActivate: [authGuard('administrador')] },
   { path: 'pacientes', component: PacientesComponent, canActivate: [authGuard('dentista')] },
   { path: 'dentista', component: DentistaComponent, canActivate: [authGuard('administrador')] },
 ];

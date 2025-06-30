@@ -1,70 +1,154 @@
-<!-- Vista Administración -->
-<div *ngIf="currentView === 'admin' && user?.tipoUsuario === 'administrador'" class="container-fluid">
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h5><i class="fas fa-cog"></i> Panel de Administración</h5>
-        <button class="btn btn-primary btn-sm" (click)="navigateTo('dashboard')">
-          <i class="fas fa-arrow-left"></i> Volver
-        </button>
+<!-- Vista Administración Mejorada SOLO TARJETAS -->
+<div *ngIf="currentView === 'admin' && user?.tipoUsuario === 'administrador'" class="container-fluid admin-panel">
+  <!-- Fondo decorativo y encabezado fuera del panel -->
+  <div class="admin-bg">
+    <div class="container py-4">
+      <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary"><i class="fas fa-cog"></i> Panel de Administración</h2>
+        <p class="lead text-secondary">Gestione pacientes y dentistas del sistema odontológico</p>
       </div>
-      <div class="card-body">
-        <!-- Filtros -->
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <input 
-              type="text" 
-              class="form-control" 
-              placeholder="Buscar usuarios..."
-              [(ngModel)]="searchTerm">
-          </div>
-          <div class="col-md-6">
-            <select class="form-select" [(ngModel)]="filterTipo">
-              <option value="todos">Todos los tipos</option>
-              <option value="paciente">Pacientes</option>
-              <option value="dentista">Dentistas</option>
-              <option value="administrador">Administradores</option>
-            </select>
+      <!-- Filtros en card pequeño -->
+      <div class="row justify-content-center mb-4">
+        <div class="col-12 col-md-10 col-lg-8">
+          <div class="card shadow-sm filter-card p-3">
+            <div class="row g-3 align-items-end">
+              <div class="col-md-6">
+                <label class="form-label fw-bold" for="searchInput">Buscar usuarios</label>
+                <input 
+                  id="searchInput"
+                  type="text" 
+                  class="form-control shadow-sm" 
+                  placeholder="Buscar usuarios..."
+                  [(ngModel)]="searchTerm"
+                  aria-label="Buscar usuarios">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold" for="filterTipo">Filtrar por tipo</label>
+                <select id="filterTipo" class="form-select shadow-sm" [(ngModel)]="filterTipo" aria-label="Filtrar por tipo de usuario">
+                  <option value="todos">Pacientes y Dentistas</option>
+                  <option value="paciente">Pacientes</option>
+                  <option value="dentista">Dentistas</option>
+                </select>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-12">
+                <button class="btn btn-primary w-100" (click)="openAddUserModal()" aria-label="Agregar nuevo usuario">
+                  <i class="fas fa-plus"></i> Agregar Nuevo Usuario
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-
-        <!-- Lista de usuarios -->
-        <div *ngIf="filteredUsuarios.length === 0" class="text-center text-muted">
+      </div>
+      <!-- Lista de usuarios como tarjetas -->
+      <div class="row g-4 justify-content-center">
+        <div *ngIf="filteredUsuarios.length === 0" class="text-center text-muted py-4">
+          <i class="fas fa-user-slash fa-2x mb-2"></i><br>
           No se encontraron usuarios
         </div>
-        <div *ngIf="filteredUsuarios.length > 0" class="table-responsive">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Usuario</th>
-                <th>Nombre</th>
-                <th>DNI</th>
-                <th>Tipo</th>
-                <th>Teléfono</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let usuario of filteredUsuarios">
-                <td>{{ usuario.nombreUsuario }}</td>
-                <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
-                <td>{{ usuario.dni }}</td>
-                <td>
-                  <span [class]="getTipoClass(usuario.tipoUsuario)">
-                    {{ usuario.tipoUsuario }}
-                  </span>
-                </td>
-                <td>{{ usuario.telefono || 'No especificado' }}</td>
-                <td>
-                  <button 
-                    class="btn btn-sm btn-danger"
-                    (click)="eliminarUsuario(usuario)">
-                    <i class="fas fa-trash"></i> Eliminar
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div *ngFor="let usuario of filteredUsuarios" class="col-12 col-sm-6 col-md-4 col-lg-3">
+          <div class="card user-card h-100 shadow-sm position-relative"
+               [ngClass]="getUserCardClass(usuario.tipoUsuario)">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex align-items-center mb-2">
+                <div class="user-avatar me-2" [ngClass]="getUserBorderClass(usuario.tipoUsuario)">
+                  {{ usuario.nombre.charAt(0) | uppercase }}
+                </div>
+                <span class="fw-bold fs-5">{{ usuario.nombre }} {{ usuario.apellido }}</span>
+              </div>
+              <div class="mb-1"><span class="badge me-1" [ngClass]="getTipoClass(usuario.tipoUsuario)"></span> <span class="text-muted">{{ usuario.tipoUsuario | titlecase }}</span></div>
+              <div class="mb-1"><i class="fas fa-user me-1 text-secondary"></i> <span class="text-muted">Usuario:</span> {{ usuario.nombreUsuario }}</div>
+              <div class="mb-1"><i class="fas fa-id-card me-1 text-secondary"></i> <span class="text-muted">DNI:</span> {{ usuario.dni }}</div>
+              <div class="mb-1"><i class="fas fa-phone me-1 text-secondary"></i> <span class="text-muted">Teléfono:</span> {{ usuario.telefono || 'No especificado' }}</div>
+              <div class="mt-auto d-flex justify-content-end">
+                <button 
+                  class="btn btn-sm btn-danger shadow-sm"
+                  (click)="openDeleteModal(usuario)"
+                  aria-label="Eliminar usuario"
+                  data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar usuario">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      <!-- Modal de confirmación para eliminar usuario -->
+      <div class="modal fade" tabindex="-1" [ngClass]="{'show d-block': showDeleteModal}" [style.display]="showDeleteModal ? 'block' : 'none'" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Confirmar eliminación</h5>
+              <button type="button" class="btn-close" aria-label="Cerrar" (click)="closeDeleteModal()"></button>
+            </div>
+            <div class="modal-body">
+              <p>¿Estás seguro de que quieres eliminar al usuario <strong>{{ usuarioAEliminar?.nombre }} {{ usuarioAEliminar?.apellido }}</strong>?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
+              <button type="button" class="btn btn-danger" (click)="confirmarEliminarUsuario()">Eliminar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Modal para agregar usuario -->
+      <div class="modal fade" tabindex="-1" [ngClass]="{'show d-block': showAddUserModal}" [style.display]="showAddUserModal ? 'block' : 'none'" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Agregar Nuevo Usuario</h5>
+              <button type="button" class="btn-close" aria-label="Cerrar" (click)="closeAddUserModal()"></button>
+            </div>
+            <div class="modal-body">
+              <form #addUserForm="ngForm" (ngSubmit)="addUser()">
+                <div class="mb-3">
+                  <label class="form-label" for="nombre">Nombre</label>
+                  <input id="nombre" class="form-control" [(ngModel)]="newUser.nombre" name="nombre" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="apellido">Apellido</label>
+                  <input id="apellido" class="form-control" [(ngModel)]="newUser.apellido" name="apellido" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="tipoUsuario">Tipo de Usuario</label>
+                  <select id="tipoUsuario" class="form-select" [(ngModel)]="newUser.tipoUsuario" name="tipoUsuario" required>
+                    <option value="paciente">Paciente</option>
+                    <option value="dentista">Dentista</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="nombreUsuario">Usuario</label>
+                  <input id="nombreUsuario" class="form-control" [(ngModel)]="newUser.nombreUsuario" name="nombreUsuario" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="dni">DNI</label>
+                  <input id="dni" class="form-control" [(ngModel)]="newUser.dni" name="dni" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="telefono">Teléfono</label>
+                  <input id="telefono" class="form-control" [(ngModel)]="newUser.telefono" name="telefono">
+                </div>
+                <button type="submit" class="btn btn-primary w-100" [disabled]="!addUserForm.valid">Agregar</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Toast de feedback -->
+      <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+        <div *ngIf="toastMessage" class="toast show align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              {{ toastMessage }}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Cerrar" (click)="toastMessage = ''"></button>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm position-fixed top-0 end-0 m-4" (click)="navigateTo('dashboard')" aria-label="Volver al dashboard">
+        <i class="fas fa-arrow-left"></i> Volver
+      </button>
     </div>
   </div>
+</div>

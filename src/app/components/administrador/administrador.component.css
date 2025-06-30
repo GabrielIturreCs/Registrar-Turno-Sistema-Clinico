@@ -1,0 +1,116 @@
+.admin-panel {
+  padding: 30px;
+  background: linear-gradient(135deg, #e3f0ff 0%, #f8fbff 100%);
+}
+
+.card {
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+.card-header {
+  background: linear-gradient(90deg, #ff416c 0%, #ff4b2b 100%);
+  color: #fff;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+}
+
+.user-card {
+  border-radius: 1rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.user-card.admin {
+  background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+  color: #fff;
+}
+
+.user-card.dentist {
+  background: linear-gradient(135deg, #36d1ff 0%, #5b86e5 100%);
+  color: #fff;
+}
+
+.user-card.patient {
+  background: linear-gradient(135deg, #ffb347 0%, #ffcc33 100%);
+  color: #212529;
+}
+
+.user-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #fff;
+  border: none;
+}
+
+.user-card.patient .user-avatar {
+  color: #212529;
+}
+
+.btn-primary {
+  background: #36d1ff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #1ab2e0;
+}
+
+.btn-danger {
+  background: #ff416c;
+  border: none;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #e31b5f;
+}
+
+.badge-administrador {
+  background: #ff416c;
+  color: #fff;
+}
+
+.badge-dentista {
+  background: #36d1ff;
+  color: #fff;
+}
+
+.badge-paciente {
+  background: #ffb347;
+  color: #212529;
+}
+
+.modal.show.d-block {
+  background: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  border-radius: 1rem;
+}
+
+.filter-card {
+  border-radius: 1rem;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+@media (max-width: 768px) {
+  .admin-panel {
+    padding: 10px;
+  }
+  .user-card {
+    min-height: 180px;
+  }
+}
