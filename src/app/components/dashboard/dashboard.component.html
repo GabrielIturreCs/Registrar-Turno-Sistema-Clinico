@@ -22,8 +22,9 @@
     </div>
   </div>
 
-  <!-- Header -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 rounded-4 shadow-sm px-4">
+  <!-- Header (navbar) siempre visible -->
+  <nav class="navbar navbar-expand-lg mb-4 rounded-4 shadow-sm px-4"
+       [ngClass]="{'admin-navbar': user?.tipoUsuario === 'administrador', 'navbar-dark bg-primary': user?.tipoUsuario !== 'administrador'}">
     <div class="container-fluid">
       <span class="navbar-brand d-flex align-items-center gap-2">
         <i class="fas fa-tooth"></i>
@@ -41,35 +42,35 @@
     </div>
   </nav>
 
-  <!-- Menú de navegación -->
+  <!-- Menú de navegación siempre visible -->
   <div class="row mb-4">
     <div class="col-12">
       <div class="btn-group w-100 shadow-sm rounded-3 overflow-hidden" role="group">
         <ng-container *ngIf="user?.tipoUsuario === 'administrador'; else noAdminMenu">
           <button 
             type="button" 
-            class="btn btn-outline-primary py-3"
+            class="btn nav-btn-dashboard py-3"
             [class.active]="true"
             (click)="navigateToDashboard()">
-            <i class="fas fa-home"></i> Dashboard
+            <i class="bi bi-house-door-fill"></i> Dashboard
           </button>
           <button 
             type="button" 
-            class="btn btn-outline-primary py-3"
+            class="btn nav-btn-dentistas py-3"
             (click)="navigateToDentistas()">
-            <i class="bi bi-person-badge"></i> Dentistas
+            <i class="bi bi-person-badge-fill"></i> Dentistas
           </button>
           <button 
             type="button" 
-            class="btn btn-outline-danger py-3"
+            class="btn nav-btn-admin py-3"
             (click)="navigateToAdmin()">
-            <i class="fas fa-cog"></i> Administración
+            <i class="bi bi-gear-fill"></i> Administración
           </button>
           <button 
             type="button" 
-            class="btn btn-outline-info py-3"
+            class="btn nav-btn-estadisticas py-3"
             (click)="navigateToEstadisticas()">
-            <i class="fas fa-chart-bar"></i> Estadísticas
+            <i class="bi bi-bar-chart-fill"></i> Estadísticas
           </button>
         </ng-container>
         <ng-template #noAdminMenu>
@@ -120,78 +121,253 @@
     </div>
   </div>
 
-  <!-- Estadísticas -->
-  <div class="row mb-4 g-4">
-    <div class="col-md-3 col-6">
-      <div class="card text-center bg-primary text-white shadow-sm">
-        <div class="card-body py-4">
-          <h5 class="card-title display-6 mb-1">{{ totalTurnos }}</h5>
-          <p class="card-text mb-0">
-            {{ isPacienteView ? 'Total Turnos del Paciente' : 'Total Turnos' }}
-          </p>
+  <!-- Dashboard del Administrador -->
+  <div *ngIf="user?.tipoUsuario === 'administrador' && !isPacienteView" class="admin-dashboard">
+    <!-- Estadísticas Administrativas -->
+    <div class="row mb-4 g-4">
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-primary text-white shadow-sm admin-stat-card">
+          <div class="card-body py-4">
+            <div class="stat-icon mb-2">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <h5 class="card-title display-6 mb-1">{{ adminStats.totalUsuarios }}</h5>
+            <p class="card-text mb-0">Total Usuarios</p>
+            <div class="stat-trend positive">
+              <i class="fas fa-arrow-up"></i> +12% este mes
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-success text-white shadow-sm admin-stat-card">
+          <div class="card-body py-4">
+            <div class="stat-icon mb-2">
+              <i class="bi bi-calendar-check-fill"></i>
+            </div>
+            <h5 class="card-title display-6 mb-1">{{ adminStats.turnosEsteMes }}</h5>
+            <p class="card-text mb-0">Turnos Este Mes</p>
+            <div class="stat-trend positive">
+              <i class="fas fa-arrow-up"></i> +8% vs mes anterior
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-info text-white shadow-sm admin-stat-card">
+          <div class="card-body py-4">
+            <div class="stat-icon mb-2">
+              <i class="bi bi-cash-coin"></i>
+            </div>
+            <h5 class="card-title display-6 mb-1">${{ adminStats.ingresosEsteMes | number:'1.0-0' }}</h5>
+            <p class="card-text mb-0">Ingresos Este Mes</p>
+            <div class="stat-trend positive">
+              <i class="fas fa-arrow-up"></i> +15% vs mes anterior
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-warning text-white shadow-sm admin-stat-card">
+          <div class="card-body py-4">
+            <div class="stat-icon mb-2">
+              <i class="bi bi-person-badge-fill"></i>
+            </div>
+            <h5 class="card-title display-6 mb-1">{{ adminStats.dentistasActivos }}</h5>
+            <p class="card-text mb-0">Dentistas Activos</p>
+            <div class="stat-trend neutral">
+              <i class="fas fa-minus"></i> Sin cambios
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-md-3 col-6">
-      <div class="card text-center bg-success text-white shadow-sm">
-        <div class="card-body py-4">
-          <h5 class="card-title display-6 mb-1">{{ turnosHoy }}</h5>
-          <p class="card-text mb-0">
-            {{ isPacienteView ? 'Turnos Hoy del Paciente' : 'Turnos Hoy' }}
-          </p>
+
+    <!-- Métricas de Rendimiento -->
+    <div class="row mb-4 g-4">
+      <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-chart-line"></i> Rendimiento del Sistema
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="performance-metrics">
+              <div class="metric-item">
+                <div class="metric-label">Ocupación de Turnos</div>
+                <div class="metric-bar">
+                  <div class="metric-fill" [style.width.%]="adminStats.ocupacionTurnos"></div>
+                </div>
+                <div class="metric-value">{{ adminStats.ocupacionTurnos }}%</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Satisfacción Pacientes</div>
+                <div class="metric-bar">
+                  <div class="metric-fill satisfaction" [style.width.%]="adminStats.satisfaccionPacientes"></div>
+                </div>
+                <div class="metric-value">{{ adminStats.satisfaccionPacientes }}%</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Eficiencia del Sistema</div>
+                <div class="metric-bar">
+                  <div class="metric-fill efficiency" [style.width.%]="adminStats.eficienciaSistema"></div>
+                </div>
+                <div class="metric-value">{{ adminStats.eficienciaSistema }}%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-exclamation-triangle"></i> Alertas del Sistema
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="alerts-list">
+              <div *ngFor="let alerta of adminStats.alertas" class="alert-item" [class]="'alert-' + alerta.tipo">
+                <div class="alert-icon">
+                  <i [class]="getAlertIcon(alerta.tipo)"></i>
+                </div>
+                <div class="alert-content">
+                  <div class="alert-title">{{ alerta.titulo }}</div>
+                  <div class="alert-description">{{ alerta.descripcion }}</div>
+                </div>
+                <div class="alert-time">{{ alerta.tiempo }}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-md-3 col-6">
-      <div class="card text-center bg-info text-white shadow-sm">
-        <div class="card-body py-4">
-          <h5 class="card-title display-6 mb-1">{{ proximoTurno?.fecha || 'Sin turnos' }}</h5>
-          <p class="card-text mb-0">
-            {{ isPacienteView ? 'Próximo Turno del Paciente' : 'Próximo Turno' }}
-          </p>
+
+    
+    <!-- Resumen de Actividad Reciente -->
+    <div class="row mb-4 g-4">
+      <div class="col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-history"></i> Actividad Reciente del Sistema
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="activity-timeline">
+              <div *ngFor="let actividad of adminStats.actividadReciente" class="activity-item">
+                <div class="activity-icon" [class]="'activity-' + actividad.tipo">
+                  <i [class]="getActivityIcon(actividad.tipo)"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">{{ actividad.titulo }}</div>
+                  <div class="activity-description">{{ actividad.descripcion }}</div>
+                  <div class="activity-time">{{ actividad.tiempo }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="col-md-3 col-6">
-      <div class="card text-center bg-warning text-white shadow-sm">
-        <div class="card-body py-4">
-          <h5 class="card-title display-6 mb-1">{{ filteredTurnos.length }}</h5>
-          <p class="card-text mb-0">
-            {{ isPacienteView ? 'Turnos Activos del Paciente' : 'Turnos Activos' }}
-          </p>
+      <div class="col-md-4">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-clock"></i> Próximos Eventos
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="upcoming-events">
+              <div *ngFor="let evento of adminStats.proximosEventos" class="event-item">
+                <div class="event-time">{{ evento.hora }}</div>
+                <div class="event-content">
+                  <div class="event-title">{{ evento.titulo }}</div>
+                  <div class="event-location">{{ evento.ubicacion }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Turnos recientes -->
-  <div class="card shadow-sm mt-4">
-    <div class="card-header">
-      <h5 class="mb-0">
-        <i class="fas fa-calendar-alt"></i> 
-        {{ isPacienteView ? 'Turnos del Paciente' : 'Turnos Recientes' }}
-      </h5>
-    </div>
-    <div class="card-body p-0">
-      <div *ngIf="filteredTurnos.length === 0" class="text-center text-muted py-4">
-        {{ isPacienteView ? 'Este paciente no tiene turnos registrados' : 'No hay turnos registrados' }}
+  <!-- Dashboard para Pacientes y Dentistas (mantiene la funcionalidad original) -->
+  <div *ngIf="user?.tipoUsuario !== 'administrador' || isPacienteView">
+    <!-- Estadísticas -->
+    <div class="row mb-4 g-4">
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-primary text-white shadow-sm">
+          <div class="card-body py-4">
+            <h5 class="card-title display-6 mb-1">{{ totalTurnos }}</h5>
+            <p class="card-text mb-0">
+              {{ isPacienteView ? 'Total Turnos del Paciente' : 'Total Turnos' }}
+            </p>
+          </div>
+        </div>
       </div>
-      <div *ngIf="filteredTurnos.length > 0" class="row g-3 px-3 py-3">
-        <div class="col-12 col-md-6 col-lg-4" *ngFor="let turno of filteredTurnos.slice(0, 5)">
-          <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(120deg, #f8fcff 60%, #e3f0ff 100%);">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold text-primary">Turno #{{ turno.nroTurno }}</span>
-                <span [class]="getStatusClass(turno.estado)" style="font-size:0.95rem;">{{ turno.estado }}</span>
-              </div>
-              <div class="mb-1"><i class="fas fa-calendar-alt text-info me-2"></i><strong>Fecha:</strong> {{ turno.fecha }}</div>
-              <div class="mb-1"><i class="fas fa-clock text-info me-2"></i><strong>Hora:</strong> {{ turno.hora }}</div>
-              <div class="mb-1"><i class="fas fa-tooth text-info me-2"></i><strong>Tratamiento:</strong> {{ turno.tratamiento }}</div>
-              <div class="mb-1"><i class="fas fa-dollar-sign text-info me-2"></i><strong>Precio:</strong> ${{ turno.precioFinal }}</div>
-              <div class="mt-3 text-end">
-                <button *ngIf="turno.estado === 'reservado'" class="btn btn-outline-danger btn-sm px-3" (click)="cancelarTurno(turno)">
-                  <i class="fas fa-times"></i> Cancelar
-                </button>
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-success text-white shadow-sm">
+          <div class="card-body py-4">
+            <h5 class="card-title display-6 mb-1">{{ turnosHoy }}</h5>
+            <p class="card-text mb-0">
+              {{ isPacienteView ? 'Turnos Hoy del Paciente' : 'Turnos Hoy' }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-info text-white shadow-sm">
+          <div class="card-body py-4">
+            <h5 class="card-title display-6 mb-1">{{ proximoTurno?.fecha || 'Sin turnos' }}</h5>
+            <p class="card-text mb-0">
+              {{ isPacienteView ? 'Próximo Turno del Paciente' : 'Próximo Turno' }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-warning text-white shadow-sm">
+          <div class="card-body py-4">
+            <h5 class="card-title display-6 mb-1">{{ filteredTurnos.length }}</h5>
+            <p class="card-text mb-0">
+              {{ isPacienteView ? 'Turnos Activos del Paciente' : 'Turnos Activos' }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Turnos recientes -->
+    <div class="card shadow-sm mt-4">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="fas fa-calendar-alt"></i> 
+          {{ isPacienteView ? 'Turnos del Paciente' : 'Turnos Recientes' }}
+        </h5>
+      </div>
+      <div class="card-body p-0">
+        <div *ngIf="filteredTurnos.length === 0" class="text-center text-muted py-4">
+          {{ isPacienteView ? 'Este paciente no tiene turnos registrados' : 'No hay turnos registrados' }}
+        </div>
+        <div *ngIf="filteredTurnos.length > 0" class="row g-3 px-3 py-3">
+          <div class="col-12 col-md-6 col-lg-4" *ngFor="let turno of filteredTurnos.slice(0, 5)">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(120deg, #f8fcff 60%, #e3f0ff 100%);">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold text-primary">Turno #{{ turno.nroTurno }}</span>
+                  <span [class]="getStatusClass(turno.estado)" style="font-size:0.95rem;">{{ turno.estado }}</span>
+                </div>
+                <div class="mb-1"><i class="fas fa-calendar-alt text-info me-2"></i><strong>Fecha:</strong> {{ turno.fecha }}</div>
+                <div class="mb-1"><i class="fas fa-clock text-info me-2"></i><strong>Hora:</strong> {{ turno.hora }}</div>
+                <div class="mb-1"><i class="fas fa-tooth text-info me-2"></i><strong>Tratamiento:</strong> {{ turno.tratamiento }}</div>
+                <div class="mb-1"><i class="fas fa-dollar-sign text-info me-2"></i><strong>Precio:</strong> ${{ turno.precioFinal }}</div>
+                <div class="mt-3 text-end">
+                  <button *ngIf="turno.estado === 'reservado'" class="btn btn-outline-danger btn-sm px-3" (click)="cancelarTurno(turno)">
+                    <i class="fas fa-times"></i> Cancelar
+                  </button>
+                </div>
               </div>
             </div>
           </div>

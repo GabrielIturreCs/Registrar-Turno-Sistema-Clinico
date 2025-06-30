@@ -6,6 +6,34 @@ import { User, Turno, Paciente } from '../../interfaces';
 import { ChatbotService } from '../../services/ChatBot.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
 // import { ReservarComponent } from '../reservar/reservar.component';
+
+interface AdminStats {
+  totalUsuarios: number;
+  turnosEsteMes: number;
+  ingresosEsteMes: number;
+  dentistasActivos: number;
+  ocupacionTurnos: number;
+  satisfaccionPacientes: number;
+  eficienciaSistema: number;
+  alertas: Array<{
+    tipo: string;
+    titulo: string;
+    descripcion: string;
+    tiempo: string;
+  }>;
+  actividadReciente: Array<{
+    tipo: string;
+    titulo: string;
+    descripcion: string;
+    tiempo: string;
+  }>;
+  proximosEventos: Array<{
+    hora: string;
+    titulo: string;
+    ubicacion: string;
+  }>;
+}
+
 @Component({
   selector: 'app-dashboard',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
@@ -17,6 +45,20 @@ export class DashboardComponent implements OnInit {
   turnos: Turno[] = [];
   selectedPaciente: Paciente | null = null;
   isPacienteView: boolean = false;
+
+  // Admin dashboard properties
+  adminStats: AdminStats = {
+    totalUsuarios: 0,
+    turnosEsteMes: 0,
+    ingresosEsteMes: 0,
+    dentistasActivos: 0,
+    ocupacionTurnos: 0,
+    satisfaccionPacientes: 0,
+    eficienciaSistema: 0,
+    alertas: [],
+    actividadReciente: [],
+    proximosEventos: []
+  };
 
   // Chatbot properties
   @ViewChild('chatMessages') chatMessages!: ElementRef;
@@ -54,7 +96,109 @@ export class DashboardComponent implements OnInit {
     this.loadUserData();
     this.checkPacienteView();
     this.loadTurnosData();
+    this.loadAdminStats();
     this.addWelcomeMessage();
+  }
+
+  // Admin dashboard methods
+  loadAdminStats(): void {
+    if (this.user?.tipoUsuario === 'administrador') {
+      // Simular datos de estadísticas administrativas
+      this.adminStats = {
+        totalUsuarios: 156,
+        turnosEsteMes: 342,
+        ingresosEsteMes: 2850000,
+        dentistasActivos: 8,
+        ocupacionTurnos: 78,
+        satisfaccionPacientes: 92,
+        eficienciaSistema: 85,
+        alertas: [
+          {
+            tipo: 'warning',
+            titulo: 'Mantenimiento Programado',
+            descripcion: 'El sistema estará en mantenimiento mañana de 2:00 a 4:00 AM',
+            tiempo: 'Hace 2 horas'
+          },
+          {
+            tipo: 'info',
+            titulo: 'Nuevo Dentista Registrado',
+            descripcion: 'Dr. María González se ha unido al equipo',
+            tiempo: 'Hace 4 horas'
+          },
+          {
+            tipo: 'success',
+            titulo: 'Meta Mensual Alcanzada',
+            descripcion: 'Se ha alcanzado el 100% de la meta de turnos del mes',
+            tiempo: 'Hace 1 día'
+          }
+        ],
+        actividadReciente: [
+          {
+            tipo: 'user',
+            titulo: 'Nuevo Paciente Registrado',
+            descripcion: 'Ana Martínez se registró en el sistema',
+            tiempo: 'Hace 30 min'
+          },
+          {
+            tipo: 'turno',
+            titulo: 'Turno Cancelado',
+            descripcion: 'Turno #T045 cancelado por el paciente',
+            tiempo: 'Hace 1 hora'
+          },
+          {
+            tipo: 'payment',
+            titulo: 'Pago Procesado',
+            descripcion: 'Pago de $15,000 procesado exitosamente',
+            tiempo: 'Hace 2 horas'
+          },
+          {
+            tipo: 'system',
+            titulo: 'Backup Completado',
+            descripcion: 'Backup automático del sistema completado',
+            tiempo: 'Hace 3 horas'
+          }
+        ],
+        proximosEventos: [
+          {
+            hora: '09:00',
+            titulo: 'Reunión de Equipo',
+            ubicacion: 'Sala de Conferencias'
+          },
+          {
+            hora: '14:30',
+            titulo: 'Capacitación Nuevo Software',
+            ubicacion: 'Aula de Capacitación'
+          },
+          {
+            hora: '16:00',
+            titulo: 'Revisión de Inventario',
+            ubicacion: 'Almacén'
+          }
+        ]
+      };
+    }
+  }
+
+  getAlertIcon(tipo: string): string {
+    const icons: { [key: string]: string } = {
+      'warning': 'fas fa-exclamation-triangle',
+      'info': 'fas fa-info-circle',
+      'success': 'fas fa-check-circle',
+      'danger': 'fas fa-times-circle'
+    };
+    return icons[tipo] || 'fas fa-info-circle';
+  }
+
+  getActivityIcon(tipo: string): string {
+    const icons: { [key: string]: string } = {
+      'user': 'fas fa-user-plus',
+      'turno': 'fas fa-calendar-times',
+      'payment': 'fas fa-credit-card',
+      'system': 'fas fa-cog',
+      'dentist': 'fas fa-user-md',
+      'patient': 'fas fa-user'
+    };
+    return icons[tipo] || 'fas fa-info-circle';
   }
 
   // Chatbot methods
