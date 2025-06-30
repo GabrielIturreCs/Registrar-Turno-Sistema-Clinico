@@ -28,6 +28,7 @@ export interface Turno {
   duracion?: number;
   pacienteId?: number;
   tratamientoId?: number;
+  tipoUsuario?: string;
 }
 
 export interface Tratamiento {
