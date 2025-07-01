@@ -596,4 +596,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       ].slice(0, 10);
     });
   }
+
+  navigateToTratamiento(): void {
+    this.router.navigate(['/tratamiento']);
+  }
 }

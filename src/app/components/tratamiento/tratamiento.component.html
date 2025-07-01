@@ -1,36 +1,138 @@
-<div class="container py-4">
-  <h2 class="mb-4 text-primary"><i class="fas fa-tooth me-2"></i>Tratamientos Disponibles</h2>
+<div class="container py-5">
+  <h2 class="mb-4 text-primary text-center display-5 fw-bold"><i class="fas fa-tooth me-2"></i>Gestión de Tratamientos</h2>
 
-  <div *ngIf="isLoading" class="text-center py-4">
-    <span class="spinner-border text-primary" role="status"></span>
-    <div class="mt-2">Cargando tratamientos...</div>
+  <!-- Search bar -->
+  <div class="mb-4">
+    <div class="input-group input-group-lg shadow-sm">
+      <span class="input-group-text bg-primary text-white"><i class="fas fa-search"></i></span>
+      <input type="text" class="form-control" placeholder="Buscar tratamientos..." [(ngModel)]="searchText" (input)="filterTratamientos()">
+    </div>
   </div>
-  <div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
 
-  <div *ngIf="!isLoading && tratamientos.length > 0" class="table-responsive">
-    <table class="table table-hover align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>#</th>
-          <th>Descripción</th>
-          <th>Duración</th>
-          <th>Historial</th>
-          <th *ngIf="tratamientos[0]?.precio">Precio</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let t of tratamientos">
-          <td>{{ t.nroTratamiento }}</td>
-          <td>{{ t.descripcion }}</td>
-          <td>{{ t.duracion }} min</td>
-          <td>{{ t.historial }}</td>
-          <td *ngIf="t.precio">${{ t.precio }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Botón para abrir modal de nuevo tratamiento -->
+  <div class="text-end mb-4">
+    <button class="btn btn-primary btn-lg shadow-sm" (click)="editando = false; formulario.reset(); showModal = true;">
+      <i class="fas fa-plus me-2"></i>Nuevo Tratamiento
+    </button>
   </div>
-  <div *ngIf="!isLoading && tratamientos.length === 0 && !errorMsg" class="text-center text-muted py-4">
-    <i class="fas fa-info-circle fa-2x mb-2"></i><br>
-    No hay tratamientos registrados
+
+  <!-- Loading spinner -->
+  <div class="text-center" *ngIf="loading">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Tabla de tratamientos -->
+  <div class="row">
+    <div class="col-lg-8 col-12">
+      <div class="table-responsive" *ngIf="!loading">
+        <table class="table table-hover align-middle shadow-sm">
+          <thead class="table-primary">
+            <tr>
+              <th scope="col">Nro</th>
+              <th scope="col">Descripción</th>
+              <th scope="col">Duración</th>
+              <th scope="col" class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of filteredTratamientos">
+              <td>{{ t.nroTratamiento }}</td>
+              <td>{{ t.descripcion }}</td>
+              <td>{{ t.duracion }}</td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-primary me-2" (click)="editarPorNro(t.nroTratamiento); showModal = true;" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="tratamientoAEliminar = t.nroTratamiento; showDeleteModal = true;" title="Eliminar">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredTratamientos.length === 0">
+              <td colspan="4" class="text-center text-muted">No se encontraron tratamientos</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <aside class="col-lg-4 col-12 mt-4 mt-lg-0">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white fw-semibold">
+          <i class="fas fa-history me-2"></i>Historial de Cambios
+        </div>
+        <div class="card-body p-3" style="max-height: 400px; overflow-y: auto;">
+          <div class="timeline">
+            <div class="timeline-item" *ngFor="let h of historialTratamientos">
+              <div class="timeline-icon bg-primary">
+                <i class="fas fa-circle fa-xs"></i>
+              </div>
+              <div class="timeline-content">
+                <h6 class="fw-bold mb-1">Tratamiento {{ h.nroTratamiento }} - {{ h.accion }}</h6>
+                <p class="text-muted small mb-1">{{ h.fecha | date:'short' }}</p>
+                <p class="mb-0">{{ h.descripcion }}</p>
+              </div>
+            </div>
+            <div class="timeline-item" *ngIf="historialTratamientos.length === 0">
+              <div class="timeline-content text-center text-muted">
+                Sin historial
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Modal de formulario (crear/editar) -->
+  <div class="modal fade" [ngClass]="{'show d-block': showModal}" [style.display]="showModal ? 'block' : 'none'" tabindex="-1" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow-lg">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title fw-semibold">{{ editando ? 'Editar Tratamiento' : 'Nuevo Tratamiento' }}</h5>
+          <button type="button" class="btn-close" (click)="showModal = false; cancelar();" aria-label="Close"></button>
+        </div>
+        <form [formGroup]="formulario" (ngSubmit)="guardar(); showModal = false;" autocomplete="off">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-medium">Nro Tratamiento</label>
+              <input type="number" class="form-control" formControlName="nroTratamiento" [readonly]="editando" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-medium">Descripción</label>
+              <input type="text" class="form-control" formControlName="descripcion" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-medium">Duración</label>
+              <input type="text" class="form-control" formControlName="duracion" required />
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="submit" class="btn btn-success" [disabled]="formulario.invalid">{{ editando ? 'Actualizar' : 'Crear' }}</button>
+            <button type="button" class="btn btn-secondary" (click)="showModal = false; cancelar();">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación para eliminar -->
+  <div class="modal fade" [ngClass]="{'show d-block': showDeleteModal}" [style.display]="showDeleteModal ? 'block' : 'none'" tabindex="-1" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow-lg">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title fw-semibold">Confirmar eliminación</h5>
+          <button type="button" class="btn-close" (click)="showDeleteModal = false; tratamientoAEliminar = null;" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que quieres eliminar el tratamiento <strong>{{ tratamientoAEliminar }}</strong>?</p>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-secondary" (click)="showDeleteModal = false; tratamientoAEliminar = null;">Cancelar</button>
+          <button type="button" class="btn btn-danger" (click)="eliminarPorNro(tratamientoAEliminar!); showDeleteModal = false; tratamientoAEliminar = null;">Eliminar</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

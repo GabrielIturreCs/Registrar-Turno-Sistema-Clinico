@@ -25,5 +25,8 @@ export class RegisterService {
     return this._http.post(this.hostBase,body,httpOptions);
   }
 
+  getUsuarios(): Observable<any[]> {
+    return this._http.get<any[]>(this.hostBase);
+  }
 
 }

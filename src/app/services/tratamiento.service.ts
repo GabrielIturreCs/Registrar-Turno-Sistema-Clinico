@@ -2,11 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Tratamiento } from '../interfaces';
+
 @Injectable({
   providedIn: 'root'
 })
 export class TratamientoService {
-  private apiUrl = 'http://localhost:3000/api/consultorio/tratamiento'; 
+  private apiUrl = 'http://localhost:3000/api/tratamiento';
+
   constructor(private http: HttpClient) { }
 
   // Obtener todos los tratamientos
@@ -15,7 +17,7 @@ export class TratamientoService {
   }
 
   // Obtener un tratamiento por ID
-  getTratamiento(id: number): Observable<Tratamiento> {
+  getTratamiento(id: string): Observable<Tratamiento> {
     return this.http.get<Tratamiento>(`${this.apiUrl}/${id}`);
   }
 
@@ -25,12 +27,12 @@ export class TratamientoService {
   }
 
   // Actualizar un tratamiento existente
-  actualizarTratamiento(id: number, tratamiento: Tratamiento): Observable<Tratamiento> {
+  actualizarTratamiento(id: string, tratamiento: Tratamiento): Observable<Tratamiento> {
     return this.http.put<Tratamiento>(`${this.apiUrl}/${id}`, tratamiento);
   }
 
   // Eliminar un tratamiento
-  eliminarTratamiento(id: number): Observable<any> {
+  eliminarTratamiento(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }

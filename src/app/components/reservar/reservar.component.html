@@ -64,7 +64,7 @@
                 >
                   <option value="">Selecciona un tratamiento</option>
                   <option *ngFor="let tratamiento of tratamientos" [value]="tratamiento.id">
-                    {{ tratamiento.descripcion }} - ${{ tratamiento.precio }} ({{ tratamiento.duracion }} min)
+                    {{ tratamiento.descripcion }} - ${{ tratamiento.historial }} ({{ tratamiento.duracion }} min)
                   </option>
                 </select>
               </div>
