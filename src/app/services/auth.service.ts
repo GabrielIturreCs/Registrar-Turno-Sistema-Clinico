@@ -1,207 +1,137 @@
-import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common'; 
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { User } from '../interfaces'; 
-import { tap, catchError } from 'rxjs/operators'; 
-import { environment } from '../environments/environment'; 
+import { User } from '../interfaces';
 
-// Declaración global para la librería de Google, para que TypeScript no de error
-declare const google: any;
-
-// Definición de la interfaz de respuesta de login de tu BACKEND
-interface LoginBackendResponse {
-  success: boolean;
-  message: string;
-  appToken?: string; // El token JWT de la aplicación
-  user?: {
-    id: string; // 
-    nombreUsuario: string;
-    email: string;
-    tipoUsuario: string;
-    nombre: string;
-    apellido: string;
-    telefono?: string; 
-    direccion?: string;
-    dni?: string;
-    obraSocial?: string; 
-  };
-}
+/*export interface User {
+  id: number;
+  nombreUsuario: string;
+  nombre: string;
+  apellido: string;
+  tipoUsuario: string;
+  dni?: string;
+  telefono?: string;
+  direccion?: string;
+  obraSocial?: string;
+}*/
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  hostBase: string; // La URL base de la API de autenticación
+  // Datos de prueba
+  /*private testData = {
+    usuarios: [
+      { id: 1, nombreUsuario: 'admin', password: 'password', nombre: 'Admin', apellido: 'Sistema', tipoUsuario: 'administrador', dni: '00000000', telefono: '1100000000' },
+      { id: 2, nombreUsuario: 'dentista', password: 'password', nombre: 'Dr. María', apellido: 'González', tipoUsuario: 'dentista', dni: '12345678', telefono: '123456789' },
+      { id: 3, nombreUsuario: 'paciente1', password: 'password', nombre: 'Juan', apellido: 'Pérez', tipoUsuario: 'paciente', dni: '87654321', telefono: '987654321', obraSocial: 'OSDE' }
+    ]
+  };*/
 
-  constructor(
-    private router: Router,
-    private _http: HttpClient,
-    @Inject(PLATFORM_ID) private platformId: Object // Inyecta PLATFORM_ID
-  ) {
-    this.hostBase = 'http://localhost:3000/api/auth/'; // URL base del backend
+  hostBase: string;
+
+  constructor(private router: Router,private _http: HttpClient) {
+    this.hostBase = "http://localhost:3000/api/usuario/";
     this.loadUserFromStorage();
   }
 
   private loadUserFromStorage(): void {
-    // Usa isPlatformBrowser para acceder a localStorage solo en el navegador
-    if (isPlatformBrowser(this.platformId)) {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          this.currentUserSubject.next(user);
-        } catch (e) {
-          console.error('Error al parsear usuario de localStorage:', e);
-          localStorage.clear(); // Limpiar si los datos están corruptos
-          this.currentUserSubject.next(null);
-        }
-      }
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      this.currentUserSubject.next(user);
     }
   }
 
-  public login(
-    nombreUsuario: string, 
-    password: string
-  ): Observable<LoginBackendResponse> {
-    const httpOption = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-      }),
-    };
-    const body = JSON.stringify({
-      nombreUsuario: nombreUsuario,
-      password: password,
+  /*login(nombreUsuario: string, password: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const foundUser = this.testData.usuarios.find(u => 
+          u.nombreUsuario === nombreUsuario && 
+          u.password === password
+        );
+
+        if (foundUser) {
+          const user: User = {
+            id: foundUser.id,
+            nombreUsuario: foundUser.nombreUsuario,
+            nombre: foundUser.nombre,
+            apellido: foundUser.apellido,
+            tipoUsuario: foundUser.tipoUsuario,
+            dni: foundUser.dni,
+            telefono: foundUser.telefono,
+            obraSocial: foundUser.obraSocial
+          };
+
+          localStorage.setItem('token', 'fake-token-' + Date.now());
+          localStorage.setItem('rol', user.tipoUsuario);
+          localStorage.setItem('user', JSON.stringify(user));
+          
+          this.currentUserSubject.next(user);
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      }, 1000);
     });
-    console.log("Enviando credenciales de login:", body);
-    return this._http
-      .post<LoginBackendResponse>(this.hostBase + 'login', body, httpOption)
-      .pipe(
-        tap((response) => {
-          if (response.success && response.appToken && response.user) {
-            console.log('Login exitoso. Respuesta del backend:', response);
-            // Guardar token y datos completos del usuario
-            localStorage.setItem('token', response.appToken);
-            localStorage.setItem('rol', response.user.tipoUsuario || '');
-            localStorage.setItem('user', JSON.stringify(response.user));
-
-            this.currentUserSubject.next({
-              id: response.user.id, // ID es string de Mongoose
-              nombreUsuario: response.user.nombreUsuario,
-              tipoUsuario: response.user.tipoUsuario,
-              nombre: response.user.nombre,
-              apellido: response.user.apellido,
-              email: response.user.email,
-              telefono: response.user.telefono || '',
-              direccion: response.user.direccion || '',
-              dni: response.user.dni || '',
-              obraSocial: response.user.obraSocial || '', 
-            });
-
-            // Redireccionar al usuario inmediatamente después de actualizar el estado
-            this.redirectByUserType();
-          } else {
-            console.warn('Login fallido o respuesta inesperada:', response);
-            // Si el backend envía un 'message' en caso de fallo
-            throw new Error(response.message || 'Error desconocido al iniciar sesión.');
-          }
-        }),
-        catchError((errorRes) => {
-          // Captura errores HTTP y relanza un error legible para el componente
-          console.error("Error en AuthService.login:", errorRes);
-          let errorMessage = 'Error de conexión con el servidor.';
-          if (errorRes.error && errorRes.error.message) {
-            errorMessage = errorRes.error.message; // Mensaje del backend
-          } else if (errorRes.statusText) {
-            errorMessage = `Error ${errorRes.status}: ${errorRes.statusText}`;
-          }
-          return throwError(() => new Error(errorMessage));
-        })
-      );
+  }*/
+  public login(nombreUsuario: string, password: string):Observable<any> 
+  { 
+     const httpOption = { 
+       headers: new HttpHeaders({ 
+         'Content-Type': 'application/json' 
+       }) 
+     } 
+     let body = JSON.stringify({ 
+      nombreUsuario: nombreUsuario, 
+       password: password 
+     }); 
+     console.log(body); 
+     return this._http.post(this.hostBase + 'login', body, httpOption); 
   }
 
-  // --- NUEVO MÉTODO PARA GOOGLE LOGIN ---
-  public googleLogin(credential: string): Observable<LoginBackendResponse> {
-    const httpOption = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-      }),
-    };
-    const body = JSON.stringify({ credential: credential }); // El backend espera un objeto { credential: "..." }
-    console.log("Enviando credencial de Google:", body);
+ /* register(userData: any): Promise<boolean> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Verificar si el usuario ya existe
+        const existingUser = this.testData.usuarios.find(u => 
+          u.nombreUsuario === userData.nombreUsuario || 
+          u.dni === userData.dni
+        );
 
-    return this._http
-      .post<LoginBackendResponse>(this.hostBase + 'google-login', body, httpOption)
-      .pipe(
-        tap((response) => {
-          if (response.success && response.appToken && response.user) {
-            console.log("Login con Google exitoso. Respuesta del backend:", response);
-            localStorage.setItem('token', response.appToken);
-            localStorage.setItem('rol', response.user.tipoUsuario || '');
-            localStorage.setItem('user', JSON.stringify(response.user));
+        if (existingUser) {
+          resolve(false);
+          return;
+        }
 
-            this.currentUserSubject.next({
-              id: response.user.id,
-              nombreUsuario: response.user.nombreUsuario,
-              tipoUsuario: response.user.tipoUsuario,
-              nombre: response.user.nombre,
-              apellido: response.user.apellido,
-              email: response.user.email,
-              telefono: response.user.telefono || '',
-              direccion: response.user.direccion || '',
-              dni: response.user.dni || '',
-              obraSocial: response.user.obraSocial || '',
-            });
+        // Agregar nuevo usuario
+        const newId = Math.max(...this.testData.usuarios.map(u => u.id)) + 1;
+        const newUser = {
+          id: newId,
+          nombreUsuario: userData.nombreUsuario,
+          password: userData.password,
+          nombre: userData.nombre,
+          apellido: userData.apellido,
+          tipoUsuario: userData.tipoUsuario,
+          dni: userData.dni,
+          telefono: userData.telefono,
+          obraSocial: userData.obraSocial
+        };
 
-            this.redirectByUserType(); // Redirige después de un login exitoso con Google
-          } else {
-            console.warn("Login con Google fallido o respuesta inesperada:", response);
-            throw new Error(response.message || 'Error desconocido al iniciar sesión con Google.');
-          }
-        }),
-        catchError((errorRes) => {
-          console.error("Error en AuthService.googleLogin:", errorRes);
-          let errorMessage = 'Error de conexión con el servidor al intentar Google Login.';
-          if (errorRes.error && errorRes.error.message) {
-            errorMessage = errorRes.error.message;
-          } else if (errorRes.statusText) {
-            errorMessage = `Error ${errorRes.status}: ${errorRes.statusText}`;
-          }
-          return throwError(() => new Error(errorMessage));
-        })
-      );
-  }
+        this.testData.usuarios.push(newUser);
+        resolve(true);
+      }, 1000);
+    });
+  }*/
 
   logout(): void {
-    // Si estás usando Google Sign-In con un botón custom o el One Tap,
-    // es buena práctica revocar la sesión de Google también.
-    if (isPlatformBrowser(this.platformId) && typeof google !== 'undefined' && google.accounts) {
-        // Para revocar, necesitas el email de la cuenta de Google con la que se logueó el usuario.
-        // Asegúrate de que lo guardas en localStorage o lo tienes accesible.
-        const userStored = localStorage.getItem('user');
-        let userEmailToRevoke: string | null = null;
-        if (userStored) {
-            try {
-                const parsedUser = JSON.parse(userStored);
-                userEmailToRevoke = parsedUser.email;
-            } catch (e) {
-                console.error("Error parsing user from localStorage for Google logout:", e);
-            }
-        }
-
-        if (userEmailToRevoke) {
-            google.accounts.id.revoke(userEmailToRevoke, (done: boolean) => {
-                console.log('Google session revoked:', done); // 'done' será true si la revocación fue exitosa
-            });
-        }
-    }
-    localStorage.clear(); // Limpia todos los datos de la sesión local
-    this.currentUserSubject.next(null); // Establece el usuario actual a null
-    this.router.navigate(['/login']); // Redirige al login
+    localStorage.clear();
+    this.currentUserSubject.next(null);
+    this.router.navigate(['/login']);
   }
 
   getCurrentUser(): User | null {
@@ -209,9 +139,7 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    // Verificar si hay un token en localStorage Y el usuario en el BehaviorSubject,
-    // y solo si estamos en un navegador (no en SSR).
-    return isPlatformBrowser(this.platformId) && !!localStorage.getItem('token') && this.currentUserSubject.value !== null;
+    return this.currentUserSubject.value !== null;
   }
 
   hasRole(role: string): boolean {
@@ -231,7 +159,7 @@ export class AuthService {
         this.router.navigate(['/dashboard']);
         break;
       case 'dentista':
-        this.router.navigate(['/agenda']);
+        this.router.navigate(['/dashboard']);
         break;
       case 'paciente':
         this.router.navigate(['/misTurnos']);
@@ -240,4 +168,4 @@ export class AuthService {
         this.router.navigate(['/']);
     }
   }
-}
+} 
