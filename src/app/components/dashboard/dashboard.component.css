@@ -688,6 +688,11 @@ body {
   background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
 }
 
+.alert-dentist-purple {
+  border-left-color: #8b5cf6;
+  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+}
+
 .alert-icon {
   font-size: 1.2rem;
   margin-top: 0.2rem;
@@ -707,6 +712,10 @@ body {
 
 .alert-danger .alert-icon {
   color: #721c24;
+}
+
+.alert-dentist-purple .alert-icon {
+  color: #7c3aed;
 }
 
 .alert-content {
@@ -816,6 +825,10 @@ body {
 
 .activity-dentist {
   background: linear-gradient(135deg, #17a2b8, #138496);
+}
+
+.activity-dentist-purple {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
 }
 
 .activity-patient {

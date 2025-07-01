@@ -8,6 +8,8 @@ import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
 import { TurnoService } from '../../services/turno.service';
 import { PacienteService } from '../../services/paciente.service';
 import { interval, Subscription } from 'rxjs';
+import { ActividadService } from '../../services/actividad.service';
+import { DentistaService } from '../../services/dentista.service';
 // import { ReservarComponent } from '../reservar/reservar.component';
 
 interface AdminStats {
@@ -101,7 +103,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private chatbotService: ChatbotService,
     private turnoService: TurnoService,
-    private pacienteService: PacienteService
+    private pacienteService: PacienteService,
+    private actividadService: ActividadService,
+    private dentistaService: DentistaService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -114,13 +118,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadTurnosData();
     this.loadAdminStats();
     this.addWelcomeMessage();
+    this.loadDentistasActividad();
     if (this.user?.tipoUsuario === 'administrador') {
       this.cargarRendimientoSistema();
       this.generarAlertasSistema();
       this.alertaInterval = interval(600000).subscribe(() => { // cada 10 minutos
         this.generarAlertasSistema();
+        this.loadDentistasActividad();
       });
     }
+    this.actividadService.actividad$.subscribe(actividad => {
+      this.adminStats.actividadReciente.unshift(actividad);
+      // Limita a 10 actividades recientes
+      this.adminStats.actividadReciente = this.adminStats.actividadReciente.slice(0, 10);
+    });
   }
 
   ngOnDestroy(): void {
@@ -223,6 +234,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'payment': 'fas fa-credit-card',
       'system': 'fas fa-cog',
       'dentist': 'fas fa-user-md',
+      'dentist-purple': 'fas fa-user-md',
       'patient': 'fas fa-user'
     };
     return icons[tipo] || 'fas fa-info-circle';
@@ -561,5 +573,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.cargandoAlertas = false;
       }, () => this.cargandoAlertas = false);
     }, () => this.cargandoAlertas = false);
+  }
+
+  loadDentistasActividad(): void {
+    this.dentistaService.getDentistas().subscribe((dentistas) => {
+      // Toma los últimos 3 dentistas creados
+      const recientes = dentistas.slice(-3).reverse().map((d: any) => ({
+        tipo: 'dentist-purple',
+        titulo: '🦷 Nuevo Dentista Registrado',
+        descripcion: `Dr. ${d.nombre} ${d.apellido} | DNI: ${d.dni} | Especialidad: ${d.especialidad || 'General'} | Matrícula: ${d.matricula || 'N/A'}`,
+        tiempo: 'Recientemente'
+      }));
+      // Agrega a actividad reciente
+      this.adminStats.actividadReciente = [
+        ...recientes,
+        ...this.adminStats.actividadReciente
+      ].slice(0, 10);
+      // Agrega a alertas
+      this.adminStats.alertas = [
+        ...recientes,
+        ...this.adminStats.alertas
+      ].slice(0, 10);
+    });
   }
 }

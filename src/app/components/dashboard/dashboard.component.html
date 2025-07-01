@@ -227,7 +227,7 @@
           </div>
           <div class="card-body">
             <div class="alerts-list">
-              <div *ngFor="let alerta of alertas" class="alert-item" [ngClass]="alerta.tipo">
+              <div *ngFor="let alerta of adminStats.alertas" class="alert-item" [ngClass]="alerta.tipo">
                 <div class="alert-title">{{ alerta.titulo }}</div>
                 <div class="alert-description">{{ alerta.descripcion }}</div>
                 <div class="alert-time">{{ alerta.tiempo }}</div>
