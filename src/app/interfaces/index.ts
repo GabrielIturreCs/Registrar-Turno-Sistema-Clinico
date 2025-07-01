@@ -91,4 +91,16 @@ export type EstadoTurno = 'reservado' | 'completado' | 'cancelado';
 export type TipoUsuario = 'administrador' | 'dentista' | 'paciente';
 
 // Tipos de alerta
-export type TipoAlerta = 'success' | 'danger' | 'warning' | 'info'; 
+export type TipoAlerta = 'success' | 'danger' | 'warning' | 'info';
+
+export interface Dentista {
+  _id?: string;
+  legajo: string;
+  email: string;
+  nombre: string;
+  apellido: string;
+  telefono: string;
+  direccion: string;
+  dni: string;
+  userId: string;
+} 

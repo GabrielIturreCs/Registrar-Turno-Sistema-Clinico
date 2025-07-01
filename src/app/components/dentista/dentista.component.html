@@ -29,39 +29,79 @@
           </div>
         </div>
 
+        <!-- Formulario de Alta/Edición de Dentista -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5>{{ isEditMode ? 'Editar Dentista' : 'Agregar Dentista' }}</h5>
+          </div>
+          <div class="card-body">
+            <form (ngSubmit)="saveDentista()">
+              <div class="row">
+                <div class="col-md-4 mb-2">
+                  <input type="text" class="form-control" placeholder="Legajo" [(ngModel)]="dentistaForm.legajo" name="legajo" required>
+                </div>
+                <div class="col-md-4 mb-2">
+                  <input type="email" class="form-control" placeholder="Email" [(ngModel)]="dentistaForm.email" name="email" required>
+                </div>
+                <div class="col-md-4 mb-2">
+                  <input type="text" class="form-control" placeholder="DNI" [(ngModel)]="dentistaForm.dni" name="dni" required>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4 mb-2">
+                  <input type="text" class="form-control" placeholder="Nombre" [(ngModel)]="dentistaForm.nombre" name="nombre" required>
+                </div>
+                <div class="col-md-4 mb-2">
+                  <input type="text" class="form-control" placeholder="Apellido" [(ngModel)]="dentistaForm.apellido" name="apellido" required>
+                </div>
+                <div class="col-md-4 mb-2">
+                  <input type="text" class="form-control" placeholder="Teléfono" [(ngModel)]="dentistaForm.telefono" name="telefono" required>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-8 mb-2">
+                  <input type="text" class="form-control" placeholder="Dirección" [(ngModel)]="dentistaForm.direccion" name="direccion" required>
+                </div>
+                <div class="col-md-4 mb-2">
+                  <input type="text" class="form-control" placeholder="userId (opcional)" [(ngModel)]="dentistaForm.userId" name="userId">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-success me-2">{{ isEditMode ? 'Actualizar' : 'Agregar' }}</button>
+              <button type="button" class="btn btn-secondary" (click)="clearDentistaForm()">Limpiar</button>
+            </form>
+          </div>
+        </div>
+
         <!-- Lista de dentistas -->
-        <div *ngIf="filteredUsuarios.length === 0" class="text-center text-muted">
+        <div *ngIf="filteredDentistas.length === 0" class="text-center text-muted">
           No se encontraron dentistas
         </div>
-        <div *ngIf="filteredUsuarios.length > 0" class="table-responsive">
+        <div *ngIf="filteredDentistas.length > 0" class="table-responsive">
           <table class="table table-striped">
             <thead>
               <tr>
-                <th>Usuario</th>
+                <th>Legajo</th>
+                <th>Email</th>
                 <th>Nombre</th>
+                <th>Apellido</th>
                 <th>DNI</th>
-                <th>Tipo</th>
                 <th>Teléfono</th>
+                <th>Dirección</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let usuario of filteredUsuarios">
-                <td>{{ usuario.nombreUsuario }}</td>
-                <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
-                <td>{{ usuario.dni }}</td>
+              <tr *ngFor="let dentista of filteredDentistas">
+                <td>{{ dentista.legajo }}</td>
+                <td>{{ dentista.email }}</td>
+                <td>{{ dentista.nombre }}</td>
+                <td>{{ dentista.apellido }}</td>
+                <td>{{ dentista.dni }}</td>
+                <td>{{ dentista.telefono }}</td>
+                <td>{{ dentista.direccion }}</td>
                 <td>
-                  <span [class]="getTipoClass(usuario.tipoUsuario)">
-                    {{ usuario.tipoUsuario }}
-                  </span>
-                </td>
-                <td>{{ usuario.telefono || 'No especificado' }}</td>
-                <td>
-                  <button 
-                    class="btn btn-sm btn-danger"
-                    (click)="eliminarUsuario(usuario)">
-                    <i class="fas fa-trash"></i> Eliminar
-                  </button>
+                  <button class="btn btn-sm btn-primary me-1" (click)="editDentista(dentista)"><i class="fas fa-edit"></i> Editar</button>
+                  <button class="btn btn-sm btn-danger" (click)="deleteDentista(dentista)"><i class="fas fa-trash"></i> Eliminar</button>
                 </td>
               </tr>
             </tbody>
