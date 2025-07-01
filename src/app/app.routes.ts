@@ -10,6 +10,7 @@ import { EstadisticaComponent } from './components/estadistica/estadistica.compo
 import { AdminComponent } from './components/administrador/administrador.component';
 import { PacientesComponent } from './components/pacientes/pacientes.component';
 import { DentistaComponent } from './components/dentista/dentista.component';
+import { TratamientoComponent } from './components/tratamiento/tratamiento.component';
 
 import { ReprogramarComponent } from './components/reprogramar/reprogramar.component';
 import { authGuard } from './guards/auth.guard';
@@ -25,6 +26,7 @@ export const routes: Routes = [
   { path: 'reprogramar', component: ReprogramarComponent, canActivate: [authGuard('dentista')] },
   { path: 'estadistica', component: EstadisticaComponent, canActivate: [authGuard('administrador')] },
   { path: 'admin', component: AdminComponent, canActivate: [authGuard('administrador')] },
-  { path: 'pacientes', component: PacientesComponent, canActivate: [authGuard('dentista')] },
+  { path: 'pacientes', component: PacientesComponent, canActivate: [authGuard(['dentista', 'administrador'])] },
   { path: 'dentista', component: DentistaComponent, canActivate: [authGuard('administrador')] },
+  { path: 'tratamiento', component: TratamientoComponent, canActivate: [authGuard('administrador')] },
 ];
