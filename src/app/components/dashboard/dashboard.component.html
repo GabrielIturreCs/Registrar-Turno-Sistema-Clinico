@@ -247,7 +247,7 @@
     
     <!-- Resumen de Actividad Reciente -->
     <div class="row mb-4 g-4">
-      <div class="col-md-8">
+      <div class="col-12">
         <div class="card shadow-sm">
           <div class="card-header">
             <h5 class="mb-0">
@@ -270,26 +270,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="card shadow-sm">
-          <div class="card-header">
-            <h5 class="mb-0">
-              <i class="fas fa-clock"></i> Próximos Eventos
-            </h5>
-          </div>
-          <div class="card-body">
-            <div class="upcoming-events">
-              <div *ngFor="let evento of adminStats.proximosEventos" class="event-item">
-                <div class="event-time">{{ evento.hora }}</div>
-                <div class="event-content">
-                  <div class="event-title">{{ evento.titulo }}</div>
-                  <div class="event-location">{{ evento.ubicacion }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </div>
   </div>
 

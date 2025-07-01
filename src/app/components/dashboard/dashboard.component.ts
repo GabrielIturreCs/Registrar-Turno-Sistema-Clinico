@@ -10,6 +10,7 @@ import { PacienteService } from '../../services/paciente.service';
 import { interval, Subscription } from 'rxjs';
 import { ActividadService } from '../../services/actividad.service';
 import { DentistaService } from '../../services/dentista.service';
+import { TratamientoService } from '../../services/tratamiento.service';
 // import { ReservarComponent } from '../reservar/reservar.component';
 
 interface AdminStats {
@@ -32,11 +33,7 @@ interface AdminStats {
     descripcion: string;
     tiempo: string;
   }>;
-  proximosEventos: Array<{
-    hora: string;
-    titulo: string;
-    ubicacion: string;
-  }>;
+
 }
 
 @Component({
@@ -61,8 +58,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     satisfaccionPacientes: 0,
     eficienciaSistema: 0,
     alertas: [],
-    actividadReciente: [],
-    proximosEventos: []
+    actividadReciente: []
   };
 
   // Chatbot properties
@@ -105,7 +101,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private turnoService: TurnoService,
     private pacienteService: PacienteService,
     private actividadService: ActividadService,
-    private dentistaService: DentistaService
+    private dentistaService: DentistaService,
+    private tratamientoService: TratamientoService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -119,12 +116,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadAdminStats();
     this.addWelcomeMessage();
     this.loadDentistasActividad();
+    this.loadPacientesActividad();
+    this.loadTratamientosActividad();
+    this.loadTurnosActividad();
     if (this.user?.tipoUsuario === 'administrador') {
       this.cargarRendimientoSistema();
       this.generarAlertasSistema();
       this.alertaInterval = interval(600000).subscribe(() => { // cada 10 minutos
         this.generarAlertasSistema();
         this.loadDentistasActividad();
+        this.loadPacientesActividad();
+        this.loadTratamientosActividad();
+        this.loadTurnosActividad();
       });
     }
     this.actividadService.actividad$.subscribe(actividad => {
@@ -150,69 +153,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         ocupacionTurnos: 78,
         satisfaccionPacientes: 92,
         eficienciaSistema: 85,
-        alertas: [
-          {
-            tipo: 'warning',
-            titulo: 'Mantenimiento Programado',
-            descripcion: 'El sistema estará en mantenimiento mañana de 2:00 a 4:00 AM',
-            tiempo: 'Hace 2 horas'
-          },
-          {
-            tipo: 'info',
-            titulo: 'Nuevo Dentista Registrado',
-            descripcion: 'Dr. María González se ha unido al equipo',
-            tiempo: 'Hace 4 horas'
-          },
-          {
-            tipo: 'success',
-            titulo: 'Meta Mensual Alcanzada',
-            descripcion: 'Se ha alcanzado el 100% de la meta de turnos del mes',
-            tiempo: 'Hace 1 día'
-          }
-        ],
-        actividadReciente: [
-          {
-            tipo: 'user',
-            titulo: 'Nuevo Paciente Registrado',
-            descripcion: 'Ana Martínez se registró en el sistema',
-            tiempo: 'Hace 30 min'
-          },
-          {
-            tipo: 'turno',
-            titulo: 'Turno Cancelado',
-            descripcion: 'Turno #T045 cancelado por el paciente',
-            tiempo: 'Hace 1 hora'
-          },
-          {
-            tipo: 'payment',
-            titulo: 'Pago Procesado',
-            descripcion: 'Pago de $15,000 procesado exitosamente',
-            tiempo: 'Hace 2 horas'
-          },
-          {
-            tipo: 'system',
-            titulo: 'Backup Completado',
-            descripcion: 'Backup automático del sistema completado',
-            tiempo: 'Hace 3 horas'
-          }
-        ],
-        proximosEventos: [
-          {
-            hora: '09:00',
-            titulo: 'Reunión de Equipo',
-            ubicacion: 'Sala de Conferencias'
-          },
-          {
-            hora: '14:30',
-            titulo: 'Capacitación Nuevo Software',
-            ubicacion: 'Aula de Capacitación'
-          },
-          {
-            hora: '16:00',
-            titulo: 'Revisión de Inventario',
-            ubicacion: 'Almacén'
-          }
-        ]
+        alertas: [],
+        actividadReciente: []
       };
     }
   }
@@ -584,6 +526,77 @@ export class DashboardComponent implements OnInit, OnDestroy {
         descripcion: `Dr. ${d.nombre} ${d.apellido} | DNI: ${d.dni} | Especialidad: ${d.especialidad || 'General'} | Matrícula: ${d.matricula || 'N/A'}`,
         tiempo: 'Recientemente'
       }));
+      // Agrega a actividad reciente
+      this.adminStats.actividadReciente = [
+        ...recientes,
+        ...this.adminStats.actividadReciente
+      ].slice(0, 10);
+      // Agrega a alertas
+      this.adminStats.alertas = [
+        ...recientes,
+        ...this.adminStats.alertas
+      ].slice(0, 10);
+    });
+  }
+
+  loadPacientesActividad(): void {
+    this.pacienteService.getPacientes().subscribe((pacientes) => {
+      // Toma los últimos 3 pacientes creados
+      const recientes = pacientes.slice(-3).reverse().map((p: any) => ({
+        tipo: 'user',
+        titulo: '👤 Nuevo Paciente Registrado',
+        descripcion: `${p.nombre} ${p.apellido} | DNI: ${p.dni} | Obra Social: ${p.obraSocial}`,
+        tiempo: 'Recientemente'
+      }));
+      // Agrega a actividad reciente
+      this.adminStats.actividadReciente = [
+        ...recientes,
+        ...this.adminStats.actividadReciente
+      ].slice(0, 10);
+      // Agrega a alertas
+      this.adminStats.alertas = [
+        ...recientes,
+        ...this.adminStats.alertas
+      ].slice(0, 10);
+    });
+  }
+
+  loadTratamientosActividad(): void {
+    this.tratamientoService.getTratamientos().subscribe((tratamientos) => {
+      // Toma los últimos 3 tratamientos creados
+      const recientes = tratamientos.slice(-3).reverse().map((t: any) => ({
+        tipo: 'system',
+        titulo: '🦷 Nuevo Tratamiento Creado',
+        descripcion: `${t.descripcion} | Duración: ${t.duracion} | Precio: $${t.precio || 'N/A'}`,
+        tiempo: 'Recientemente'
+      }));
+      // Agrega a actividad reciente
+      this.adminStats.actividadReciente = [
+        ...recientes,
+        ...this.adminStats.actividadReciente
+      ].slice(0, 10);
+      // Agrega a alertas
+      this.adminStats.alertas = [
+        ...recientes,
+        ...this.adminStats.alertas
+      ].slice(0, 10);
+    });
+  }
+
+  loadTurnosActividad(): void {
+    this.turnoService.getTurnosFromAPI().subscribe((turnos) => {
+      // Toma los últimos 5 turnos creados
+      const recientes = turnos.slice(-5).reverse().map((t: any) => {
+        const emoji = t.estado === 'completado' ? '✅' : t.estado === 'cancelado' ? '❌' : '📅';
+        const titulo = t.estado === 'completado' ? 'Turno Completado' : t.estado === 'cancelado' ? 'Turno Cancelado' : 'Nuevo Turno Reservado';
+        
+        return {
+          tipo: t.estado === 'completado' ? 'success' : t.estado === 'cancelado' ? 'danger' : 'info',
+          titulo: `${emoji} ${titulo}`,
+          descripcion: `Turno #${t.nroTurno} | ${t.nombre} ${t.apellido} | ${t.tratamiento} | $${t.precioFinal}`,
+          tiempo: 'Recientemente'
+        };
+      });
       // Agrega a actividad reciente
       this.adminStats.actividadReciente = [
         ...recientes,

@@ -718,6 +718,15 @@ body {
   color: #7c3aed;
 }
 
+.alert-user {
+  border-left-color: #007bff;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+}
+
+.alert-user .alert-icon {
+  color: #1976d2;
+}
+
 .alert-content {
   flex: 1;
 }
@@ -829,6 +838,10 @@ body {
 
 .activity-dentist-purple {
   background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.activity-user {
+  background: linear-gradient(135deg, #007bff, #0056b3);
 }
 
 .activity-patient {

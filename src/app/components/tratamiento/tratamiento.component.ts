@@ -70,27 +70,39 @@ export class TratamientoComponent implements OnInit {
       // Buscar el tratamiento por nroTratamiento
       const t = this.tratamientos.find(x => x.nroTratamiento === this.nroEditando);
       if (t && (t as any)._id) {
-        this.tratamientoService.actualizarTratamiento((t as any)._id, this.formulario.value).subscribe(() => {
+        this.tratamientoService.actualizarTratamiento((t as any)._id, this.formulario.value).subscribe({
+          next: () => {
+            this.cargarTratamientos();
+            this.historialTratamientos.unshift({
+              nroTratamiento: this.formulario.value.nroTratamiento,
+              accion: 'Editado',
+              fecha: new Date(),
+              descripcion: this.formulario.value.descripcion
+            });
+            this.cancelar();
+          },
+          error: (error) => {
+            console.error('Error al actualizar tratamiento:', error);
+            alert('Error al actualizar el tratamiento. Verifique los datos e intente nuevamente.');
+          }
+        });
+      }
+    } else {
+      this.tratamientoService.crearTratamiento(this.formulario.value).subscribe({
+        next: () => {
           this.cargarTratamientos();
           this.historialTratamientos.unshift({
             nroTratamiento: this.formulario.value.nroTratamiento,
-            accion: 'Editado',
+            accion: 'Creado',
             fecha: new Date(),
             descripcion: this.formulario.value.descripcion
           });
           this.cancelar();
-        });
-      }
-    } else {
-      this.tratamientoService.crearTratamiento(this.formulario.value).subscribe(() => {
-        this.cargarTratamientos();
-        this.historialTratamientos.unshift({
-          nroTratamiento: this.formulario.value.nroTratamiento,
-          accion: 'Creado',
-          fecha: new Date(),
-          descripcion: this.formulario.value.descripcion
-        });
-        this.cancelar();
+        },
+        error: (error) => {
+          console.error('Error al crear tratamiento:', error);
+          alert('Error al crear el tratamiento. Verifique los datos e intente nuevamente.');
+        }
       });
     }
   }

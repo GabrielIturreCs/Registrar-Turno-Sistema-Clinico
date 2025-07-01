@@ -107,6 +107,10 @@
               <label class="form-label fw-medium">Duración</label>
               <input type="text" class="form-control" formControlName="duracion" required />
             </div>
+            <div class="mb-3">
+              <label class="form-label fw-medium">Historial</label>
+              <textarea class="form-control" formControlName="historial" rows="3" placeholder="Ingrese el historial del tratamiento" required></textarea>
+            </div>
           </div>
           <div class="modal-footer border-0">
             <button type="submit" class="btn btn-success" [disabled]="formulario.invalid">{{ editando ? 'Actualizar' : 'Crear' }}</button>
