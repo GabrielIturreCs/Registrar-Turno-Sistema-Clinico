@@ -395,7 +395,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   navigateToEstadisticas(): void {
-    this.router.navigate(['/estadistica']);
+    if (this.user?.tipoUsuario === 'administrador') {
+      this.router.navigate(['/estadistica']);
+    }
   }
 
   navigateToPacientes(): void {
