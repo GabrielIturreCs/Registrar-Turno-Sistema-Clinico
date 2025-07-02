@@ -101,7 +101,6 @@
             <tr>
               <th>Hora</th>
               <th>Paciente</th>
-              <th>DNI</th>
               <th>Tratamiento</th>
               <th>Estado</th>
               <th>Precio</th>
@@ -120,7 +119,6 @@
                   <small class="text-muted">{{ turno.telefono || 'Sin teléfono' }}</small>
                 </div>
               </td>
-              <td>{{ turno.dni }}</td>
               <td>
                 <div>
                   <strong>{{ turno.tratamiento }}</strong>
@@ -130,39 +128,69 @@
               </td>
               <td>
                 <span [class]="getStatusClass(turno.estado)">
-                  {{ turno.estado }}
+                  <i [class]="getStatusIcon(turno.estado)"></i>
+                  {{ getStatusText(turno.estado) }}
                 </span>
               </td>
               <td>
                 <strong>${{ turno.precioFinal }}</strong>
               </td>
               <td>
-                <div class="btn-group btn-group-sm">
+                <div class="btn-group btn-group-sm" role="group">
+                  <!-- Botón para completar (solo si está reservado) -->
                   <button 
                     *ngIf="turno.estado === 'reservado'" 
-                    class="btn btn-success"
+                    class="btn btn-success me-1"
                     (click)="completarTurno(turno)"
-                    title="Marcar como completado">
-                    <i class="fas fa-check"></i>
+                    title="✅ Marcar como completado"
+                    data-bs-toggle="tooltip">
+                    <i class="fas fa-check-circle"></i>
                   </button>
+                  
+                  <!-- Botón para reservar (solo si está cancelado) -->
+                  <button 
+                    *ngIf="turno.estado === 'cancelado'" 
+                    class="btn btn-warning me-1"
+                    (click)="reservarTurno(turno)"
+                    title="📅 Reactivar turno"
+                    data-bs-toggle="tooltip">
+                    <i class="fas fa-calendar-check"></i>
+                  </button>
+                  
+                  <!-- Botón para reprogramar (solo si está reservado) -->
                   <button 
                     *ngIf="turno.estado === 'reservado'" 
-                    class="btn btn-warning"
+                    class="btn btn-info me-1"
                     (click)="reprogramarTurno(turno)"
-                    title="Reprogramar">
-                    <i class="fas fa-clock"></i>
+                    title="✏️ Reprogramar fecha/hora"
+                    data-bs-toggle="tooltip">
+                    <i class="fas fa-edit"></i>
                   </button>
+                  
+                  <!-- Botón para cancelar (solo si está reservado) -->
                   <button 
                     *ngIf="turno.estado === 'reservado'" 
-                    class="btn btn-danger"
+                    class="btn btn-danger me-1"
                     (click)="cancelarTurno(turno)"
-                    title="Cancelar">
-                    <i class="fas fa-times"></i>
+                    title="❌ Cancelar turno"
+                    data-bs-toggle="tooltip">
+                    <i class="fas fa-times-circle"></i>
                   </button>
+                  
+                  <!-- Indicador para turnos completados -->
+                  <span 
+                    *ngIf="turno.estado === 'completado'"
+                    class="badge bg-success me-1"
+                    title="Turno completado - No se pueden realizar acciones">
+                    <i class="fas fa-lock"></i> Completado
+                  </span>
+                  
+                  <!-- Botón para ver detalles (siempre disponible) -->
                   <button 
-                    class="btn btn-info"
+                    class="btn btn-outline-primary"
                     (click)="verDetalles(turno)"
-                    title="Ver detalles">
+                    title="👁️ Ver información detallada"
+                    data-bs-toggle="tooltip">
                     <i class="fas fa-eye"></i>
                   </button>
                 </div>

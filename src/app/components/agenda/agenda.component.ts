@@ -64,15 +64,15 @@ export class AgendaComponent implements OnInit {
   }
 
   completarTurno(turno: Turno): void {
-    if (confirm('¿Confirmar que el turno ha sido completado?')) {
+    if (confirm(`¿Marcar como completado el turno de ${turno.nombre} ${turno.apellido}?\n\nTratamiento: ${turno.tratamiento}\nPrecio: $${turno.precioFinal}`)) {
       const turnoId = turno._id || turno.id?.toString() || '';
       if (turnoId) {
         this.turnoService.cambiarEstadoTurno(turnoId, 'completado').subscribe({
           next: () => {
             this.loadTurnosData();
-            alert('Turno marcado como completado');
+            alert('✅ Turno marcado como completado exitosamente');
           },
-          error: () => alert('Error al completar el turno')
+          error: () => alert('❌ Error al completar el turno')
         });
       }
     }
@@ -84,28 +84,61 @@ export class AgendaComponent implements OnInit {
   }
 
   cancelarTurno(turno: Turno): void {
-    if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
+    if (confirm(`¿Cancelar el turno de ${turno.nombre} ${turno.apellido}?\n\nFecha: ${turno.fecha} - ${turno.hora}\nTratamiento: ${turno.tratamiento}\n\nEsta acción se puede revertir.`)) {
       const turnoId = turno._id || turno.id?.toString() || '';
       if (turnoId) {
         this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
           next: () => {
             this.loadTurnosData();
-            alert('Turno cancelado exitosamente');
+            alert('✅ Turno cancelado exitosamente');
           },
-          error: () => alert('Error al cancelar el turno')
+          error: () => alert('❌ Error al cancelar el turno')
         });
       }
     }
   }
 
   verDetalles(turno: Turno): void {
-    // Aquí podrías abrir un modal con los detalles del turno
-    alert(`Detalles del turno ${turno.nroTurno}:\nPaciente: ${turno.nombre} ${turno.apellido}\nTratamiento: ${turno.tratamiento}\nPrecio: $${turno.precioFinal}`);
+    const detalles = `
+📅 DETALLES DEL TURNO #${turno.nroTurno}
+
+👤 PACIENTE:
+   • Nombre: ${turno.nombre} ${turno.apellido}
+   • Teléfono: ${turno.telefono || 'No especificado'}
+
+🦷 TRATAMIENTO:
+   • Descripción: ${turno.tratamiento}
+   • Duración: ${turno.duracion || '30'} minutos
+   • Precio: $${turno.precioFinal}
+
+⏰ HORARIO:
+   • Fecha: ${turno.fecha}
+   • Hora: ${turno.hora}
+
+📋 ESTADO: ${turno.estado.toUpperCase()}
+    `.trim();
+    
+    alert(detalles);
   }
 
   exportarAgenda(): void {
     // Aquí podrías generar un PDF o Excel con la agenda
     alert('Función de exportación - En desarrollo');
+  }
+
+  reservarTurno(turno: Turno): void {
+    if (confirm('¿Confirmar que el turno ha sido reservado nuevamente?')) {
+      const turnoId = turno._id || turno.id?.toString() || '';
+      if (turnoId) {
+        this.turnoService.cambiarEstadoTurno(turnoId, 'reservado').subscribe({
+          next: () => {
+            this.loadTurnosData();
+            alert('Turno marcado como reservado');
+          },
+          error: () => alert('Error al reservar el turno')
+        });
+      }
+    }
   }
 
   get filteredTurnos(): Turno[] {
@@ -117,7 +150,6 @@ export class AgendaComponent implements OnInit {
       filtered = filtered.filter(turno => 
         turno.nombre?.toLowerCase().includes(search) ||
         turno.apellido?.toLowerCase().includes(search) ||
-        turno.dni?.includes(search) ||
         turno.tratamiento.toLowerCase().includes(search)
       );
     }
@@ -151,10 +183,28 @@ export class AgendaComponent implements OnInit {
 
   getStatusClass(estado: string): string {
     switch (estado) {
-      case 'reservado': return 'badge bg-warning';
+      case 'reservado': return 'badge bg-warning text-dark';
       case 'completado': return 'badge bg-success';
       case 'cancelado': return 'badge bg-danger';
       default: return 'badge bg-secondary';
+    }
+  }
+
+  getStatusIcon(estado: string): string {
+    switch (estado) {
+      case 'reservado': return 'fas fa-calendar-check';
+      case 'completado': return 'fas fa-check-circle';
+      case 'cancelado': return 'fas fa-times-circle';
+      default: return 'fas fa-question-circle';
+    }
+  }
+
+  getStatusText(estado: string): string {
+    switch (estado) {
+      case 'reservado': return 'Reservado';
+      case 'completado': return 'Completado';
+      case 'cancelado': return 'Cancelado';
+      default: return 'Sin estado';
     }
   }
 }
