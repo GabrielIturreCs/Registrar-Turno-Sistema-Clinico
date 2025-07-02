@@ -598,12 +598,27 @@ export class ReservarComponent implements OnInit {
 
   // Navigate back to dashboard/home
   volverAlInicio(): void {
-    this.router.navigate(['/dashboard']);
+    // Redirigir según el tipo de usuario
+    if (this.user?.tipoUsuario === 'paciente') {
+      this.router.navigate(['/vistaPaciente']);
+    } else {
+      // Para dentistas y administradores
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   // Start a new booking
   nuevaReserva(): void {
     this.resetWizard();
+  }
+
+  // Cancelar reserva y volver al inicio
+  cancelarReserva(): void {
+    // Confirmar si realmente quiere cancelar
+    if (confirm('¿Estás seguro de que quieres cancelar la reserva? Se perderán todos los datos ingresados.')) {
+      this.resetWizard();
+      this.volverAlInicio();
+    }
   }
 
   // Método para obtener el pacienteId correcto

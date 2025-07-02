@@ -6,6 +6,7 @@ import { RegistroComponent } from './components/registro/registro.component';
 import { HomeComponent } from './components/layouts/home/home.component';
 import { AgendaComponent } from './components/agenda/agenda.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { VistaPacienteComponent } from './components/vistaPaciente/vistaPaciente.component';
 import { EstadisticaComponent } from './components/estadistica/estadistica.component';
 import { AdminComponent } from './components/administrador/administrador.component';
 import { PacientesComponent } from './components/pacientes/pacientes.component';
@@ -19,7 +20,8 @@ export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'registro', component: RegistroComponent },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard()] },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard(['dentista', 'administrador'])] },
+  { path: 'vistaPaciente', component: VistaPacienteComponent, canActivate: [authGuard('paciente')] },
   { path: 'misTurnos', component: TurnosComponent, canActivate: [authGuard('paciente')] },
   { path: 'reservarTurno', component: ReservarComponent, canActivate: [authGuard()] },
   { path: 'agenda', component: AgendaComponent, canActivate: [authGuard('dentista')] },

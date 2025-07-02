@@ -1,0 +1,1155 @@
+/* ======================
+   VARIABLES CSS GLOBALES
+   ====================== */
+:root {
+  --primary-color: #00bfff;
+  --primary-light: #7ff6ff;
+  --primary-dark: #0099cc;
+  --secondary-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --info-color: #17a2b8;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --gradient-bg: linear-gradient(135deg, #e3f0ff 0%, #fbeee6 60%, #e3f0ff 100%);
+  --card-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  --card-hover-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  --border-radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ======================
+   DASHBOARD DEL PACIENTE
+   ====================== */
+.patient-dashboard {
+  min-height: 100vh;
+  background: var(--gradient-bg);
+  background-attachment: fixed;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ======================
+   TARJETA DE BIENVENIDA
+   ====================== */
+.welcome-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+}
+
+.welcome-title {
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+}
+
+.welcome-subtitle {
+  color: #6c757d;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.user-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0, 191, 255, 0.3);
+  margin-left: auto;
+}
+
+/* ======================
+   ACCIONES RÁPIDAS
+   ====================== */
+.quick-action-card {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 2rem 1.5rem;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+}
+
+.quick-action-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  opacity: 0;
+  transition: var(--transition);
+  z-index: 1;
+}
+
+.quick-action-card:hover::before {
+  opacity: 0.05;
+}
+
+.quick-action-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--card-hover-shadow);
+  border-color: var(--primary-color);
+  color: inherit;
+  text-decoration: none;
+}
+
+.quick-action-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+.action-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2rem;
+  color: white;
+  transition: var(--transition);
+}
+
+.action-icon.bg-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+}
+
+.action-icon.bg-info {
+  background: linear-gradient(135deg, var(--info-color), #5bc0de);
+}
+
+.action-icon.bg-success {
+  background: linear-gradient(135deg, var(--secondary-color), #4caf50);
+}
+
+.quick-action-card:hover .action-icon {
+  transform: scale(1.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.quick-action-card h5 {
+  font-weight: 600;
+  color: var(--dark-color);
+  margin-bottom: 0.8rem;
+  font-size: 1.2rem;
+}
+
+.quick-action-card p {
+  color: #6c757d;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* ======================
+   TARJETAS DE MÉTRICAS
+   ====================== */
+.metric-card {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  text-align: center;
+  transition: var(--transition);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  transition: var(--transition);
+}
+
+.metric-card.total::before {
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+}
+
+.metric-card.completed::before {
+  background: linear-gradient(90deg, var(--secondary-color), #4caf50);
+}
+
+.metric-card.cancelled::before {
+  background: linear-gradient(90deg, var(--danger-color), #ff6b6b);
+}
+
+.metric-card.spent::before {
+  background: linear-gradient(90deg, var(--warning-color), #ffeb3b);
+}
+
+.metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-hover-shadow);
+}
+
+.metric-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.metric-card.total .metric-number {
+  color: var(--primary-color);
+}
+
+.metric-card.completed .metric-number {
+  color: var(--secondary-color);
+}
+
+.metric-card.cancelled .metric-number {
+  color: var(--danger-color);
+}
+
+.metric-card.spent .metric-number {
+  color: var(--warning-color);
+}
+
+.metric-label {
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ======================
+   PRÓXIMO TURNO
+   ====================== */
+.next-appointment-card {
+  background: linear-gradient(135deg, rgba(0, 191, 255, 0.05), rgba(127, 246, 255, 0.05));
+  border: 2px solid rgba(0, 191, 255, 0.2);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.next-appointment-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+}
+
+.appointment-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.appointment-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.appointment-title {
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.appointment-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.detail-item i {
+  color: var(--primary-color);
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.detail-item strong {
+  color: var(--dark-color);
+}
+
+/* ======================
+   TURNOS RECIENTES
+   ====================== */
+.recent-appointments {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+}
+
+.recent-appointments h5 {
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.appointment-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 0.8rem;
+  transition: var(--transition);
+}
+
+.appointment-item:hover {
+  background: rgba(0, 191, 255, 0.02);
+  border-color: var(--primary-color);
+  transform: translateX(5px);
+}
+
+.appointment-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.appointment-date {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  min-width: 80px;
+  text-align: center;
+}
+
+.appointment-desc {
+  flex: 1;
+}
+
+.appointment-desc h6 {
+  margin: 0 0 0.3rem 0;
+  color: var(--dark-color);
+  font-weight: 600;
+}
+
+.appointment-desc p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.status-badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.completed {
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(76, 175, 80, 0.1));
+  color: var(--secondary-color);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-badge.reserved {
+  background: linear-gradient(135deg, rgba(0, 191, 255, 0.1), rgba(127, 246, 255, 0.1));
+  color: var(--primary-color);
+  border: 1px solid rgba(0, 191, 255, 0.3);
+}
+
+.status-badge.cancelled {
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(255, 107, 107, 0.1));
+  color: var(--danger-color);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+/* ======================
+   TRATAMIENTOS FRECUENTES
+   ====================== */
+.frequent-treatments {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+}
+
+.frequent-treatments h5 {
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.treatment-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 0.8rem;
+  transition: var(--transition);
+}
+
+.treatment-item:hover {
+  background: rgba(40, 167, 69, 0.02);
+  border-color: var(--secondary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.1);
+}
+
+.treatment-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.treatment-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--secondary-color), #4caf50);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+.treatment-name {
+  font-weight: 600;
+  color: var(--dark-color);
+  margin: 0;
+}
+
+.treatment-name-item {
+  color: var(--dark-color);
+  font-weight: 600;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.treatment-count {
+  background: linear-gradient(135deg, var(--secondary-color), #4caf50);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: 700;
+  min-width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+/* ======================
+   SIMPLIFIED TREATMENT ITEMS
+   ====================== */
+.treatment-item-simple {
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 0.8rem;
+  transition: var(--transition);
+  background: white;
+}
+
+.treatment-item-simple:hover {
+  background: rgba(40, 167, 69, 0.02);
+  border-color: var(--secondary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.1);
+}
+
+.treatment-info-simple {
+  flex: 1;
+}
+
+.treatment-count-simple {
+  background: linear-gradient(135deg, var(--secondary-color), #4caf50);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+/* ======================
+   ESTADOS DE CARGA
+   ====================== */
+.loading-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(0, 191, 255, 0.2);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6c757d;
+}
+
+.empty-state i {
+  font-size: 4rem;
+  color: #dee2e6;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.empty-state h6 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* ======================
+   RESPONSIVE DESIGN
+   ====================== */
+@media (max-width: 768px) {
+  .welcome-title {
+    font-size: 1.5rem;
+  }
+  
+  .welcome-subtitle {
+    font-size: 1rem;
+  }
+  
+  .user-avatar-large {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+  
+  .quick-action-card {
+    margin-bottom: 1rem;
+  }
+  
+  .action-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+  
+  .metric-number {
+    font-size: 2rem;
+  }
+  
+  .appointment-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .appointment-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .appointment-info {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .appointment-date {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 576px) {
+  .patient-dashboard {
+    padding: 1rem 0;
+  }
+  
+  .welcome-card {
+    padding: 1.5rem;
+  }
+  
+  .quick-action-card,
+  .metric-card,
+  .recent-appointments,
+  .frequent-treatments {
+    margin-bottom: 1rem;
+  }
+}
+
+/* ======================
+   ANIMACIONES
+   ====================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-card,
+.quick-action-card,
+.metric-card,
+.next-appointment-card,
+.recent-appointments,
+.frequent-treatments {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.quick-action-card:nth-child(1) { animation-delay: 0.1s; }
+.quick-action-card:nth-child(2) { animation-delay: 0.2s; }
+.quick-action-card:nth-child(3) { animation-delay: 0.3s; }
+
+.metric-card:nth-child(1) { animation-delay: 0.1s; }
+.metric-card:nth-child(2) { animation-delay: 0.2s; }
+.metric-card:nth-child(3) { animation-delay: 0.3s; }
+.metric-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* ======================
+   EFECTOS HOVER ADICIONALES
+   ====================== */
+.appointment-item:hover .appointment-date {
+  transform: scale(1.05);
+}
+
+.treatment-item:hover .treatment-icon {
+  transform: rotate(10deg) scale(1.1);
+}
+
+.metric-card:hover .metric-number {
+  transform: scale(1.1);
+}
+
+/* ======================
+   TARJETAS DE ESTADÍSTICAS
+   ====================== */
+.stat-card {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-hover-shadow);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-content h3 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--dark-color);
+}
+
+.stat-content p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* ======================
+   WIDGET DE CHATBOT
+   ====================== */
+.chatbot-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.chat-toggle-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  box-shadow: 0 4px 20px rgba(0, 191, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: white;
+  font-size: 1.5rem;
+}
+
+.chat-toggle-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(0, 191, 255, 0.5);
+}
+
+.chat-toggle-btn.open {
+  background: linear-gradient(135deg, var(--danger-color), #ff6b6b);
+}
+
+.chat-window {
+  position: absolute;
+  bottom: 80px;
+  right: 0;
+  width: 350px;
+  height: 500px;
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  transform: scale(0) translateY(20px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: bottom right;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.chat-window.open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.chat-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  overflow: hidden;
+}
+
+.chat-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.btn-close-chat {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: var(--transition);
+  margin-left: auto;
+}
+
+.btn-close-chat:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.chat-body {
+  height: 340px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: 280px;
+}
+
+.message {
+  margin-bottom: 1rem;
+  display: flex;
+}
+
+.message.user {
+  justify-content: flex-end;
+}
+
+.message.bot {
+  justify-content: flex-start;
+}
+
+.message-content {
+  max-width: 80%;
+  padding: 0.75rem 1rem;
+  border-radius: 18px;
+  position: relative;
+}
+
+.message.user .message-content {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message.bot .message-content {
+  background: #f8f9fa;
+  color: var(--dark-color);
+  border-bottom-left-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.message-text {
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.message-time {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.5rem 0;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  animation: typingDot 1.4s infinite ease-in-out both;
+}
+
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typingDot {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.quick-questions {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.quick-question-item {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  margin: 0.25rem 0;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.9rem;
+}
+
+.quick-question-item:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.chat-footer {
+  padding: 1rem;
+  border-top: 1px solid #e9ecef;
+  background: white;
+}
+
+.chat-input {
+  border-radius: 25px;
+  border: 1px solid #e9ecef;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+
+.chat-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(0, 191, 255, 0.25);
+}
+
+.chat-send-btn {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  border: none;
+}
+
+.chat-send-btn:hover {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+  transform: scale(1.05);
+}
+
+.chat-send-btn:disabled {
+  opacity: 0.6;
+  transform: none;
+}
+
+/* ======================
+   TARJETAS ADICIONALES
+   ====================== */
+.upcoming-appointment {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--primary-color);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.upcoming-appointment::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 191, 255, 0.03), rgba(127, 246, 255, 0.03));
+  pointer-events: none;
+}
+
+.appointment-date {
+  text-align: center;
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  color: white;
+  border-radius: 15px;
+  padding: 1.5rem 1rem;
+  min-width: 100px;
+  box-shadow: 0 6px 20px rgba(44, 62, 80, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.date-number {
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.date-month {
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  margin-top: 0.3rem;
+  opacity: 0.9;
+}
+
+.date-year {
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  margin-top: 0.2rem;
+  opacity: 0.8;
+}
+
+.treatment-name-simple {
+  color: var(--primary-color);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.appointment-time-simple {
+  color: var(--dark-color);
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.appointment-time-simple i {
+  color: var(--primary-color);
+}
+
+.status-badge-simple {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ======================
+   CHAT TOGGLE IMAGE STYLING
+   ====================== */
+.chat-toggle-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ======================
+   NAVBAR STYLING FOR PATIENT
+   ====================== */
+.navbar {
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+}
+
+.navbar-text {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.btn-outline-light {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+/* ======================
+   NAVIGATION MENU STYLING
+   ====================== */
+.btn-group .btn {
+  flex: 1;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.btn-group .btn:hover {
+  background-color: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 191, 255, 0.3);
+}
+
+.btn-group .btn.active {
+  background-color: rgba(0, 191, 255, 0.1);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  border-width: 2px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 191, 255, 0.2);
+}

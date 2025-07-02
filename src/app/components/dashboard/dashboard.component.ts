@@ -370,7 +370,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const userStr = localStorage.getItem('user');
       if (userStr) {
         this.user = JSON.parse(userStr);
+        console.log('Dashboard: Usuario cargado:', this.user);
+        console.log('Dashboard: Nombre del usuario:', this.user?.nombre);
+        console.log('Dashboard: Tipo de usuario:', this.user?.tipoUsuario);
+        
+        // Redirigir pacientes a su vista específica
+        if (this.user?.tipoUsuario === 'paciente') {
+          this.router.navigate(['/vistaPaciente']);
+          return;
+        }
       } else {
+        console.log('Dashboard: No se encontró usuario en localStorage');
         this.router.navigate(['/login']);
       }
     }
@@ -700,5 +710,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   navigateToTratamiento(): void {
     this.router.navigate(['/tratamiento']);
+  }
+
+  getUserGreeting(): string {
+    if (!this.user) return 'Usuario';
+    
+    // Si hay nombre disponible, usarlo
+    if (this.user.nombre && this.user.apellido) {
+      return `${this.user.nombre} ${this.user.apellido}`;
+    } else if (this.user.nombre) {
+      return this.user.nombre;
+    }
+    
+    // Si no hay nombre, usar el tipo de usuario como saludo
+    switch (this.user.tipoUsuario) {
+      case 'dentista':
+        return 'dentista';
+      case 'administrador':
+        return 'administrador';
+      case 'paciente':
+        return 'paciente';
+      default:
+        return 'usuario';
+    }
   }
 }

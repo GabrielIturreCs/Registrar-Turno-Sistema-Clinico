@@ -94,6 +94,13 @@
                 <i class="fas fa-refresh"></i> Reintentar
               </button>
             </div>
+            
+            <!-- Botón cancelar para el paso de selección de paciente -->
+            <div class="wizard-navigation mt-4">
+              <button class="btn btn-outline-danger" (click)="cancelarReserva()">
+                <i class="fas fa-times"></i> Cancelar Reserva
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -163,6 +170,13 @@
                   <span>Hoy</span>
                 </div>
               </div>
+            </div>
+            
+            <!-- Botón cancelar para el primer paso -->
+            <div class="wizard-navigation mt-4">
+              <button class="btn btn-outline-danger" (click)="cancelarReserva()">
+                <i class="fas fa-times"></i> Cancelar Reserva
+              </button>
             </div>
           </div>
         </div>

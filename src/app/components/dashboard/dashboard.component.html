@@ -32,7 +32,7 @@
       </span>
       <div class="navbar-nav ms-auto align-items-center">
         <span class="navbar-text me-3">
-          Bienvenido, <span class="fw-semibold">{{ user?.nombre }} {{ user?.apellido }}</span>
+          Bienvenido, <span class="fw-semibold">{{ getUserGreeting() }}</span>
           <span [class]="getTipoClass(user?.tipoUsuario || '')" style="margin-left: 8px;">{{ user?.tipoUsuario }}</span>
         </span>
         <button class="btn btn-outline-danger btn-sm ms-2" (click)="logout()">

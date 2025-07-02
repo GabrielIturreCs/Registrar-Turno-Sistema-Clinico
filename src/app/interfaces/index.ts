@@ -43,11 +43,13 @@ export interface Tratamiento {
 
 export interface Paciente {
   id: number;
+  _id?: string;
   nombre: string;
   apellido: string;
   dni: string;
   obraSocial: string;
   telefono?: string;
+  userId?: string;
 }
 
 export interface LoginForm {
