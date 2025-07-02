@@ -294,11 +294,13 @@ export class TurnosComponent implements OnInit {
     this.turnoService.createTurno(turnoData).subscribe({
       next: (response) => {
         console.log('Turno creado exitosamente:', response);
-        this.loadTurnosData();
-        this.turnoForm = { pacienteId: '', fecha: '', hora: '', tratamientoId: '' };
-        this.currentView = 'turnos';
         this.isLoading = false;
         alert('Turno registrado exitosamente');
+        
+        // Force page reload to ensure fresh data
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       },
       error: (error) => {
         console.error('Error al registrar turno:', error);
@@ -321,8 +323,11 @@ export class TurnosComponent implements OnInit {
       if (turnoId) {
         this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
           next: () => {
-            this.loadTurnosData();
             alert('Turno cancelado exitosamente');
+            // Force page reload to ensure fresh data
+            setTimeout(() => {
+              window.location.reload();
+            }, 500);
           },
           error: () => alert('Error al cancelar el turno')
         });
@@ -336,8 +341,11 @@ export class TurnosComponent implements OnInit {
       if (turnoId) {
         this.turnoService.cambiarEstadoTurno(turnoId, 'completado').subscribe({
           next: () => {
-            this.loadTurnosData();
             alert('Turno marcado como completado');
+            // Force page reload to ensure fresh data
+            setTimeout(() => {
+              window.location.reload();
+            }, 500);
           },
           error: () => alert('Error al completar el turno')
         });
