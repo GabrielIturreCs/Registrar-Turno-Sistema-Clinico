@@ -22,6 +22,13 @@ export class PacientesComponent implements OnInit {
   // Modal y formulario para nuevo paciente
   showModal: boolean = false;
   isCreating: boolean = false;
+  
+  // Modal y formulario para editar paciente
+  showEditModal: boolean = false;
+  isUpdating: boolean = false;
+  editPacienteForm: Partial<Paciente> = {};
+  currentEditingPaciente: Paciente | null = null;
+  
   pacienteForm = {
     // Datos de usuario (para autenticación)
     nombreUsuario: '',
@@ -91,20 +98,46 @@ export class PacientesComponent implements OnInit {
   verDashboardPaciente(paciente: Paciente): void {
     // Guardar el paciente seleccionado en localStorage para que el dashboard lo use
     localStorage.setItem('selectedPaciente', JSON.stringify(paciente));
-    this.router.navigate(['/dashboard'], { queryParams: { pacienteId: paciente.id } });
+    // Navegar a vistaPaciente que es el dashboard específico para pacientes
+    const pacienteId = (paciente as any)._id || paciente.id;
+    this.router.navigate(['/vistaPaciente'], { queryParams: { pacienteId: pacienteId } });
   }
 
   editarPaciente(paciente: Paciente): void {
-    // Implementar edición de paciente
-    console.log('Editar paciente:', paciente);
-    // this.router.navigate(['/editar-paciente', paciente.id]);
+    this.currentEditingPaciente = paciente;
+    this.editPacienteForm = {
+      nombre: paciente.nombre,
+      apellido: paciente.apellido,
+      dni: paciente.dni,
+      telefono: paciente.telefono || '',
+      obraSocial: paciente.obraSocial
+    };
+    this.showEditModal = true;
   }
 
   eliminarPaciente(paciente: Paciente): void {
     if (confirm(`¿Estás seguro de que quieres eliminar a ${paciente.nombre} ${paciente.apellido}?`)) {
-      // Implementar eliminación de paciente
-      console.log('Eliminar paciente:', paciente);
-      // this.pacienteService.deletePaciente(paciente.id.toString()).subscribe(...)
+      // Usar _id de MongoDB o id dependiendo de lo que esté disponible
+      const pacienteId = (paciente as any)._id || paciente.id;
+      
+      if (!pacienteId) {
+        alert('Error: No se puede identificar el paciente para eliminar');
+        return;
+      }
+
+      console.log('Eliminando paciente con ID:', pacienteId);
+      
+      this.pacienteService.deletePaciente(pacienteId.toString()).subscribe({
+        next: () => {
+          console.log('Paciente eliminado exitosamente');
+          alert('Paciente eliminado exitosamente');
+          this.loadPacientes(); // Recargar la lista
+        },
+        error: (error) => {
+          console.error('Error al eliminar paciente:', error);
+          alert('Error al eliminar el paciente. Por favor, intenta nuevamente.');
+        }
+      });
     }
   }
 
@@ -216,5 +249,61 @@ export class PacientesComponent implements OnInit {
 
   get canCreatePaciente(): boolean {
     return this.isValidForm() && !this.isCreating;
+  }
+
+  // Métodos para el modal de editar paciente
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.editPacienteForm = {};
+    this.currentEditingPaciente = null;
+  }
+
+  updatePaciente(): void {
+    if (!this.isValidEditForm()) {
+      alert('Por favor, completa todos los campos obligatorios');
+      return;
+    }
+
+    if (!this.currentEditingPaciente) {
+      alert('Error: No hay paciente seleccionado para editar');
+      return;
+    }
+
+    this.isUpdating = true;
+
+    // Usar _id de MongoDB o id dependiendo de lo que esté disponible
+    const pacienteId = (this.currentEditingPaciente as any)._id || this.currentEditingPaciente.id;
+
+    // Crear el objeto con los datos actualizados
+    const updatedPaciente: Paciente = {
+      ...this.currentEditingPaciente,
+      ...this.editPacienteForm
+    };
+
+    this.pacienteService.updatePaciente(pacienteId.toString(), updatedPaciente).subscribe({
+      next: (response) => {
+        console.log('Paciente actualizado exitosamente:', response);
+        this.isUpdating = false;
+        this.closeEditModal();
+        alert('Paciente actualizado exitosamente');
+        this.loadPacientes(); // Recargar la lista
+      },
+      error: (error) => {
+        console.error('Error al actualizar paciente:', error);
+        this.isUpdating = false;
+        alert('Error al actualizar el paciente. Por favor, intenta nuevamente.');
+      }
+    });
+  }
+
+  isValidEditForm(): boolean {
+    return (this.editPacienteForm.nombre?.trim() !== '' &&
+           this.editPacienteForm.apellido?.trim() !== '' &&
+           this.editPacienteForm.dni?.trim() !== '' &&
+           this.editPacienteForm.obraSocial?.trim() !== '') || false;
+  }
+
+  get canUpdatePaciente(): boolean {
+    return this.isValidEditForm() && !this.isUpdating;
   }
 }
