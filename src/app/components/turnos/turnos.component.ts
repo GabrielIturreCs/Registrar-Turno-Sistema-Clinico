@@ -257,20 +257,22 @@ export class TurnosComponent implements OnInit {
     if (!this.canRegisterTurno) return;
     this.isLoading = true;
     const turnoData = {
-      pacienteId: parseInt(this.turnoForm.pacienteId),
+      pacienteId: this.turnoForm.pacienteId,
       fecha: this.turnoForm.fecha,
       hora: this.turnoForm.hora,
-      tratamientoId: parseInt(this.turnoForm.tratamientoId)
+      tratamientoId: this.turnoForm.tratamientoId
     };
     this.turnoService.createTurno(turnoData).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('Turno creado exitosamente:', response);
         this.loadTurnosData();
         this.turnoForm = { pacienteId: '', fecha: '', hora: '', tratamientoId: '' };
         this.currentView = 'turnos';
         this.isLoading = false;
         alert('Turno registrado exitosamente');
       },
-      error: () => {
+      error: (error) => {
+        console.error('Error al registrar turno:', error);
         this.isLoading = false;
         alert('Error al registrar el turno');
       }
@@ -286,25 +288,31 @@ export class TurnosComponent implements OnInit {
 
   cancelarTurno(turno: Turno): void {
     if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
-      this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'cancelado').subscribe({
-        next: () => {
-          this.loadTurnosData();
-          alert('Turno cancelado exitosamente');
-        },
-        error: () => alert('Error al cancelar el turno')
-      });
+      const turnoId = turno._id || turno.id?.toString() || '';
+      if (turnoId) {
+        this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
+          next: () => {
+            this.loadTurnosData();
+            alert('Turno cancelado exitosamente');
+          },
+          error: () => alert('Error al cancelar el turno')
+        });
+      }
     }
   }
 
   completarTurno(turno: Turno): void {
     if (confirm('¿Confirmar que el turno ha sido completado?')) {
-      this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'completado').subscribe({
-        next: () => {
-          this.loadTurnosData();
-          alert('Turno marcado como completado');
-        },
-        error: () => alert('Error al completar el turno')
-      });
+      const turnoId = turno._id || turno.id?.toString() || '';
+      if (turnoId) {
+        this.turnoService.cambiarEstadoTurno(turnoId, 'completado').subscribe({
+          next: () => {
+            this.loadTurnosData();
+            alert('Turno marcado como completado');
+          },
+          error: () => alert('Error al completar el turno')
+        });
+      }
     }
   }
 
@@ -315,7 +323,7 @@ export class TurnosComponent implements OnInit {
     if (this.searchTerm.trim() !== '') {
       const search = this.searchTerm.toLowerCase();
       filtered = filtered.filter(turno => 
-        turno.nroTurno.toLowerCase().includes(search) ||
+        String(turno.nroTurno).toLowerCase().includes(search) ||
         turno.tratamiento.toLowerCase().includes(search) ||
         turno.nombre?.toLowerCase().includes(search) ||
         turno.apellido?.toLowerCase().includes(search)
@@ -329,7 +337,10 @@ export class TurnosComponent implements OnInit {
 
     // Filtrar por usuario (si es paciente, solo mostrar sus turnos)
     if (this.user?.tipoUsuario === 'paciente') {
-      filtered = filtered.filter(turno => turno.pacienteId === this.user?.id);
+      filtered = filtered.filter(turno => 
+        String(turno.pacienteId) === String(this.user?.id) ||
+        String(turno.pacienteId) === String(this.user?.id)
+      );
     }
 
     return filtered;

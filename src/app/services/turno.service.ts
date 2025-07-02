@@ -8,7 +8,7 @@ import { tap } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class TurnoService {
-  private apiUrl = 'http://localhost:3000/api/turnos';
+  private apiUrl = 'http://localhost:3000/api/turno';
   private turnosSubject = new BehaviorSubject<Turno[]>([]);
   public turnos$ = this.turnosSubject.asObservable();
 
@@ -17,10 +17,9 @@ export class TurnoService {
   }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
+    // Simplificar headers por ahora para debugging
     return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Content-Type': 'application/json'
     });
   }
 
@@ -127,9 +126,8 @@ export class TurnoService {
 
   // Obtener tratamientos disponibles
   getTratamientos(): Observable<Tratamiento[]> {
-    return this.http.get<Tratamiento[]>('http://localhost:3000/api/tratamientos', { 
-      headers: this.getHeaders() 
-    });
+    // Sin headers de autenticación para simplificar
+    return this.http.get<Tratamiento[]>('http://localhost:3000/api/tratamiento');
   }
 
   // Obtener pacientes

@@ -14,20 +14,21 @@ export interface User {
 }
 
 export interface Turno {
-  id: number;
-  nroTurno: string;
+  id?: number | string;
+  _id?: string;
+  nroTurno: string | number;
   fecha: string;
   hora: string;
   estado: string;
   tratamiento: string;
-  precioFinal: number;
+  precioFinal: number | string;
   nombre?: string;
   apellido?: string;
   dni?: string;
   telefono?: string;
-  duracion?: number;
-  pacienteId?: number;
-  tratamientoId?: number;
+  duracion?: number | string;
+  pacienteId?: number | string;
+  tratamientoId?: number | string;
   tipoUsuario?: string;
 }
 

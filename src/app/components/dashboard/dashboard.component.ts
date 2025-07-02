@@ -144,19 +144,69 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Admin dashboard methods
   loadAdminStats(): void {
     if (this.user?.tipoUsuario === 'administrador') {
-      // Simular datos de estadísticas administrativas
+      // Inicializar con valores por defecto
       this.adminStats = {
-        totalUsuarios: 156,
-        turnosEsteMes: 342,
-        ingresosEsteMes: 2850000,
-        dentistasActivos: 8,
-        ocupacionTurnos: 78,
-        satisfaccionPacientes: 92,
-        eficienciaSistema: 85,
+        totalUsuarios: 0,
+        turnosEsteMes: 0,
+        ingresosEsteMes: 0,
+        dentistasActivos: 0,
+        ocupacionTurnos: 0,
+        satisfaccionPacientes: 0,
+        eficienciaSistema: 0,
         alertas: [],
         actividadReciente: []
       };
+
+      // Cargar datos reales de la BD
+      this.loadRealAdminStats();
     }
+  }
+
+  loadRealAdminStats(): void {
+    // Cargar turnos para estadísticas
+    this.turnoService.getTurnosFromAPI().subscribe({
+      next: (turnos) => {
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        
+        // Turnos de este mes
+        const turnosEsteMes = turnos.filter(turno => {
+          const turnoDate = new Date(turno.fecha);
+          return turnoDate.getMonth() === currentMonth && turnoDate.getFullYear() === currentYear;
+        });
+        
+        // Ingresos de este mes (solo turnos completados)
+        const ingresosEsteMes = turnosEsteMes
+          .filter(turno => turno.estado === 'completado')
+          .reduce((total, turno) => total + (Number(turno.precioFinal) || 0), 0);
+        
+        this.adminStats.turnosEsteMes = turnosEsteMes.length;
+        this.adminStats.ingresosEsteMes = ingresosEsteMes;
+      },
+      error: (error) => {
+        console.error('Error cargando estadísticas de turnos:', error);
+      }
+    });
+
+    // Cargar pacientes para total de usuarios
+    this.pacienteService.getPacientes().subscribe({
+      next: (pacientes) => {
+        this.adminStats.totalUsuarios = pacientes.length;
+      },
+      error: (error) => {
+        console.error('Error cargando pacientes:', error);
+      }
+    });
+
+    // Cargar dentistas activos
+    this.dentistaService.getDentistas().subscribe({
+      next: (dentistas) => {
+        this.adminStats.dentistasActivos = dentistas.length;
+      },
+      error: (error) => {
+        console.error('Error cargando dentistas:', error);
+      }
+    });
   }
 
   getAlertIcon(tipo: string): string {
@@ -359,15 +409,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   loadTurnosData(): void {
+    console.log('Dashboard: Iniciando carga de turnos...');
     this.turnoService.getTurnosFromAPI().subscribe({
       next: (turnos) => {
+        console.log('Dashboard: Turnos recibidos del backend:', turnos);
+        console.log('Dashboard: Cantidad de turnos recibidos:', turnos.length);
+        
+        if (turnos.length > 0) {
+          console.log('Dashboard: Primer turno de ejemplo:', turnos[0]);
+          console.log('Dashboard: Campos disponibles en el primer turno:', Object.keys(turnos[0]));
+        }
+        
         if (this.selectedPaciente) {
-          this.turnos = turnos.filter(turno => turno.pacienteId === this.selectedPaciente!.id);
+          this.turnos = turnos.filter(turno => String(turno.pacienteId) === String(this.selectedPaciente!.id));
+          console.log('Dashboard: Turnos filtrados para paciente:', this.turnos);
         } else {
           this.turnos = turnos;
+          console.log('Dashboard: Todos los turnos cargados:', this.turnos.length, 'turnos');
         }
       },
-      error: () => {
+      error: (error) => {
+        console.error('Dashboard: Error cargando turnos:', error);
         this.turnos = [];
       }
     });
@@ -418,9 +480,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   cancelarTurno(turno: Turno): void {
     if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
-      this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'cancelado').subscribe({
+      const turnoId = turno._id || turno.id?.toString() || '';
+      this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
         next: () => {
           this.loadTurnosData();
+          this.loadRealAdminStats(); // Recargar estadísticas después de cancelar
           alert('Turno cancelado exitosamente');
         },
         error: () => alert('Error al cancelar el turno')
@@ -428,8 +492,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Método público para recargar todas las estadísticas
+  refreshDashboard(): void {
+    this.loadTurnosData();
+    if (this.user?.tipoUsuario === 'administrador') {
+      this.loadRealAdminStats();
+      this.cargarRendimientoSistema();
+      this.generarAlertasSistema();
+      this.loadDentistasActividad();
+      this.loadPacientesActividad();
+      this.loadTratamientosActividad();
+      this.loadTurnosActividad();
+    }
+  }
+
   get filteredTurnos(): Turno[] {
-    return this.turnos.filter(turno => turno.estado !== 'cancelado');
+    return this.turnos
+      .filter(turno => turno.estado !== 'cancelado')
+      .sort((a, b) => {
+        // Ordenar por fecha (más recientes primero)
+        const fechaA = new Date(a.fecha).getTime();
+        const fechaB = new Date(b.fecha).getTime();
+        return fechaB - fechaA;
+      });
   }
 
   get totalTurnos(): number {
@@ -484,6 +569,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const completados = turnos.filter((t: any) => t.estado === 'completado').length;
       this.rendimiento.ocupacion = total ? Math.round((completados / total) * 100) : 0;
     });
+    
     this.pacienteService.getPacientes().subscribe((pacientes: any[]) => {
       this.rendimiento.usuarios = pacientes.length;
     });

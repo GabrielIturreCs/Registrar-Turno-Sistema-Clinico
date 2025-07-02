@@ -117,23 +117,29 @@ export class DentistaComponent implements OnInit {
   }
 
   cancelarTurno(turno: Turno): void {
-    this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'cancelado').subscribe({
-      next: () => {
-        this.loadTurnos();
-        this.showAlert('Turno cancelado exitosamente.', 'warning');
-      },
-      error: () => this.showAlert('Error al cancelar el turno', 'danger')
-    });
+    const turnoId = turno._id || turno.id?.toString() || '';
+    if (turnoId) {
+      this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
+        next: () => {
+          this.loadTurnos();
+          this.showAlert('Turno cancelado exitosamente.', 'warning');
+        },
+        error: () => this.showAlert('Error al cancelar el turno', 'danger')
+      });
+    }
   }
 
   completarTurno(turno: Turno): void {
-    this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'completado').subscribe({
-      next: () => {
-        this.loadTurnos();
-        this.showAlert('Turno completado exitosamente.', 'success');
-      },
-      error: () => this.showAlert('Error al completar el turno', 'danger')
-    });
+    const turnoId = turno._id || turno.id?.toString() || '';
+    if (turnoId) {
+      this.turnoService.cambiarEstadoTurno(turnoId, 'completado').subscribe({
+        next: () => {
+          this.loadTurnos();
+          this.showAlert('Turno completado exitosamente.', 'success');
+        },
+        error: () => this.showAlert('Error al completar el turno', 'danger')
+      });
+    }
   }
 
   clearForms(): void {
@@ -177,7 +183,7 @@ export class DentistaComponent implements OnInit {
     // Filtrar por búsqueda
     if (this.searchTerm) {
       filtered = filtered.filter(turno =>
-        turno.nroTurno.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        String(turno.nroTurno).toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         turno.nombre?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         turno.apellido?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         turno.tratamiento.toLowerCase().includes(this.searchTerm.toLowerCase())
@@ -228,7 +234,7 @@ export class DentistaComponent implements OnInit {
     const cancelados = this.turnos.filter(t => t.estado === 'cancelado').length;
     const ingresos = this.turnos
       .filter(t => t.estado === 'completado')
-      .reduce((sum, t) => sum + t.precioFinal, 0);
+      .reduce((sum, t) => sum + Number(t.precioFinal || 0), 0);
 
     return { total, reservados, completados, cancelados, ingresos };
   }

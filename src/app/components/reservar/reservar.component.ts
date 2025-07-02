@@ -17,11 +17,13 @@ interface User {
 }
 
 interface Paciente {
-  id: number;
+  id?: number;
+  _id?: string;
   nombre: string;
   apellido: string;
   dni: string;
   obraSocial: string;
+  userId?: string;
 }
 
 @Component({
@@ -33,6 +35,25 @@ interface Paciente {
 export class ReservarComponent implements OnInit {
   user: User | null = null;
   isLoading: boolean = false;
+
+  // Wizard Steps
+  currentStep: number = 1;
+  totalSteps: number = 5;
+  
+  // Para dentistas/administradores - selección de paciente
+  selectedPaciente: Paciente | null = null;
+  
+  // Calendar and booking data
+  selectedDate: string = '';
+  selectedTime: string = '';
+  selectedTreatment: Tratamiento | null = null;
+  availableDates: string[] = [];
+  availableTimeSlots: { time: string, available: boolean }[] = [];
+  occupiedSlots: { [key: string]: string[] } = {}; // fecha -> array de horas ocupadas
+  
+  // Calendar view
+  currentMonth: Date = new Date();
+  calendarDays: { date: Date, available: boolean, isToday: boolean, isSelected: boolean }[] = [];
 
   // Chatbot properties
   @ViewChild('chatMessages') chatMessages!: ElementRef;
@@ -74,6 +95,15 @@ export class ReservarComponent implements OnInit {
     this.loadPacientes();
     this.loadTratamientos();
     this.addWelcomeMessage();
+    this.generateCalendar();
+    this.loadOccupiedSlots();
+    
+    // Ajustar total de pasos según el tipo de usuario
+    if (this.user?.tipoUsuario === 'dentista' || this.user?.tipoUsuario === 'administrador') {
+      this.totalSteps = 6; // Paso adicional para seleccionar paciente
+    } else {
+      this.totalSteps = 5;
+    }
   }
 
   // Chatbot methods
@@ -230,9 +260,64 @@ export class ReservarComponent implements OnInit {
   }
 
   loadTratamientos(): void {
+    console.log('Cargando tratamientos...');
     this.turnoService.getTratamientos().subscribe({
-      next: (tratamientos) => this.tratamientos = tratamientos,
-      error: () => this.tratamientos = []
+      next: (tratamientos) => {
+        console.log('Tratamientos recibidos:', tratamientos);
+        // Mapear _id a id para compatibilidad con la interfaz
+        this.tratamientos = tratamientos.map(t => ({
+          ...t,
+          id: t._id
+        }));
+        console.log('Tratamientos mapeados:', this.tratamientos);
+      },
+      error: (error) => {
+        console.error('Error cargando tratamientos:', error);
+        // Datos de prueba en caso de error
+        this.tratamientos = [
+          {
+            id: 1,
+            nroTratamiento: 1,
+            descripcion: 'Consulta General',
+            duracion: '30',
+            historial: '5000',
+            _id: '1'
+          },
+          {
+            id: 2,
+            nroTratamiento: 2,
+            descripcion: 'Limpieza Dental',
+            duracion: '45',
+            historial: '8000',
+            _id: '2'
+          },
+          {
+            id: 3,
+            nroTratamiento: 3,
+            descripcion: 'Empaste',
+            duracion: '60',
+            historial: '12000',
+            _id: '3'
+          },
+          {
+            id: 4,
+            nroTratamiento: 4,
+            descripcion: 'Extracción',
+            duracion: '45',
+            historial: '15000',
+            _id: '4'
+          },
+          {
+            id: 5,
+            nroTratamiento: 5,
+            descripcion: 'Ortodoncia',
+            duracion: '90',
+            historial: '10000',
+            _id: '5'
+          }
+        ];
+        console.log('Usando datos de prueba:', this.tratamientos);
+      }
     });
   }
 
@@ -273,5 +358,278 @@ export class ReservarComponent implements OnInit {
     return this.turnoForm.fecha.trim() !== '' &&
            this.turnoForm.hora.trim() !== '' &&
            this.turnoForm.tratamientoId.trim() !== '';
+  }
+
+  // Wizard Navigation Methods
+  nextStep(): void {
+    if (this.currentStep < this.totalSteps) {
+      this.currentStep++;
+    }
+  }
+
+  prevStep(): void {
+    if (this.currentStep > 1) {
+      this.currentStep--;
+    }
+  }
+
+  goToStep(step: number): void {
+    this.currentStep = step;
+  }
+
+  resetWizard(): void {
+    this.currentStep = 1;
+    this.selectedDate = '';
+    this.selectedTime = '';
+    this.selectedTreatment = null;
+    this.selectedPaciente = null; // Resetear paciente seleccionado
+    this.generateCalendar();
+  }
+
+  // Calendar Methods
+  generateCalendar(): void {
+    this.calendarDays = [];
+    const year = this.currentMonth.getFullYear();
+    const month = this.currentMonth.getMonth();
+    
+    // First day of the month
+    const firstDay = new Date(year, month, 1);
+    // Last day of the month
+    const lastDay = new Date(year, month + 1, 0);
+    
+    // Start from the first Monday of the week containing the 1st day
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - ((startDate.getDay() + 6) % 7));
+    
+    // Generate 42 days (6 weeks)
+    for (let i = 0; i < 42; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+      
+      const dateStr = this.formatDate(currentDate);
+      const isToday = this.isToday(currentDate);
+      const isCurrentMonth = currentDate.getMonth() === month;
+      const isPastDate = currentDate < new Date(new Date().setHours(0, 0, 0, 0));
+      const hasAvailableSlots = this.hasAvailableSlots(dateStr);
+      
+      this.calendarDays.push({
+        date: currentDate,
+        available: isCurrentMonth && !isPastDate && hasAvailableSlots,
+        isToday: isToday,
+        isSelected: dateStr === this.selectedDate
+      });
+    }
+  }
+
+  prevMonth(): void {
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
+    this.generateCalendar();
+  }
+
+  nextMonth(): void {
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
+    this.generateCalendar();
+  }
+
+  selectDate(day: any): void {
+    if (!day.available) return;
+    
+    this.selectedDate = this.formatDate(day.date);
+    this.generateTimeSlots();
+    this.generateCalendar(); // Refresh to show selection
+    this.nextStep();
+  }
+
+  // Time Slots Methods
+  generateTimeSlots(): void {
+    this.availableTimeSlots = [];
+    const startHour = 8; // 8:00 AM
+    const endHour = 18; // 6:00 PM
+    const intervalMinutes = 20;
+    
+    const occupiedTimes = this.occupiedSlots[this.selectedDate] || [];
+    
+    for (let hour = startHour; hour < endHour; hour++) {
+      for (let minute = 0; minute < 60; minute += intervalMinutes) {
+        const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        const isOccupied = occupiedTimes.includes(timeStr);
+        
+        this.availableTimeSlots.push({
+          time: timeStr,
+          available: !isOccupied
+        });
+      }
+    }
+  }
+
+  selectTime(timeSlot: any): void {
+    if (!timeSlot.available) return;
+    
+    this.selectedTime = timeSlot.time;
+    this.nextStep();
+  }
+
+  selectTreatment(treatment: Tratamiento): void {
+    this.selectedTreatment = treatment;
+    this.nextStep();
+  }
+
+  // Método para seleccionar paciente (solo para dentistas/administradores)
+  selectPaciente(paciente: Paciente): void {
+    this.selectedPaciente = paciente;
+    this.nextStep();
+  }
+
+  // Determinar si el usuario debe seleccionar paciente
+  get shouldSelectPaciente(): boolean {
+    return this.user?.tipoUsuario === 'dentista' || this.user?.tipoUsuario === 'administrador';
+  }
+
+  // Determinar cuál es el paso actual basado en el tipo de usuario
+  getCurrentStepForUser(): number {
+    if (this.shouldSelectPaciente) {
+      // Para dentistas: 1=Paciente, 2=Fecha, 3=Hora, 4=Tratamiento, 5=Confirmar, 6=Éxito
+      return this.currentStep;
+    } else {
+      // Para pacientes: 1=Fecha, 2=Hora, 3=Tratamiento, 4=Confirmar, 5=Éxito
+      return this.currentStep;
+    }
+  }
+
+  // Helper Methods
+  formatDate(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
+  isToday(date: Date): boolean {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  }
+
+  hasAvailableSlots(dateStr: string): boolean {
+    // Simular que hay slots disponibles (en una app real, esto vendría del backend)
+    const occupiedTimes = this.occupiedSlots[dateStr] || [];
+    const totalSlots = (18 - 8) * 3; // 8AM to 6PM, every 20 minutes
+    return occupiedTimes.length < totalSlots;
+  }
+
+  loadOccupiedSlots(): void {
+    // Simular datos ocupados (en una app real, esto vendría del backend)
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    
+    this.occupiedSlots = {
+      [this.formatDate(today)]: ['09:00', '10:20', '14:00', '15:40'],
+      [this.formatDate(tomorrow)]: ['08:00', '11:00', '16:20']
+    };
+  }
+
+  getMonthName(): string {
+    const months = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    return months[this.currentMonth.getMonth()];
+  }
+
+  getYear(): number {
+    return this.currentMonth.getFullYear();
+  }
+
+  formatSelectedDate(): string {
+    if (!this.selectedDate) return '';
+    const date = new Date(this.selectedDate);
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    return date.toLocaleDateString('es-ES', options);
+  }
+
+  // Final Booking
+  async confirmBooking(): Promise<void> {
+    if (!this.selectedDate || !this.selectedTime || !this.selectedTreatment) {
+      console.log('Datos incompletos para confirmar booking');
+      return;
+    }
+    
+    this.isLoading = true;
+    
+    // Obtener el pacienteId correcto
+    const pacienteId = await this.getPacienteId();
+    if (!pacienteId) {
+      this.isLoading = false;
+      alert('Error: No se pudo obtener el ID del paciente');
+      return;
+    }
+    
+    const turnoData = {
+      pacienteId: pacienteId,
+      fecha: this.selectedDate,
+      hora: this.selectedTime,
+      tratamientoId: this.selectedTreatment._id || this.selectedTreatment.id // Usar _id del backend o id de fallback
+    };
+
+    console.log('Datos del turno a enviar:', turnoData);
+    console.log('User completo:', this.user);
+    console.log('Selected treatment completo:', this.selectedTreatment);
+    console.log('Tipo de pacienteId:', typeof turnoData.pacienteId);
+    console.log('Tipo de tratamientoId:', typeof turnoData.tratamientoId);
+    console.log('Paso actual antes de confirmar:', this.currentStep);
+
+    this.turnoService.createTurno(turnoData).subscribe({
+      next: (response) => {
+        console.log('Turno creado exitosamente:', response);
+        console.log('Cambiando al paso final (éxito)');
+        this.isLoading = false;
+        this.currentStep = this.shouldSelectPaciente ? 6 : 5; // Ir al paso correcto según el tipo de usuario
+        console.log('Paso actual después de éxito:', this.currentStep);
+      },
+      error: (error) => {
+        console.error('Error al registrar el turno:', error);
+        this.isLoading = false;
+        alert('Error al registrar el turno. Por favor, intenta nuevamente.');
+      }
+    });
+  }
+
+  // Navigate back to dashboard/home
+  volverAlInicio(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+  // Start a new booking
+  nuevaReserva(): void {
+    this.resetWizard();
+  }
+
+  // Método para obtener el pacienteId correcto
+  async getPacienteId(): Promise<string | null> {
+    if (this.user?.tipoUsuario === 'paciente') {
+      // Para usuarios tipo paciente, buscar en la lista de pacientes el que tenga userId igual al user.id
+      const paciente = this.pacientes.find(p => p.userId === this.user?.id?.toString());
+      if (paciente) {
+        return paciente._id || paciente.id?.toString() || null;
+      }
+      // Si no encontramos el paciente, intentar cargarlo desde el servidor
+      try {
+        const allPacientes = await this.pacienteService.getPacientes().toPromise() as any[];
+        const foundPaciente = allPacientes?.find((p: any) => p.userId === this.user?.id?.toString());
+        return foundPaciente?._id || foundPaciente?.id?.toString() || null;
+      } catch (error) {
+        console.error('Error al buscar paciente:', error);
+        return null;
+      }
+    } else {
+      // Para usuarios tipo dentista/administrador, usar el paciente seleccionado en el wizard
+      if (this.selectedPaciente) {
+        return this.selectedPaciente._id || this.selectedPaciente.id?.toString() || null;
+      }
+      // Fallback: usar el pacienteId del formulario si existe
+      return this.turnoForm.pacienteId || null;
+    }
   }
 }

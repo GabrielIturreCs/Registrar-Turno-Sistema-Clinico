@@ -124,11 +124,9 @@
                   [(ngModel)]="turnoForm.tratamientoId" 
                   name="tratamientoId"
                   required>
-                >
                   <option value="">Selecciona un tratamiento</option>
-                  <option *ngFor="let tratamiento of tratamientos" [value]="tratamiento.id">
-                  <!--  {{ tratamiento.descripcion }} - ${{ tratamiento.precio }} ({{ tratamiento.duracion }} min) -->
-
+                  <option *ngFor="let tratamiento of tratamientos" [value]="tratamiento._id">
+                    {{ tratamiento.descripcion }} - ${{ tratamiento.historial }} ({{ tratamiento.duracion }} min)
                   </option>
                 </select>
               </div>

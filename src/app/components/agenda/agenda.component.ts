@@ -65,13 +65,16 @@ export class AgendaComponent implements OnInit {
 
   completarTurno(turno: Turno): void {
     if (confirm('¿Confirmar que el turno ha sido completado?')) {
-      this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'completado').subscribe({
-        next: () => {
-          this.loadTurnosData();
-          alert('Turno marcado como completado');
-        },
-        error: () => alert('Error al completar el turno')
-      });
+      const turnoId = turno._id || turno.id?.toString() || '';
+      if (turnoId) {
+        this.turnoService.cambiarEstadoTurno(turnoId, 'completado').subscribe({
+          next: () => {
+            this.loadTurnosData();
+            alert('Turno marcado como completado');
+          },
+          error: () => alert('Error al completar el turno')
+        });
+      }
     }
   }
 
@@ -82,13 +85,16 @@ export class AgendaComponent implements OnInit {
 
   cancelarTurno(turno: Turno): void {
     if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
-      this.turnoService.cambiarEstadoTurno(turno.id.toString(), 'cancelado').subscribe({
-        next: () => {
-          this.loadTurnosData();
-          alert('Turno cancelado exitosamente');
-        },
-        error: () => alert('Error al cancelar el turno')
-      });
+      const turnoId = turno._id || turno.id?.toString() || '';
+      if (turnoId) {
+        this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
+          next: () => {
+            this.loadTurnosData();
+            alert('Turno cancelado exitosamente');
+          },
+          error: () => alert('Error al cancelar el turno')
+        });
+      }
     }
   }
 
@@ -140,7 +146,7 @@ export class AgendaComponent implements OnInit {
   get ingresosHoy(): number {
     return this.turnos
       .filter(t => t.fecha === this.selectedDate && t.estado === 'completado')
-      .reduce((total, t) => total + t.precioFinal, 0);
+      .reduce((total, t) => total + Number(t.precioFinal || 0), 0);
   }
 
   getStatusClass(estado: string): string {

@@ -151,7 +151,7 @@ export class EstadisticaComponent implements OnInit {
       cancelados: filteredTurnos.filter(t => t.estado === 'cancelado').length,
       ingresos: filteredTurnos
         .filter(t => t.estado === 'completado')
-        .reduce((total, t) => total + t.precioFinal, 0)
+        .reduce((total, t) => total + Number(t.precioFinal || 0), 0)
     };
 
     // Calcular estadísticas por tratamiento
@@ -191,7 +191,7 @@ export class EstadisticaComponent implements OnInit {
       estadistica.cantidad++;
       
       if (turno.estado === 'completado') {
-        estadistica.ingresos += turno.precioFinal;
+        estadistica.ingresos += Number(turno.precioFinal || 0);
       }
     });
 
