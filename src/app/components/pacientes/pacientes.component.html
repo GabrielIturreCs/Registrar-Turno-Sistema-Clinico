@@ -2,31 +2,35 @@
   <div class="row">
     <div class="col-12">
       <!-- Header -->
-      <div class="d-flex justify-content-between align-items-center mb-4">
+      <div class="page-header d-flex justify-content-between align-items-center">
         <div>
-          <h2 class="mb-1">
-            <i class="bi bi-people-fill text-primary me-2"></i>
+          <h1 class="page-title mb-2">
+            <i class="bi bi-people-fill me-3"></i>
             Gestión de Pacientes
-          </h2>
-          <p class="text-muted mb-0">Administra la información de todos los pacientes</p>
+          </h1>
+          <p class="page-subtitle">Administra la información de todos los pacientes de manera eficiente</p>
         </div>
-        <div class="d-flex gap-2">
-          <button class="btn btn-outline-secondary" (click)="loadPacientes()">
-            <i class="bi bi-arrow-clockwise me-1"></i>
+        <div class="d-flex gap-3">
+          <button class="btn btn-primary" (click)="loadPacientes()" title="Actualizar lista">
+            <i class="bi bi-arrow-clockwise me-2"></i>
             Actualizar
           </button>
-          <button class="btn btn-primary" (click)="openCreateModal()">
-            <i class="bi bi-person-plus me-1"></i>
+          <button class="btn btn-success" (click)="openCreateModal()" title="Agregar nuevo paciente">
+            <i class="bi bi-person-plus me-2"></i>
             Nuevo Paciente
           </button>
         </div>
       </div>
 
       <!-- Search and Filters -->
-      <div class="card mb-4">
+      <div class="search-card card mb-4">
         <div class="card-body">
           <div class="row align-items-center">
-            <div class="col-md-6">
+            <div class="col-lg-8 col-md-12 mb-3 mb-lg-0">
+              <label class="form-label fw-semibold mb-2">
+                <i class="bi bi-search text-primary me-2"></i>
+                Buscar Pacientes
+              </label>
               <div class="input-group">
                 <span class="input-group-text">
                   <i class="bi bi-search"></i>
@@ -38,110 +42,134 @@
                   [(ngModel)]="searchTerm"
                   (input)="filterPacientes()"
                 >
+                <button class="btn btn-danger" type="button" (click)="searchTerm = ''; filterPacientes()" title="Limpiar búsqueda">
+                  <i class="bi bi-x-lg"></i>
+                </button>
               </div>
             </div>
-            <div class="col-md-6 text-md-end mt-3 mt-md-0">
-              <span class="text-muted">
-                <i class="bi bi-info-circle me-1"></i>
-                {{ pacientesFiltrados.length }} de {{ pacientes.length }} pacientes
-              </span>
+            <div class="col-lg-4 col-md-12 text-lg-end">
+              <div class="d-flex align-items-center justify-content-lg-end justify-content-center">
+                <div class="me-3">
+                  <span class="badge bg-gradient-primary fs-6 px-3 py-2">
+                    <i class="bi bi-people me-2"></i>
+                    {{ pacientesFiltrados.length }} de {{ pacientes.length }} pacientes
+                  </span>
+                </div>
+                <div *ngIf="searchTerm" class="text-info fw-bold small">
+                  <i class="bi bi-funnel me-1"></i>
+                  Filtrado
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Loading State -->
-      <div *ngIf="isLoading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
+      <div *ngIf="isLoading" class="loading-container text-center">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
           <span class="visually-hidden">Cargando...</span>
         </div>
-        <p class="mt-3 text-muted">Cargando pacientes...</p>
+        <h5 class="text-muted">Cargando pacientes...</h5>
+        <p class="text-muted mb-0">Por favor espera un momento</p>
       </div>
 
       <!-- Patients Table -->
-      <div *ngIf="!isLoading" class="card">
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th class="border-0 ps-4">
-                    <i class="bi bi-person me-1"></i>
-                    Paciente
-                  </th>
-                  <th class="border-0">
-                    <i class="bi bi-card-text me-1"></i>
-                    DNI
-                  </th>
-                  <th class="border-0">
-                    <i class="bi bi-telephone me-1"></i>
-                    Teléfono
-                  </th>
-                  <th class="border-0">
-                    <i class="bi bi-shield-check me-1"></i>
-                    Obra Social
-                  </th>
-                  <th class="border-0 text-center">
-                    <i class="bi bi-gear me-1"></i>
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let paciente of pacientesFiltrados" class="align-middle">
-                  <td class="ps-4">
-                    <div class="d-flex align-items-center">
-                      <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
-                        {{ paciente.nombre.charAt(0) }}{{ paciente.apellido.charAt(0) }}
-                      </div>
-                      <div>
-                        <h6 class="mb-0 fw-semibold">{{ paciente.nombre }} {{ paciente.apellido }}</h6>
-                        <small class="text-muted">ID: {{ paciente.id }}</small>
-                      </div>
+      <div *ngIf="!isLoading" class="table-container">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th class="ps-4">
+                  <i class="bi bi-person me-2"></i>
+                  Paciente
+                </th>
+                <th>
+                  <i class="bi bi-card-text me-2"></i>
+                  DNI
+                </th>
+                <th>
+                  <i class="bi bi-telephone me-2"></i>
+                  Teléfono
+                </th>
+                <th>
+                  <i class="bi bi-shield-check me-2"></i>
+                  Obra Social
+                </th>
+                <th class="text-center">
+                  <i class="bi bi-gear me-2"></i>
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let paciente of pacientesFiltrados; let i = index" class="align-middle">
+                <td class="ps-4">
+                  <div class="d-flex align-items-center">
+                    <div class="avatar-sm bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                      {{ paciente.nombre.charAt(0) }}{{ paciente.apellido.charAt(0) }}
                     </div>
-                  </td>
-                  <td>
-                    <span class="fw-medium">{{ paciente.dni }}</span>
-                  </td>
-                  <td>
-                    <span class="text-muted">{{ paciente.telefono || 'No especificado' }}</span>
-                  </td>
-                  <td>
-                    <span [class]="getObraSocialClass(paciente.obraSocial)">
-                      {{ paciente.obraSocial }}
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <div class="btn-group" role="group">
-                      <button 
-                        class="btn btn-sm btn-outline-secondary" 
-                        (click)="editarPaciente(paciente)"
-                        title="Editar Paciente"
-                      >
-                        <i class="bi bi-pencil"></i>
-                      </button>
-                      <button 
-                        class="btn btn-sm btn-outline-danger" 
-                        (click)="eliminarPaciente(paciente)"
-                        title="Eliminar Paciente"
-                      >
-                        <i class="bi bi-trash"></i>
-                      </button>
+                    <div>
+                      <h6 class="mb-1 fw-bold text-dark">{{ paciente.nombre }} {{ paciente.apellido }}</h6>
+                      <small class="text-muted">
+                        <i class="bi bi-hash me-1"></i>
+                        ID: {{ paciente.id || paciente._id }}
+                      </small>
                     </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="fw-semibold text-dark">{{ paciente.dni }}</span>
+                </td>
+                <td>
+                  <span class="text-muted">
+                    <i class="bi bi-telephone-fill me-1 text-success"></i>
+                    {{ paciente.telefono || 'No especificado' }}
+                  </span>
+                </td>
+                <td>
+                  <span [class]="getObraSocialClass(paciente.obraSocial)">
+                    {{ paciente.obraSocial }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="btn-group" role="group">
+                    <button 
+                      class="btn btn-sm btn-warning" 
+                      (click)="editarPaciente(paciente)"
+                      title="Editar información del paciente"
+                    >
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button 
+                      class="btn btn-sm btn-danger" 
+                      (click)="eliminarPaciente(paciente)"
+                      title="Eliminar paciente del sistema"
+                    >
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-          <!-- Empty State -->
-          <div *ngIf="pacientesFiltrados.length === 0 && !isLoading" class="text-center py-5">
-            <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
-            <h5 class="mt-3 text-muted">No se encontraron pacientes</h5>
-            <p class="text-muted">
-              {{ searchTerm ? 'Intenta con otros términos de búsqueda.' : 'No hay pacientes registrados en el sistema.' }}
-            </p>
-          </div>
+        <!-- Empty State -->
+        <div *ngIf="pacientesFiltrados.length === 0 && !isLoading" class="empty-state">
+          <i class="bi bi-people display-1 mb-4"></i>
+          <h4 class="text-muted mb-3">No se encontraron pacientes</h4>
+          <p class="text-muted mb-4">
+            {{ searchTerm ? 'Intenta con otros términos de búsqueda o verifica la ortografía.' : 'No hay pacientes registrados en el sistema. ¡Comienza agregando el primer paciente!' }}
+          </p>
+          <button *ngIf="!searchTerm" class="btn btn-success" (click)="openCreateModal()">
+            <i class="bi bi-person-plus me-2"></i>
+            Agregar Primer Paciente
+          </button>
+          <button *ngIf="searchTerm" class="btn btn-primary" (click)="searchTerm = ''; filterPacientes()">
+            <i class="bi bi-arrow-clockwise me-2"></i>
+            Limpiar Filtros
+          </button>
         </div>
       </div>
     </div>
@@ -151,28 +179,38 @@
   <div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl" role="document">
       <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
+        <div class="modal-header">
           <h5 class="modal-title">
-            <i class="bi bi-person-plus me-2"></i>
-            Nuevo Paciente
+            <i class="bi bi-person-plus-fill me-3"></i>
+            Registrar Nuevo Paciente
           </h5>
-          <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+          <button type="button" class="btn-close btn-close-white" (click)="closeModal()" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
+          <div class="alert alert-info mb-4">
+            <div class="d-flex align-items-center">
+              <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+              <div>
+                <h6 class="mb-1">Información Importante</h6>
+                <p class="mb-0">Se creará una cuenta de usuario completa para el paciente. Los campos marcados con (*) son obligatorios.</p>
+              </div>
+            </div>
+          </div>
+
           <form (ngSubmit)="createPaciente()" #pacienteFormRef="ngForm">
             <!-- Datos de acceso -->
-            <div class="card mb-3">
-              <div class="card-header bg-light">
+            <div class="card mb-4">
+              <div class="card-header">
                 <h6 class="mb-0">
-                  <i class="bi bi-key me-1"></i>
-                  Datos de Acceso
+                  <i class="bi bi-key-fill me-2 text-primary"></i>
+                  Credenciales de Acceso
                 </h6>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="nombreUsuario" class="form-label fw-semibold">
-                      <i class="bi bi-person-circle me-1"></i>
+                    <label for="nombreUsuario" class="form-label">
+                      <i class="bi bi-person-circle"></i>
                       Nombre de Usuario *
                     </label>
                     <input 
@@ -182,13 +220,14 @@
                       [(ngModel)]="pacienteForm.nombreUsuario"
                       name="nombreUsuario"
                       required
-                      placeholder="Usuario único para el sistema"
+                      placeholder="ej: juan.perez"
                     >
+                    <div class="form-text">Debe ser único en el sistema</div>
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label for="email" class="form-label fw-semibold">
-                      <i class="bi bi-envelope me-1"></i>
-                      Email *
+                    <label for="email" class="form-label">
+                      <i class="bi bi-envelope"></i>
+                      Correo Electrónico *
                     </label>
                     <input 
                       type="email" 
@@ -203,8 +242,8 @@
                 </div>
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="password" class="form-label fw-semibold">
-                      <i class="bi bi-lock me-1"></i>
+                    <label for="password" class="form-label">
+                      <i class="bi bi-lock"></i>
                       Contraseña *
                     </label>
                     <input 
@@ -214,13 +253,13 @@
                       [(ngModel)]="pacienteForm.password"
                       name="password"
                       required
-                      placeholder="Contraseña segura"
+                      placeholder="Mínimo 6 caracteres"
                       minlength="6"
                     >
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label for="confirmPassword" class="form-label fw-semibold">
-                      <i class="bi bi-lock-fill me-1"></i>
+                    <label for="confirmPassword" class="form-label">
+                      <i class="bi bi-lock-fill"></i>
                       Confirmar Contraseña *
                     </label>
                     <input 
@@ -235,22 +274,28 @@
                     >
                   </div>
                 </div>
+                
+                <!-- Validación de contraseñas -->
+                <div class="alert alert-warning" *ngIf="pacienteForm.password && pacienteForm.confirmPassword && pacienteForm.password !== pacienteForm.confirmPassword">
+                  <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                  Las contraseñas no coinciden. Por favor, verifica que sean idénticas.
+                </div>
               </div>
             </div>
 
             <!-- Datos personales -->
-            <div class="card mb-3">
-              <div class="card-header bg-light">
+            <div class="card mb-4">
+              <div class="card-header">
                 <h6 class="mb-0">
-                  <i class="bi bi-person me-1"></i>
-                  Datos Personales
+                  <i class="bi bi-person-vcard-fill me-2 text-primary"></i>
+                  Información Personal
                 </h6>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="nombre" class="form-label fw-semibold">
-                      <i class="bi bi-person me-1"></i>
+                    <label for="nombre" class="form-label">
+                      <i class="bi bi-person"></i>
                       Nombre *
                     </label>
                     <input 
@@ -260,12 +305,12 @@
                       [(ngModel)]="pacienteForm.nombre"
                       name="nombre"
                       required
-                      placeholder="Ingresa el nombre"
+                      placeholder="Nombre del paciente"
                     >
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label for="apellido" class="form-label fw-semibold">
-                      <i class="bi bi-person me-1"></i>
+                    <label for="apellido" class="form-label">
+                      <i class="bi bi-person"></i>
                       Apellido *
                     </label>
                     <input 
@@ -275,16 +320,16 @@
                       [(ngModel)]="pacienteForm.apellido"
                       name="apellido"
                       required
-                      placeholder="Ingresa el apellido"
+                      placeholder="Apellido del paciente"
                     >
                   </div>
                 </div>
                 
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="dni" class="form-label fw-semibold">
-                      <i class="bi bi-card-text me-1"></i>
-                      DNI *
+                    <label for="dni" class="form-label">
+                      <i class="bi bi-card-text"></i>
+                      Documento Nacional de Identidad *
                     </label>
                     <input 
                       type="text" 
@@ -299,9 +344,9 @@
                     >
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label for="telefono" class="form-label fw-semibold">
-                      <i class="bi bi-telephone me-1"></i>
-                      Teléfono
+                    <label for="telefono" class="form-label">
+                      <i class="bi bi-telephone"></i>
+                      Teléfono de Contacto
                     </label>
                     <input 
                       type="tel" 
@@ -309,77 +354,67 @@
                       id="telefono"
                       [(ngModel)]="pacienteForm.telefono"
                       name="telefono"
-                      placeholder="123456789"
+                      placeholder="(código área) número"
                     >
                   </div>
                 </div>
                 
-                <div class="mb-3">
-                  <label for="direccion" class="form-label fw-semibold">
-                    <i class="bi bi-geo-alt me-1"></i>
-                    Dirección
-                  </label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
-                    id="direccion"
-                    [(ngModel)]="pacienteForm.direccion"
-                    name="direccion"
-                    placeholder="Dirección completa"
-                  >
-                </div>
-                
-                <div class="mb-3">
-                  <label for="obraSocial" class="form-label fw-semibold">
-                    <i class="bi bi-shield-check me-1"></i>
-                    Obra Social *
-                  </label>
-                  <select 
-                    class="form-select" 
-                    id="obraSocial"
-                    [(ngModel)]="pacienteForm.obraSocial"
-                    name="obraSocial"
-                    required
-                  >
-                    <option value="">Selecciona una obra social</option>
-                    <option value="OSDE">OSDE</option>
-                    <option value="Swiss Medical">Swiss Medical</option>
-                    <option value="Galeno">Galeno</option>
-                    <option value="Medicus">Medicus</option>
-                    <option value="PAMI">PAMI</option>
-                    <option value="IOMA">IOMA</option>
-                    <option value="Particular">Particular</option>
-                  </select>
+                <div class="row">
+                  <div class="col-md-8 mb-3">
+                    <label for="direccion" class="form-label">
+                      <i class="bi bi-geo-alt"></i>
+                      Dirección Completa
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="direccion"
+                      [(ngModel)]="pacienteForm.direccion"
+                      name="direccion"
+                      placeholder="Calle, número, ciudad, provincia"
+                    >
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="obraSocial" class="form-label">
+                      <i class="bi bi-shield-check"></i>
+                      Obra Social *
+                    </label>
+                    <select 
+                      class="form-select" 
+                      id="obraSocial"
+                      [(ngModel)]="pacienteForm.obraSocial"
+                      name="obraSocial"
+                      required
+                    >
+                      <option value="">Seleccionar...</option>
+                      <option value="OSDE">OSDE</option>
+                      <option value="Swiss Medical">Swiss Medical</option>
+                      <option value="Galeno">Galeno</option>
+                      <option value="Medicus">Medicus</option>
+                      <option value="PAMI">PAMI</option>
+                      <option value="IOMA">IOMA</option>
+                      <option value="Particular">Particular</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="alert alert-info">
-              <i class="bi bi-info-circle me-1"></i>
-              Los campos marcados con (*) son obligatorios. Se creará una cuenta de usuario para el paciente.
-            </div>
-
-            <!-- Validación de contraseñas -->
-            <div class="alert alert-warning" *ngIf="pacienteForm.password && pacienteForm.confirmPassword && pacienteForm.password !== pacienteForm.confirmPassword">
-              <i class="bi bi-exclamation-triangle me-1"></i>
-              Las contraseñas no coinciden.
             </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeModal()" [disabled]="isCreating">
-            <i class="bi bi-x-circle me-1"></i>
+          <button type="button" class="btn btn-danger" (click)="closeModal()" [disabled]="isCreating">
+            <i class="bi bi-x-circle me-2"></i>
             Cancelar
           </button>
           <button 
             type="button" 
-            class="btn btn-primary" 
+            class="btn btn-success" 
             (click)="createPaciente()"
             [disabled]="!canCreatePaciente"
           >
             <span *ngIf="isCreating" class="spinner-border spinner-border-sm me-2"></span>
-            <i *ngIf="!isCreating" class="bi bi-check-circle me-1"></i>
-            {{ isCreating ? 'Creando...' : 'Crear Paciente' }}
+            <i *ngIf="!isCreating" class="bi bi-check-circle me-2"></i>
+            {{ isCreating ? 'Creando Paciente...' : 'Crear Paciente' }}
           </button>
         </div>
       </div>
@@ -395,26 +430,36 @@
       <div class="modal-content">
         <div class="modal-header bg-warning text-dark">
           <h5 class="modal-title">
-            <i class="bi bi-pencil me-2"></i>
+            <i class="bi bi-pencil-square me-3"></i>
             Editar Paciente: {{ editPacienteForm.nombre }} {{ editPacienteForm.apellido }}
           </h5>
           <button type="button" class="btn-close" (click)="closeEditModal()"></button>
         </div>
         <div class="modal-body">
+          <div class="alert alert-info mb-4">
+            <div class="d-flex align-items-center">
+              <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+              <div>
+                <h6 class="mb-1">Información del Paciente</h6>
+                <p class="mb-0">Modifica los datos necesarios. Los campos marcados con (*) son obligatorios.</p>
+              </div>
+            </div>
+          </div>
+
           <form (ngSubmit)="updatePaciente()" #editFormRef="ngForm">
             <!-- Datos personales -->
-            <div class="card mb-3">
-              <div class="card-header bg-light">
+            <div class="card">
+              <div class="card-header">
                 <h6 class="mb-0">
-                  <i class="bi bi-person me-1"></i>
-                  Datos Personales
+                  <i class="bi bi-person-vcard-fill me-2 text-warning"></i>
+                  Información Personal
                 </h6>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="editNombre" class="form-label fw-semibold">
-                      <i class="bi bi-person me-1"></i>
+                    <label for="editNombre" class="form-label">
+                      <i class="bi bi-person"></i>
                       Nombre *
                     </label>
                     <input 
@@ -424,11 +469,12 @@
                       [(ngModel)]="editPacienteForm.nombre"
                       name="editNombre"
                       required
+                      placeholder="Nombre del paciente"
                     >
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label for="editApellido" class="form-label fw-semibold">
-                      <i class="bi bi-person me-1"></i>
+                    <label for="editApellido" class="form-label">
+                      <i class="bi bi-person"></i>
                       Apellido *
                     </label>
                     <input 
@@ -438,15 +484,16 @@
                       [(ngModel)]="editPacienteForm.apellido"
                       name="editApellido"
                       required
+                      placeholder="Apellido del paciente"
                     >
                   </div>
                 </div>
                 
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="editDni" class="form-label fw-semibold">
-                      <i class="bi bi-card-text me-1"></i>
-                      DNI *
+                    <label for="editDni" class="form-label">
+                      <i class="bi bi-card-text"></i>
+                      Documento Nacional de Identidad *
                     </label>
                     <input 
                       type="text" 
@@ -457,12 +504,13 @@
                       required
                       maxlength="8"
                       pattern="[0-9]{7,8}"
+                      placeholder="12345678"
                     >
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label for="editTelefono" class="form-label fw-semibold">
-                      <i class="bi bi-telephone me-1"></i>
-                      Teléfono
+                    <label for="editTelefono" class="form-label">
+                      <i class="bi bi-telephone"></i>
+                      Teléfono de Contacto
                     </label>
                     <input 
                       type="tel" 
@@ -470,13 +518,14 @@
                       id="editTelefono"
                       [(ngModel)]="editPacienteForm.telefono"
                       name="editTelefono"
+                      placeholder="(código área) número"
                     >
                   </div>
                 </div>
                 
                 <div class="mb-3">
-                  <label for="editObraSocial" class="form-label fw-semibold">
-                    <i class="bi bi-shield-check me-1"></i>
+                  <label for="editObraSocial" class="form-label">
+                    <i class="bi bi-shield-check"></i>
                     Obra Social *
                   </label>
                   <select 
@@ -486,7 +535,7 @@
                     name="editObraSocial"
                     required
                   >
-                    <option value="">Selecciona una obra social</option>
+                    <option value="">Seleccionar obra social...</option>
                     <option value="OSDE">OSDE</option>
                     <option value="Swiss Medical">Swiss Medical</option>
                     <option value="Galeno">Galeno</option>
@@ -498,16 +547,11 @@
                 </div>
               </div>
             </div>
-            
-            <div class="alert alert-info">
-              <i class="bi bi-info-circle me-1"></i>
-              Los campos marcados con (*) son obligatorios.
-            </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeEditModal()" [disabled]="isUpdating">
-            <i class="bi bi-x-circle me-1"></i>
+          <button type="button" class="btn btn-danger" (click)="closeEditModal()" [disabled]="isUpdating">
+            <i class="bi bi-x-circle me-2"></i>
             Cancelar
           </button>
           <button 
@@ -517,8 +561,8 @@
             [disabled]="!canUpdatePaciente"
           >
             <span *ngIf="isUpdating" class="spinner-border spinner-border-sm me-2"></span>
-            <i *ngIf="!isUpdating" class="bi bi-check-circle me-1"></i>
-            {{ isUpdating ? 'Actualizando...' : 'Actualizar Paciente' }}
+            <i *ngIf="!isUpdating" class="bi bi-check-circle me-2"></i>
+            {{ isUpdating ? 'Actualizando...' : 'Guardar Cambios' }}
           </button>
         </div>
       </div>
