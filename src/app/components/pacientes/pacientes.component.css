@@ -126,3 +126,139 @@
     background-position: 200% 0;
   }
 }
+
+/* Modal styles */
+.modal {
+  backdrop-filter: blur(3px);
+}
+
+.modal.show {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+.modal-content {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  border-radius: 12px 12px 0 0;
+  border-bottom: none;
+  padding: 1.5rem;
+}
+
+.modal-body {
+  padding: 2rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  border-top: 1px solid #e9ecef;
+  padding: 1.5rem;
+  border-radius: 0 0 12px 12px;
+}
+
+.modal-backdrop {
+  backdrop-filter: blur(2px);
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Modal and form styling */
+.modal-xl {
+  max-width: 1000px;
+}
+
+.card-header h6 {
+  color: #495057;
+  font-weight: 600;
+}
+
+/* Form styles */
+.form-label {
+  color: #495057;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-label i {
+  color: #0d6efd;
+  margin-right: 0.25rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Alert styles */
+.alert {
+  border-radius: 8px;
+  border: none;
+}
+
+.alert-info {
+  background-color: #e3f2fd;
+  color: #0277bd;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border-left: 4px solid #ffc107;
+}
+
+/* Animation for password mismatch */
+.alert-warning {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 20%, 40%, 60%, 80% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+}
+
+/* Loading state styling */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Better card spacing */
+.card .card-body {
+  padding: 1.25rem;
+}
+
+/* Form validation styling */
+.form-control.ng-invalid.ng-touched {
+  border-color: #dc3545;
+}
+
+.form-select.ng-invalid.ng-touched {
+  border-color: #dc3545;
+}
+
+.form-control.ng-valid.ng-touched {
+  border-color: #28a745;
+}
+
+.form-select.ng-valid.ng-touched {
+  border-color: #28a745;
+}

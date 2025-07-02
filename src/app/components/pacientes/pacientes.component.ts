@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Paciente } from '../../interfaces';
+import { Paciente, RegisterForm } from '../../interfaces';
 import { PacienteService } from '../../services/paciente.service';
+import { RegisterService } from '../../services/register.service';
 
 @Component({
   selector: 'app-pacientes',
@@ -17,6 +18,25 @@ export class PacientesComponent implements OnInit {
   isLoading: boolean = false;
   searchTerm: string = '';
   selectedPaciente: Paciente | null = null;
+  
+  // Modal y formulario para nuevo paciente
+  showModal: boolean = false;
+  isCreating: boolean = false;
+  pacienteForm = {
+    // Datos de usuario (para autenticación)
+    nombreUsuario: '',
+    password: '',
+    confirmPassword: '',
+    tipoUsuario: 'paciente',
+    email: '',
+    // Datos del paciente
+    nombre: '',
+    apellido: '',
+    dni: '',
+    telefono: '',
+    obraSocial: '',
+    direccion: ''
+  };
 
   // Datos de prueba para desarrollo
   testData = {
@@ -31,6 +51,7 @@ export class PacientesComponent implements OnInit {
 
   constructor(
     private pacienteService: PacienteService,
+    private registerService: RegisterService,
     private router: Router
   ) {}
 
@@ -98,5 +119,102 @@ export class PacientesComponent implements OnInit {
 
   navigateToTratamientos(): void {
     this.router.navigate(['/tratamiento']);
+  }
+
+  // Métodos para el modal de nuevo paciente
+  openCreateModal(): void {
+    this.showModal = true;
+    this.resetForm();
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
+  resetForm(): void {
+    this.pacienteForm = {
+      nombreUsuario: '',
+      password: '',
+      confirmPassword: '',
+      tipoUsuario: 'paciente',
+      email: '',
+      nombre: '',
+      apellido: '',
+      dni: '',
+      telefono: '',
+      obraSocial: '',
+      direccion: ''
+    };
+  }
+
+  createPaciente(): void {
+    if (!this.isValidForm()) {
+      alert('Por favor, completa todos los campos obligatorios');
+      return;
+    }
+
+    if (this.pacienteForm.password !== this.pacienteForm.confirmPassword) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+
+    this.isCreating = true;
+
+    // Preparar datos para el registro usando la estructura de RegisterForm
+    const registerData: RegisterForm = {
+      nombreUsuario: this.pacienteForm.nombreUsuario.trim(),
+      password: this.pacienteForm.password,
+      confirmPassword: this.pacienteForm.confirmPassword,
+      nombre: this.pacienteForm.nombre.trim(),
+      apellido: this.pacienteForm.apellido.trim(),
+      telefono: this.pacienteForm.telefono.trim(),
+      direccion: this.pacienteForm.direccion.trim(),
+      dni: this.pacienteForm.dni.trim(),
+      tipoUsuario: 'paciente',
+      obraSocial: this.pacienteForm.obraSocial.trim(),
+      email: this.pacienteForm.email.trim()
+    };
+
+    // Usar el RegisterService para crear el usuario completo (usuario + paciente)
+    this.registerService.addUsuario(registerData).subscribe({
+      next: (response) => {
+        console.log('Usuario y paciente creados exitosamente:', response);
+        this.isCreating = false;
+        this.closeModal();
+        alert('Paciente creado exitosamente. Se ha creado una cuenta de usuario para el paciente.');
+        
+        // Force page reload to ensure fresh data
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      },
+      error: (error) => {
+        console.error('Error al crear paciente:', error);
+        this.isCreating = false;
+        
+        if (error.status === 400) {
+          alert('Error: Verifica que el nombre de usuario no esté en uso y que todos los datos sean válidos.');
+        } else {
+          alert('Error al crear el paciente. Por favor, intenta nuevamente.');
+        }
+      }
+    });
+  }
+
+  isValidForm(): boolean {
+    return this.pacienteForm.nombreUsuario.trim() !== '' &&
+           this.pacienteForm.password.trim() !== '' &&
+           this.pacienteForm.confirmPassword.trim() !== '' &&
+           this.pacienteForm.email.trim() !== '' &&
+           this.pacienteForm.nombre.trim() !== '' &&
+           this.pacienteForm.apellido.trim() !== '' &&
+           this.pacienteForm.dni.trim() !== '' &&
+           this.pacienteForm.obraSocial.trim() !== '' &&
+           this.pacienteForm.password === this.pacienteForm.confirmPassword;
+  }
+
+  get canCreatePaciente(): boolean {
+    return this.isValidForm() && !this.isCreating;
   }
 }

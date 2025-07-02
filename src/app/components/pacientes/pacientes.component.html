@@ -15,7 +15,7 @@
             <i class="bi bi-arrow-clockwise me-1"></i>
             Actualizar
           </button>
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" (click)="openCreateModal()">
             <i class="bi bi-person-plus me-1"></i>
             Nuevo Paciente
           </button>
@@ -157,4 +157,246 @@
       </button>
     </div>
   </div>
+
+  <!-- Modal para Nuevo Paciente -->
+  <div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">
+            <i class="bi bi-person-plus me-2"></i>
+            Nuevo Paciente
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="createPaciente()" #pacienteFormRef="ngForm">
+            <!-- Datos de acceso -->
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">
+                  <i class="bi bi-key me-1"></i>
+                  Datos de Acceso
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="nombreUsuario" class="form-label fw-semibold">
+                      <i class="bi bi-person-circle me-1"></i>
+                      Nombre de Usuario *
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="nombreUsuario"
+                      [(ngModel)]="pacienteForm.nombreUsuario"
+                      name="nombreUsuario"
+                      required
+                      placeholder="Usuario único para el sistema"
+                    >
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label fw-semibold">
+                      <i class="bi bi-envelope me-1"></i>
+                      Email *
+                    </label>
+                    <input 
+                      type="email" 
+                      class="form-control" 
+                      id="email"
+                      [(ngModel)]="pacienteForm.email"
+                      name="email"
+                      required
+                      placeholder="correo@ejemplo.com"
+                    >
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="password" class="form-label fw-semibold">
+                      <i class="bi bi-lock me-1"></i>
+                      Contraseña *
+                    </label>
+                    <input 
+                      type="password" 
+                      class="form-control" 
+                      id="password"
+                      [(ngModel)]="pacienteForm.password"
+                      name="password"
+                      required
+                      placeholder="Contraseña segura"
+                      minlength="6"
+                    >
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="confirmPassword" class="form-label fw-semibold">
+                      <i class="bi bi-lock-fill me-1"></i>
+                      Confirmar Contraseña *
+                    </label>
+                    <input 
+                      type="password" 
+                      class="form-control" 
+                      id="confirmPassword"
+                      [(ngModel)]="pacienteForm.confirmPassword"
+                      name="confirmPassword"
+                      required
+                      placeholder="Repite la contraseña"
+                      minlength="6"
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Datos personales -->
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">
+                  <i class="bi bi-person me-1"></i>
+                  Datos Personales
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="nombre" class="form-label fw-semibold">
+                      <i class="bi bi-person me-1"></i>
+                      Nombre *
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="nombre"
+                      [(ngModel)]="pacienteForm.nombre"
+                      name="nombre"
+                      required
+                      placeholder="Ingresa el nombre"
+                    >
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="apellido" class="form-label fw-semibold">
+                      <i class="bi bi-person me-1"></i>
+                      Apellido *
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="apellido"
+                      [(ngModel)]="pacienteForm.apellido"
+                      name="apellido"
+                      required
+                      placeholder="Ingresa el apellido"
+                    >
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="dni" class="form-label fw-semibold">
+                      <i class="bi bi-card-text me-1"></i>
+                      DNI *
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="dni"
+                      [(ngModel)]="pacienteForm.dni"
+                      name="dni"
+                      required
+                      placeholder="12345678"
+                      maxlength="8"
+                      pattern="[0-9]{7,8}"
+                    >
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="telefono" class="form-label fw-semibold">
+                      <i class="bi bi-telephone me-1"></i>
+                      Teléfono
+                    </label>
+                    <input 
+                      type="tel" 
+                      class="form-control" 
+                      id="telefono"
+                      [(ngModel)]="pacienteForm.telefono"
+                      name="telefono"
+                      placeholder="123456789"
+                    >
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="direccion" class="form-label fw-semibold">
+                    <i class="bi bi-geo-alt me-1"></i>
+                    Dirección
+                  </label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="direccion"
+                    [(ngModel)]="pacienteForm.direccion"
+                    name="direccion"
+                    placeholder="Dirección completa"
+                  >
+                </div>
+                
+                <div class="mb-3">
+                  <label for="obraSocial" class="form-label fw-semibold">
+                    <i class="bi bi-shield-check me-1"></i>
+                    Obra Social *
+                  </label>
+                  <select 
+                    class="form-select" 
+                    id="obraSocial"
+                    [(ngModel)]="pacienteForm.obraSocial"
+                    name="obraSocial"
+                    required
+                  >
+                    <option value="">Selecciona una obra social</option>
+                    <option value="OSDE">OSDE</option>
+                    <option value="Swiss Medical">Swiss Medical</option>
+                    <option value="Galeno">Galeno</option>
+                    <option value="Medicus">Medicus</option>
+                    <option value="PAMI">PAMI</option>
+                    <option value="IOMA">IOMA</option>
+                    <option value="Particular">Particular</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-1"></i>
+              Los campos marcados con (*) son obligatorios. Se creará una cuenta de usuario para el paciente.
+            </div>
+
+            <!-- Validación de contraseñas -->
+            <div class="alert alert-warning" *ngIf="pacienteForm.password && pacienteForm.confirmPassword && pacienteForm.password !== pacienteForm.confirmPassword">
+              <i class="bi bi-exclamation-triangle me-1"></i>
+              Las contraseñas no coinciden.
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()" [disabled]="isCreating">
+            <i class="bi bi-x-circle me-1"></i>
+            Cancelar
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            (click)="createPaciente()"
+            [disabled]="!canCreatePaciente"
+          >
+            <span *ngIf="isCreating" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!isCreating" class="bi bi-check-circle me-1"></i>
+            {{ isCreating ? 'Creando...' : 'Crear Paciente' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal backdrop -->
+  <div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal" (click)="closeModal()"></div>
 </div>
