@@ -1044,6 +1044,299 @@
   font-weight: 600 !important;
 }
 
+/* ========== FORMULARIOS EN MODALES - MEJORAR VISIBILIDAD ========== */
+
+/* Campos de entrada más visibles */
+.modal .form-control,
+.modal .form-select {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+  border: 3px solid var(--primary-color) !important;
+  color: #1e293b !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  padding: 0.875rem 1.25rem !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2) !important;
+  transition: all 0.3s ease !important;
+}
+
+.modal .form-control::placeholder {
+  color: #64748b !important;
+  font-weight: 500 !important;
+  opacity: 0.8 !important;
+}
+
+.modal .form-control:focus,
+.modal .form-select:focus {
+  background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%) !important;
+  border-color: var(--secondary-color) !important;
+  box-shadow: 0 0 0 0.4rem rgba(139, 92, 246, 0.3) !important;
+  color: #1e293b !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Labels más visibles */
+.modal .form-label {
+  color: var(--primary-color) !important;
+  font-weight: 800 !important;
+  font-size: 1rem !important;
+  margin-bottom: 0.75rem !important;
+  text-shadow: none !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  background-clip: unset !important;
+}
+
+.modal .form-label i {
+  color: var(--secondary-color) !important;
+  font-size: 1.2rem !important;
+  margin-right: 0.75rem !important;
+  text-shadow: none !important;
+}
+
+/* Cards en modales más contrastantes */
+.modal .card {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%) !important;
+  border: 3px solid var(--primary-color) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15) !important;
+  margin-bottom: 2rem !important;
+}
+
+.modal .card-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+  color: white !important;
+  border-bottom: none !important;
+  padding: 1.5rem 2rem !important;
+  border-radius: 13px 13px 0 0 !important;
+}
+
+.modal .card-header h6 {
+  color: white !important;
+  font-weight: 800 !important;
+  font-size: 1.1rem !important;
+  margin: 0 !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  background-clip: unset !important;
+}
+
+.modal .card-header i {
+  color: white !important;
+  font-size: 1.3rem !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+}
+
+.modal .card-body {
+  padding: 2.5rem !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+}
+
+/* Form text más visible */
+.modal .form-text {
+  color: var(--info-color) !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  margin-top: 0.5rem !important;
+}
+
+/* Alertas en modales más visibles */
+.modal .alert {
+  border: 3px solid !important;
+  border-radius: 12px !important;
+  padding: 1.5rem 2rem !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.modal .alert-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%) !important;
+  border-color: var(--info-color) !important;
+  color: #0369a1 !important;
+}
+
+.modal .alert-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
+  border-color: var(--warning-color) !important;
+  color: #92400e !important;
+}
+
+.modal .alert h6 {
+  color: inherit !important;
+  font-weight: 800 !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  background-clip: unset !important;
+}
+
+/* Modal body con mejor contraste */
+.modal-body {
+  background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%) !important;
+  padding: 2.5rem !important;
+}
+
+/* Modal header más contrastante */
+.modal-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+  border-bottom: 4px solid var(--accent-color) !important;
+  padding: 2rem 2.5rem !important;
+}
+
+.modal-header.bg-warning {
+  background: linear-gradient(135deg, var(--warning-color), var(--accent-color)) !important;
+  border-bottom: 4px solid var(--warning-hover) !important;
+}
+
+.modal-title {
+  color: white !important;
+  font-weight: 800 !important;
+  font-size: 1.4rem !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  background-clip: unset !important;
+}
+
+.modal-title i {
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+}
+
+/* Botones cerrar más visibles */
+.btn-close,
+.btn-close-white {
+  background-size: 1.5em !important;
+  opacity: 0.9 !important;
+  border-radius: 50% !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  background-color: rgba(255,255,255,0.2) !important;
+}
+
+.btn-close:hover,
+.btn-close-white:hover {
+  opacity: 1 !important;
+  transform: scale(1.1) !important;
+  background-color: rgba(255,255,255,0.3) !important;
+}
+
+/* Select específico */
+.modal .form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 1rem center !important;
+  background-size: 16px 12px !important;
+}
+
+/* Validación visual mejorada */
+.modal .form-control.ng-invalid.ng-touched {
+  border-color: var(--danger-color) !important;
+  box-shadow: 0 0 0 0.3rem rgba(239, 68, 68, 0.25) !important;
+}
+
+.modal .form-control.ng-valid.ng-touched {
+  border-color: var(--success-color) !important;
+  box-shadow: 0 0 0 0.3rem rgba(34, 197, 94, 0.25) !important;
+}
+
+/* ========== CLASES ADICIONALES PARA GRADIENTES ========== */
+
+.bg-gradient-accent {
+  background: linear-gradient(135deg, #f97316, #ea580c, #c2410c) !important;
+  color: white !important;
+  border: 2px solid #c2410c !important;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4) !important;
+}
+
+.bg-gradient-secondary {
+  background: linear-gradient(135deg, #ec4899, #db2777, #be185d) !important;
+  color: white !important;
+  border: 2px solid #be185d !important;
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4) !important;
+}
+
+/* ========== MEJORAS ADICIONALES PARA ELEMENTOS ESPECÍFICOS ========== */
+
+/* Mejorar los spinners */
+.spinner-border-sm {
+  width: 1.2rem !important;
+  height: 1.2rem !important;
+  border-width: 2px !important;
+  color: inherit !important;
+}
+
+/* Mejorar los form-select en modales */
+.modal .form-select {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%) !important;
+  border: 3px solid var(--primary-color) !important;
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+
+.modal .form-select:focus {
+  border-color: var(--secondary-color) !important;
+  box-shadow: 0 0 0 0.3rem rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Mejorar el text en pequeño */
+.form-text {
+  color: var(--info-color) !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+}
+
+/* Mejorar los close buttons */
+.btn-close-white {
+  filter: brightness(0) invert(1) !important;
+  opacity: 0.8 !important;
+  background-size: 1.2em !important;
+}
+
+.btn-close-white:hover {
+  opacity: 1 !important;
+  transform: scale(1.1) !important;
+}
+
+/* Mejorar las alertas en modales */
+.modal .alert-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%) !important;
+  border-left: 5px solid var(--info-color) !important;
+  border-radius: 12px !important;
+  color: #0369a1 !important;
+}
+
+.modal .alert-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
+  border-left: 5px solid var(--warning-color) !important;
+  border-radius: 12px !important;
+  color: #92400e !important;
+}
+
+/* Mejorar los headers de cards en modales */
+.modal .card-header {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+  border-bottom: 3px solid var(--primary-color) !important;
+  color: var(--primary-color) !important;
+  font-weight: 700 !important;
+}
+
+.modal .card-header h6 {
+  color: var(--primary-color) !important;
+  font-weight: 800 !important;
+}
+
+/* Mejorar los iconos en las labels */
+.modal .form-label i {
+  color: var(--secondary-color) !important;
+  font-size: 1.1rem !important;
+  margin-right: 0.5rem !important;
+}
+
 /* ========== ESTILOS ESPECÍFICOS PARA OBRAS SOCIALES ========== */
 
 .obra-social-osde {
