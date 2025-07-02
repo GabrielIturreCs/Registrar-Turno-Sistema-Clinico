@@ -124,9 +124,19 @@
             <h5 class="mb-0">
               <i class="fas fa-history me-2"></i>Mis Turnos Recientes
             </h5>
-            <button class="btn btn-outline-primary btn-sm" (click)="navigateToMisTurnos()">
-              Ver Todos
-            </button>
+            <div class="d-flex gap-2">
+              <button 
+                class="btn btn-outline-success btn-sm" 
+                (click)="refreshData()" 
+                [disabled]="isLoading"
+                title="Actualizar datos">
+                <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+                <span *ngIf="isLoading" class="ms-1">Actualizando...</span>
+              </button>
+              <button class="btn btn-outline-primary btn-sm" (click)="navigateToMisTurnos()">
+                Ver Todos
+              </button>
+            </div>
           </div>
           <div class="card-body">
             <div *ngIf="isLoading" class="text-center py-4">

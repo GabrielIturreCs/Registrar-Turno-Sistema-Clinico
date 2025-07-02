@@ -1,13 +1,16 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { User, Turno, Tratamiento, Paciente } from '../../interfaces';
 import { ChatbotService } from '../../services/ChatBot.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
 import { TurnoService } from '../../services/turno.service';
 import { TratamientoService } from '../../services/tratamiento.service';
 import { PacienteService } from '../../services/paciente.service';
+import { DataRefreshService } from '../../services/data-refresh.service';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 interface PacienteStats {
   totalTurnos: number;
@@ -24,12 +27,14 @@ interface PacienteStats {
   templateUrl: './vistaPaciente.component.html',
   styleUrls: ['./vistaPaciente.component.css']
 })
-export class VistaPacienteComponent implements OnInit {
+export class VistaPacienteComponent implements OnInit, OnDestroy {
   user: User | null = null;
   paciente: Paciente | null = null;
   misTurnos: Turno[] = [];
   tratamientos: Tratamiento[] = [];
   isLoading = false;
+  private routerSubscription!: Subscription;
+  private refreshSubscription!: Subscription;
 
   // Estadísticas del paciente
   pacienteStats: PacienteStats = {
@@ -60,7 +65,8 @@ export class VistaPacienteComponent implements OnInit {
     private chatbotService: ChatbotService,
     private turnoService: TurnoService,
     private tratamientoService: TratamientoService,
-    private pacienteService: PacienteService
+    private pacienteService: PacienteService,
+    private dataRefreshService: DataRefreshService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -69,6 +75,58 @@ export class VistaPacienteComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUserData();
+    
+    // Suscribirse al servicio de refresh
+    this.refreshSubscription = this.dataRefreshService.refresh$.subscribe((component) => {
+      if (component === 'vistaPaciente' || component === 'all') {
+        console.log('Recibida notificación de refresh para vistaPaciente');
+        this.refreshData();
+      }
+    });
+    
+    // Escuchar cambios de navegación para recargar datos
+    this.routerSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        if (event.url === '/vistaPaciente') {
+          console.log('Navegando a vista paciente, recargando datos...');
+          setTimeout(() => this.refreshData(), 100); // Pequeño delay para asegurar que el componente esté listo
+        }
+      });
+
+    // También escuchar cuando la ventana recibe foco (útil cuando regresa de otra pestaña)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('focus', () => {
+        if (this.router.url === '/vistaPaciente') {
+          console.log('Ventana recibió foco, recargando datos...');
+          this.refreshData();
+        }
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+    }
+  }
+
+  refreshData(): void {
+    console.log('Refrescando datos del paciente...');
+    this.isLoading = true;
+    this.loadPacienteData();
+    // loadPacienteData ya llama a loadMisTurnos(), así que no lo duplicamos
+    this.loadTratamientos();
+    
+    // Mostrar un mensaje temporal de actualización
+    setTimeout(() => {
+      if (!this.isLoading) {
+        console.log('Datos actualizados correctamente');
+      }
+    }, 1000);
   }
 
   loadUserData(): void {
@@ -406,5 +464,13 @@ export class VistaPacienteComponent implements OnInit {
   logout(): void {
     localStorage.clear();
     this.router.navigate(['/login']);
+  }
+
+  // Método público para refrescar datos manualmente
+  forceRefresh(): void {
+    console.log('Forzando actualización de datos...');
+    this.paciente = null;
+    this.misTurnos = [];
+    this.refreshData();
   }
 }

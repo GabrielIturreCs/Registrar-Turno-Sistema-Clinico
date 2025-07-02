@@ -6,6 +6,7 @@ import { ChatbotService } from '../../services/ChatBot.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
 import { TurnoService } from '../../services/turno.service';
 import { PacienteService } from '../../services/paciente.service';
+import { DataRefreshService } from '../../services/data-refresh.service';
 import { Tratamiento } from '../../interfaces';
 
 interface User {
@@ -83,7 +84,8 @@ export class ReservarComponent implements OnInit {
     private fb: FormBuilder,
     private chatbotService: ChatbotService,
     private turnoService: TurnoService,
-    private pacienteService: PacienteService
+    private pacienteService: PacienteService,
+    private dataRefreshService: DataRefreshService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -104,6 +106,24 @@ export class ReservarComponent implements OnInit {
     } else {
       this.totalSteps = 5;
     }
+    
+    // Force page refresh when at the beginning of the wizard
+    // This ensures fresh data when starting the reservation process
+    setTimeout(() => {
+      // Check if we're at the very beginning (step 1)
+      if (this.currentStep === 1) {
+        console.log('At beginning of reservation wizard - checking if page needs refresh');
+        const hasRefreshed = sessionStorage.getItem('reservar-step1-refreshed');
+        if (!hasRefreshed) {
+          console.log('Refreshing page at step 1 for fresh data');
+          sessionStorage.setItem('reservar-step1-refreshed', 'true');
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+          return;
+        }
+      }
+    }, 500); // Give more time for user data to load
   }
 
   // Chatbot methods
@@ -334,6 +354,9 @@ export class ReservarComponent implements OnInit {
       next: () => {
         this.isLoading = false;
         alert('¡Turno registrado exitosamente!');
+        // Trigger refresh for patient dashboard
+        // Trigger refresh for patient dashboard
+        this.dataRefreshService.triggerRefresh('vistaPaciente');
         this.router.navigate(['/dashboard']);
       },
       error: () => {
@@ -344,7 +367,24 @@ export class ReservarComponent implements OnInit {
   }
 
   navigateToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    // Trigger refresh for patient dashboard before navigation
+    this.dataRefreshService.triggerRefresh('vistaPaciente');
+    
+    // Add delay for more reliable navigation
+    setTimeout(() => {
+      // Check user type and navigate accordingly
+      if (this.user?.tipoUsuario === 'paciente') {
+        this.router.navigate(['/vistaPaciente']).catch((error: any) => {
+          console.error('Navigation to /vistaPaciente failed:', error);
+          window.location.href = '/vistaPaciente';
+        });
+      } else {
+        this.router.navigate(['/dashboard']).catch((error: any) => {
+          console.error('Navigation to /dashboard failed:', error);
+          window.location.href = '/dashboard';
+        });
+      }
+    }, 200);
   }
 
   getCurrentDate(): string {
@@ -364,6 +404,10 @@ export class ReservarComponent implements OnInit {
   nextStep(): void {
     if (this.currentStep < this.totalSteps) {
       this.currentStep++;
+      // Clear refresh flag when advancing past step 1
+      if (this.currentStep > 1) {
+        sessionStorage.removeItem('reservar-step1-refreshed');
+      }
     }
   }
 
@@ -587,6 +631,9 @@ export class ReservarComponent implements OnInit {
         this.isLoading = false;
         this.currentStep = this.shouldSelectPaciente ? 6 : 5; // Ir al paso correcto según el tipo de usuario
         console.log('Paso actual después de éxito:', this.currentStep);
+        
+        // Trigger refresh for patient dashboard
+        this.dataRefreshService.triggerRefresh('vistaPaciente');
       },
       error: (error) => {
         console.error('Error al registrar el turno:', error);
@@ -598,13 +645,44 @@ export class ReservarComponent implements OnInit {
 
   // Navigate back to dashboard/home
   volverAlInicio(): void {
-    // Redirigir según el tipo de usuario
-    if (this.user?.tipoUsuario === 'paciente') {
-      this.router.navigate(['/vistaPaciente']);
-    } else {
-      // Para dentistas y administradores
-      this.router.navigate(['/dashboard']);
-    }
+    console.log('volverAlInicio called');
+    console.log('User:', this.user);
+    console.log('User tipo:', this.user?.tipoUsuario);
+    
+    // Clear any refresh flags
+    sessionStorage.removeItem('reservar-step1-refreshed');
+    
+    // Trigger refresh for patient dashboard before navigation
+    this.dataRefreshService.triggerRefresh('vistaPaciente');
+    
+    // Add a small delay to ensure refresh is processed and navigation is reliable
+    setTimeout(() => {
+      if (this.user?.tipoUsuario === 'paciente') {
+        console.log('Navigating to /vistaPaciente and forcing page reload');
+        this.router.navigate(['/vistaPaciente']).then(
+          (success) => {
+            if (success) {
+              // Force page reload to ensure data is completely fresh
+              console.log('Navigation successful, forcing page reload');
+              setTimeout(() => {
+                window.location.reload();
+              }, 500);
+            }
+          }
+        ).catch((error: any) => {
+          console.error('Navigation to /vistaPaciente failed:', error);
+          // Force hard navigation as fallback
+          window.location.href = '/vistaPaciente';
+        });
+      } else {
+        // Para dentistas y administradores
+        console.log('Attempting navigation to /dashboard');
+        this.router.navigate(['/dashboard']).catch((error: any) => {
+          console.error('Navigation to /dashboard failed:', error);
+          window.location.href = '/dashboard';
+        });
+      }
+    }, 200);
   }
 
   // Start a new booking
