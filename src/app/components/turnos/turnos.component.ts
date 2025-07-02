@@ -17,6 +17,7 @@ import { PacienteService } from '../../services/paciente.service';
 export class TurnosComponent implements OnInit {
   currentView: string = 'turnos';
   user: User | null = null;
+  pacienteActual: Paciente | null = null; // Información del paciente logueado
   turnos: Turno[] = [];
   searchTerm: string = '';
   filterEstado: string = 'todos';
@@ -67,7 +68,7 @@ export class TurnosComponent implements OnInit {
     this.loadTratamientos();
     if (this.user?.tipoUsuario === 'paciente') {
       this.currentView = 'mis-turnos';
-      this.turnoForm.pacienteId = this.user.id.toString();
+      this.loadPacienteData(); // Cargar datos del paciente
       this.addWelcomeMessage();
     }
   }
@@ -241,8 +242,36 @@ export class TurnosComponent implements OnInit {
     });
   }
 
+  loadPacienteData(): void {
+    if (!this.user?.id) return;
+    
+    this.pacienteService.getPacientes().subscribe({
+      next: (pacientes) => {
+        // Buscar el paciente que corresponde al usuario logueado
+        this.pacienteActual = pacientes.find(p => p.userId === this.user?.id.toString()) || null;
+        
+        if (this.pacienteActual) {
+          console.log('Paciente encontrado:', this.pacienteActual);
+          // Configurar el formulario con el pacienteId correcto
+          this.turnoForm.pacienteId = this.pacienteActual._id || this.pacienteActual.id?.toString() || '';
+        } else {
+          console.warn('No se encontró información del paciente para el usuario:', this.user?.id);
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar datos del paciente:', error);
+      }
+    });
+  }
+
   navigateToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    // Redirigir según el tipo de usuario
+    if (this.user?.tipoUsuario === 'paciente') {
+      this.router.navigate(['/vistaPaciente']);
+    } else {
+      // Para dentistas y administradores
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   navigateTo(view: string): void {
@@ -319,6 +348,14 @@ export class TurnosComponent implements OnInit {
   get filteredTurnos(): Turno[] {
     let filtered = this.turnos;
 
+    // Debug: mostrar información inicial
+    if (this.user?.tipoUsuario === 'paciente') {
+      console.log('Filtrando turnos para paciente:');
+      console.log('- Usuario:', this.user);
+      console.log('- Paciente actual:', this.pacienteActual);
+      console.log('- Total turnos:', this.turnos.length);
+    }
+
     // Filtrar por búsqueda
     if (this.searchTerm.trim() !== '') {
       const search = this.searchTerm.toLowerCase();
@@ -335,12 +372,38 @@ export class TurnosComponent implements OnInit {
       filtered = filtered.filter(turno => turno.estado === this.filterEstado);
     }
 
-    // Filtrar por usuario (si es paciente, solo mostrar sus turnos)
+    // Filtrar por usuario según el tipo y la vista actual
     if (this.user?.tipoUsuario === 'paciente') {
-      filtered = filtered.filter(turno => 
-        String(turno.pacienteId) === String(this.user?.id) ||
-        String(turno.pacienteId) === String(this.user?.id)
-      );
+      // Para pacientes: mostrar solo sus turnos usando múltiples criterios
+      if (this.pacienteActual) {
+        const pacienteId = this.pacienteActual._id || this.pacienteActual.id;
+        filtered = filtered.filter(turno => {
+          // Verificar por pacienteId
+          if (pacienteId && turno.pacienteId) {
+            const idMatch = turno.pacienteId.toString() === pacienteId.toString();
+            if (idMatch) return true;
+          }
+          
+          // Verificar por nombre y apellido como fallback
+          if (this.pacienteActual?.nombre && this.pacienteActual?.apellido && turno.nombre && turno.apellido) {
+            const nombreMatch = turno.nombre.toLowerCase().trim() === this.pacienteActual.nombre.toLowerCase().trim();
+            const apellidoMatch = turno.apellido.toLowerCase().trim() === this.pacienteActual.apellido.toLowerCase().trim();
+            return nombreMatch && apellidoMatch;
+          }
+          
+          return false;
+        });
+      } else {
+        // Si no se encontró la información del paciente, no mostrar ningún turno
+        filtered = [];
+      }
+    }
+    // Para dentistas y administradores: mostrar todos los turnos (no filtrar por paciente)
+
+    // Debug: mostrar resultado final
+    if (this.user?.tipoUsuario === 'paciente') {
+      console.log('- Turnos filtrados:', filtered.length);
+      console.log('- Turnos finales:', filtered);
     }
 
     return filtered;
