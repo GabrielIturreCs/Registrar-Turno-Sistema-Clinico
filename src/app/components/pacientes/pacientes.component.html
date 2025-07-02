@@ -399,4 +399,143 @@
   
   <!-- Modal backdrop -->
   <div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal" (click)="closeModal()"></div>
+
+  <!-- Modal para Editar Paciente -->
+  <div class="modal fade" [class.show]="showEditModal" [style.display]="showEditModal ? 'block' : 'none'" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title">
+            <i class="bi bi-pencil me-2"></i>
+            Editar Paciente: {{ editPacienteForm.nombre }} {{ editPacienteForm.apellido }}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="updatePaciente()" #editFormRef="ngForm">
+            <!-- Datos personales -->
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">
+                  <i class="bi bi-person me-1"></i>
+                  Datos Personales
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="editNombre" class="form-label fw-semibold">
+                      <i class="bi bi-person me-1"></i>
+                      Nombre *
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="editNombre"
+                      [(ngModel)]="editPacienteForm.nombre"
+                      name="editNombre"
+                      required
+                    >
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="editApellido" class="form-label fw-semibold">
+                      <i class="bi bi-person me-1"></i>
+                      Apellido *
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="editApellido"
+                      [(ngModel)]="editPacienteForm.apellido"
+                      name="editApellido"
+                      required
+                    >
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="editDni" class="form-label fw-semibold">
+                      <i class="bi bi-card-text me-1"></i>
+                      DNI *
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="editDni"
+                      [(ngModel)]="editPacienteForm.dni"
+                      name="editDni"
+                      required
+                      maxlength="8"
+                      pattern="[0-9]{7,8}"
+                    >
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="editTelefono" class="form-label fw-semibold">
+                      <i class="bi bi-telephone me-1"></i>
+                      Teléfono
+                    </label>
+                    <input 
+                      type="tel" 
+                      class="form-control" 
+                      id="editTelefono"
+                      [(ngModel)]="editPacienteForm.telefono"
+                      name="editTelefono"
+                    >
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="editObraSocial" class="form-label fw-semibold">
+                    <i class="bi bi-shield-check me-1"></i>
+                    Obra Social *
+                  </label>
+                  <select 
+                    class="form-select" 
+                    id="editObraSocial"
+                    [(ngModel)]="editPacienteForm.obraSocial"
+                    name="editObraSocial"
+                    required
+                  >
+                    <option value="">Selecciona una obra social</option>
+                    <option value="OSDE">OSDE</option>
+                    <option value="Swiss Medical">Swiss Medical</option>
+                    <option value="Galeno">Galeno</option>
+                    <option value="Medicus">Medicus</option>
+                    <option value="PAMI">PAMI</option>
+                    <option value="IOMA">IOMA</option>
+                    <option value="Particular">Particular</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-1"></i>
+              Los campos marcados con (*) son obligatorios.
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeEditModal()" [disabled]="isUpdating">
+            <i class="bi bi-x-circle me-1"></i>
+            Cancelar
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-warning" 
+            (click)="updatePaciente()"
+            [disabled]="!canUpdatePaciente"
+          >
+            <span *ngIf="isUpdating" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!isUpdating" class="bi bi-check-circle me-1"></i>
+            {{ isUpdating ? 'Actualizando...' : 'Actualizar Paciente' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal backdrop for edit -->
+  <div class="modal-backdrop fade" [class.show]="showEditModal" *ngIf="showEditModal" (click)="closeEditModal()"></div>
 </div>
