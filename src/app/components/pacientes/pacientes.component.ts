@@ -95,12 +95,13 @@ export class PacientesComponent implements OnInit {
     }
   }
 
-  verDashboardPaciente(paciente: Paciente): void {
-    // Guardar el paciente seleccionado en localStorage para que el dashboard lo use
-    localStorage.setItem('selectedPaciente', JSON.stringify(paciente));
-    // Navegar a vistaPaciente que es el dashboard específico para pacientes
-    const pacienteId = (paciente as any)._id || paciente.id;
-    this.router.navigate(['/vistaPaciente'], { queryParams: { pacienteId: pacienteId } });
+  getObraSocialClass(obraSocial: string): string {
+    switch (obraSocial.toLowerCase()) {
+      case 'osde': return 'badge bg-primary';
+      case 'swiss medical': return 'badge bg-success';
+      case 'galeno': return 'badge bg-warning';
+      default: return 'badge bg-secondary';
+    }
   }
 
   editarPaciente(paciente: Paciente): void {
@@ -139,19 +140,6 @@ export class PacientesComponent implements OnInit {
         }
       });
     }
-  }
-
-  getObraSocialClass(obraSocial: string): string {
-    switch (obraSocial.toLowerCase()) {
-      case 'osde': return 'badge bg-primary';
-      case 'swiss medical': return 'badge bg-success';
-      case 'galeno': return 'badge bg-warning';
-      default: return 'badge bg-secondary';
-    }
-  }
-
-  navigateToTratamientos(): void {
-    this.router.navigate(['/tratamiento']);
   }
 
   // Métodos para el modal de nuevo paciente
