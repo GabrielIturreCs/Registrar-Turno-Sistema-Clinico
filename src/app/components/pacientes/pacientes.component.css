@@ -233,17 +233,29 @@
 }
 
 .btn-outline-secondary {
-  background: linear-gradient(135deg, var(--secondary-light), var(--pink-light));
-  border: 3px solid var(--secondary-color);
-  color: var(--secondary-color);
+  background: linear-gradient(135deg, var(--secondary-light), var(--pink-light)) !important;
+  border: 3px solid var(--secondary-color) !important;
+  color: var(--secondary-color) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
 }
 
 .btn-outline-secondary:hover {
-  background: linear-gradient(135deg, var(--secondary-color), var(--pink-color));
-  border-color: var(--pink-hover);
-  color: white;
-  transform: scale(1.1) rotate(-2deg);
-  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, var(--secondary-color), var(--pink-color)) !important;
+  border-color: var(--pink-color) !important;
+  color: white !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5) !important;
+}
+
+.btn-outline-secondary i {
+  color: inherit !important;
+  transition: var(--transition) !important;
+}
+
+.btn-outline-secondary:hover i {
+  transform: scale(1.1) !important;
+  color: white !important;
 }
 
 .btn-outline-danger {

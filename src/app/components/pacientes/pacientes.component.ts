@@ -298,4 +298,9 @@ export class PacientesComponent implements OnInit {
   get canUpdatePaciente(): boolean {
     return this.isValidEditForm() && !this.isUpdating;
   }
+
+  // Método para volver al dashboard
+  volverAlDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
 }
