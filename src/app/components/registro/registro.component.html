@@ -44,6 +44,13 @@
             </div>
           </div>
         </div>
+        <div class="col-md-6 mb-3" *ngIf="registerForm.get('tipoUsuario')?.value === 'dentista'">
+          <label for="regLegajo" class="form-label fw-bold fs-6">Legajo</label>
+          <input type="text" class="form-control form-control-lg" id="regLegajo" formControlName="legajo" required placeholder="Legajo" />
+          <div *ngIf="isFieldInvalid('legajo')" class="text-danger mt-2">
+            <small class="fw-bold">{{ getFieldError('legajo') }}</small>
+          </div>
+        </div>
         <div class="row g-3">
           <div class="col-md-6 mb-3">
             <label for="regDni" class="form-label fw-bold fs-6">DNI</label>
