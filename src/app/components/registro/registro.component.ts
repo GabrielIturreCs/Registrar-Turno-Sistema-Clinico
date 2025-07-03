@@ -46,6 +46,7 @@ export class RegistroComponent {
         Validators.maxLength(50),
         Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
       ]],
+      legajo: [''],
       telefono: ['', [
         Validators.required,
         Validators.pattern(/^[0-9]{10,15}$/)
@@ -68,7 +69,7 @@ export class RegistroComponent {
     }, { validators: this.passwordMatchValidator });
 
     // Validación condicional para obra social
-    this.registerForm.get('tipoUsuario')?.valueChanges.subscribe(tipo => {
+    /*this.registerForm.get('tipoUsuario')?.valueChanges.subscribe(tipo => {
       const obraSocialControl = this.registerForm.get('obraSocial');
       if (tipo === 'paciente') {
         obraSocialControl?.setValidators([Validators.required]);
@@ -76,7 +77,25 @@ export class RegistroComponent {
         obraSocialControl?.clearValidators();
       }
       obraSocialControl?.updateValueAndValidity();
+    });*/
+    this.registerForm.get('tipoUsuario')?.valueChanges.subscribe(tipo => {
+      const obraSocialControl = this.registerForm.get('obraSocial');
+      // Aquí agregamos:
+      const legajoControl = this.registerForm.get('legajo');
+      if (tipo === 'paciente') {
+        obraSocialControl?.setValidators([Validators.required]);
+        legajoControl?.clearValidators();
+      } else if (tipo === 'dentista') {
+        legajoControl?.setValidators([Validators.required, Validators.pattern(/^[a-zA-Z0-9]+$/)]);
+        obraSocialControl?.clearValidators();
+      } else {
+        obraSocialControl?.clearValidators();
+        legajoControl?.clearValidators();
+      }
+      obraSocialControl?.updateValueAndValidity();
+      legajoControl?.updateValueAndValidity();
     });
+
   }
 
   // Validador personalizado para fortaleza de contraseña
