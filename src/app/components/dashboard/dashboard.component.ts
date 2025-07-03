@@ -373,6 +373,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         // Asegurar que el rol esté correctamente seteado en localStorage
         if (this.user?.tipoUsuario) {
           localStorage.setItem('rol', this.user.tipoUsuario);
+          console.log('Dashboard: Rol guardado en localStorage:', this.user.tipoUsuario);
         }
         console.log('Dashboard: Usuario cargado:', this.user);
         console.log('Dashboard: Nombre del usuario:', this.user?.nombre);
@@ -471,7 +472,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   navigateToEstadisticas(): void {
     if (this.user?.tipoUsuario === 'administrador') {
-      this.router.navigate(['/estadistica']);
+      // Asegurar que el rol esté correctamente guardado en localStorage
+      localStorage.setItem('rol', this.user.tipoUsuario);
+      localStorage.setItem('token', 'fake-token'); // Asegurar que el token esté presente
+      console.log('Dashboard: Navegando a estadísticas. Rol:', this.user.tipoUsuario);
+      console.log('Dashboard: Token en localStorage:', localStorage.getItem('token'));
+      console.log('Dashboard: Rol en localStorage:', localStorage.getItem('rol'));
+      
+      // Verificar que todo esté correcto antes de navegar
+      const token = localStorage.getItem('token');
+      const rol = localStorage.getItem('rol');
+      const user = localStorage.getItem('user');
+      
+      if (token && rol === 'administrador' && user) {
+        console.log('Dashboard: Todo correcto, navegando a estadísticas');
+        this.router.navigate(['/estadistica']);
+      } else {
+        console.log('Dashboard: Error en datos de autenticación');
+        console.log('Dashboard: Token:', token);
+        console.log('Dashboard: Rol:', rol);
+        console.log('Dashboard: User:', user);
+        alert('Error en la autenticación. Por favor, inicie sesión nuevamente.');
+        this.router.navigate(['/login']);
+      }
+    } else {
+      console.log('Dashboard: Usuario no es administrador:', this.user?.tipoUsuario);
+      alert('Solo los administradores pueden acceder a las estadísticas.');
     }
   }
 

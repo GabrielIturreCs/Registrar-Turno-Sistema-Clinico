@@ -102,10 +102,33 @@ export class EstadisticaComponent implements OnInit {
 
   //aca se carga el usuario actual
   loadUserData(): void {
-    this.user = this.authService.getCurrentUser();
+    // Verificar si hay usuario en localStorage
+    const userStr = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    const rol = localStorage.getItem('rol');
+    
+    console.log('Estadísticas: Verificando autenticación...');
+    console.log('Estadísticas: Token:', token);
+    console.log('Estadísticas: Rol:', rol);
+    console.log('Estadísticas: User:', userStr);
+    
+    if (userStr && token && rol) {
+      this.user = JSON.parse(userStr);
+      // Asegurar que el rol esté correctamente seteado
+      if (this.user?.tipoUsuario) {
+        localStorage.setItem('rol', this.user.tipoUsuario);
+      }
+    } else {
+      this.user = this.authService.getCurrentUser();
+    }
+    
     // Solo permitir acceso a administrador
     if (!this.user || this.user.tipoUsuario !== 'administrador') {
+      console.log('Estadísticas: Acceso denegado. Usuario:', this.user);
+      alert('Acceso denegado. Solo los administradores pueden ver las estadísticas.');
       this.router.navigate(['/login']);
+    } else {
+      console.log('Estadísticas: Acceso permitido para administrador:', this.user.nombre);
     }
   }
 
