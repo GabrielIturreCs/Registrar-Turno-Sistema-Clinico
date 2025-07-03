@@ -284,12 +284,7 @@ export class ReservarComponent implements OnInit {
     this.turnoService.getTratamientos().subscribe({
       next: (tratamientos) => {
         console.log('Tratamientos recibidos:', tratamientos);
-        // Mapear _id a id para compatibilidad con la interfaz
-        this.tratamientos = tratamientos.map(t => ({
-          ...t,
-          id: t._id
-        }));
-        console.log('Tratamientos mapeados:', this.tratamientos);
+        this.tratamientos = tratamientos;
       },
       error: (error) => {
         console.error('Error cargando tratamientos:', error);
@@ -300,7 +295,7 @@ export class ReservarComponent implements OnInit {
             nroTratamiento: 1,
             descripcion: 'Consulta General',
             duracion: '30',
-            historial: '5000',
+            precio: 5000,
             _id: '1'
           },
           {
@@ -308,7 +303,7 @@ export class ReservarComponent implements OnInit {
             nroTratamiento: 2,
             descripcion: 'Limpieza Dental',
             duracion: '45',
-            historial: '8000',
+            precio: 8000,
             _id: '2'
           },
           {
@@ -316,7 +311,7 @@ export class ReservarComponent implements OnInit {
             nroTratamiento: 3,
             descripcion: 'Empaste',
             duracion: '60',
-            historial: '12000',
+            precio: 12000,
             _id: '3'
           },
           {
@@ -324,7 +319,7 @@ export class ReservarComponent implements OnInit {
             nroTratamiento: 4,
             descripcion: 'Extracción',
             duracion: '45',
-            historial: '15000',
+            precio: 15000,
             _id: '4'
           },
           {
@@ -332,7 +327,7 @@ export class ReservarComponent implements OnInit {
             nroTratamiento: 5,
             descripcion: 'Ortodoncia',
             duracion: '90',
-            historial: '10000',
+            precio: 10000,
             _id: '5'
           }
         ];

@@ -264,10 +264,7 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
   loadTratamientos(): void {
     this.turnoService.getTratamientos().subscribe({
       next: (tratamientos) => {
-        this.tratamientos = tratamientos.map(t => ({
-          ...t,
-          id: t._id
-        }));
+        this.tratamientos = tratamientos;
       },
       error: (error) => {
         console.error('Error al cargar tratamientos:', error);

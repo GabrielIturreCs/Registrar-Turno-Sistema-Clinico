@@ -19,67 +19,68 @@ export class TratamientoComponent implements OnInit {
   showDeleteModal: boolean = false;
   tratamientoAEliminar: number | null = null;
 
-  // NUEVO: Variables para búsqueda, loading y filtrado
+  // Variables para búsqueda, loading y filtrado
   searchText: string = '';
   filteredTratamientos: Tratamiento[] = [];
   loading: boolean = false;
-  historialTratamientos: { nroTratamiento: number, accion: string, fecha: Date, descripcion: string }[] = [];
 
   constructor(private tratamientoService: TratamientoService, private fb: FormBuilder) {
     this.formulario = this.fb.group({
       nroTratamiento: ['', Validators.required],
       descripcion: ['', Validators.required],
       duracion: ['', Validators.required],
-      historial: ['', Validators.required]
+      precio: ['', [Validators.required, Validators.min(0)]]
     });
   }
 
   ngOnInit() {
     this.cargarTratamientos();
-    // Simulación de historial (puedes reemplazarlo con datos reales si tienes endpoint)
-    this.historialTratamientos = [];
   }
 
   cargarTratamientos() {
     this.loading = true;
-    this.tratamientoService.getTratamientos().subscribe(data => {
-      this.tratamientos = data;
-      this.filterTratamientos();
-      this.loading = false;
-      // El historial solo se llena al crear/editar/eliminar, no aquí
-      // this.historialTratamientos = data.map(t => ({ ... })); // ELIMINADO
-    }, () => {
-      this.loading = false;
+    this.tratamientoService.getTratamientos().subscribe({
+      next: (data) => {
+        this.tratamientos = data;
+        this.filterTratamientos();
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar tratamientos:', error);
+        this.loading = false;
+      }
     });
   }
 
-  // NUEVO: Función de filtrado
+  // Función de filtrado
   filterTratamientos() {
     const text = this.searchText ? this.searchText.toLowerCase() : '';
     this.filteredTratamientos = this.tratamientos.filter(t =>
       t.descripcion.toLowerCase().includes(text) ||
       t.duracion.toLowerCase().includes(text) ||
-      t.historial.toLowerCase().includes(text) ||
-      ('' + t.nroTratamiento).includes(text)
+      ('' + t.nroTratamiento).includes(text) ||
+      ('' + t.precio).includes(text)
     );
   }
 
   guardar() {
     if (this.formulario.invalid) return;
+    
+    const tratamientoData = this.formulario.value;
+    
     if (this.editando && this.nroEditando !== null) {
       // Buscar el tratamiento por nroTratamiento
       const t = this.tratamientos.find(x => x.nroTratamiento === this.nroEditando);
-      if (t && (t as any)._id) {
-        this.tratamientoService.actualizarTratamiento((t as any)._id, this.formulario.value).subscribe({
-          next: () => {
-            this.cargarTratamientos();
-            this.historialTratamientos.unshift({
-              nroTratamiento: this.formulario.value.nroTratamiento,
-              accion: 'Editado',
-              fecha: new Date(),
-              descripcion: this.formulario.value.descripcion
-            });
-            this.cancelar();
+      if (t && t._id) {
+        this.tratamientoService.actualizarTratamiento(t._id, tratamientoData).subscribe({
+          next: (response) => {
+            if (response.status === '1') {
+              this.cargarTratamientos();
+              this.cancelar();
+              alert('Tratamiento actualizado correctamente');
+            } else {
+              alert('Error: ' + response.msg);
+            }
           },
           error: (error) => {
             console.error('Error al actualizar tratamiento:', error);
@@ -88,16 +89,15 @@ export class TratamientoComponent implements OnInit {
         });
       }
     } else {
-      this.tratamientoService.crearTratamiento(this.formulario.value).subscribe({
-        next: () => {
-          this.cargarTratamientos();
-          this.historialTratamientos.unshift({
-            nroTratamiento: this.formulario.value.nroTratamiento,
-            accion: 'Creado',
-            fecha: new Date(),
-            descripcion: this.formulario.value.descripcion
-          });
-          this.cancelar();
+      this.tratamientoService.crearTratamiento(tratamientoData).subscribe({
+        next: (response) => {
+          if (response.status === '1') {
+            this.cargarTratamientos();
+            this.cancelar();
+            alert('Tratamiento creado correctamente');
+          } else {
+            alert('Error: ' + response.msg);
+          }
         },
         error: (error) => {
           console.error('Error al crear tratamiento:', error);
@@ -116,22 +116,27 @@ export class TratamientoComponent implements OnInit {
         nroTratamiento: t.nroTratamiento,
         descripcion: t.descripcion,
         duracion: t.duracion,
-        historial: t.historial
+        precio: t.precio
       });
     }
   }
 
   eliminarPorNro(nro: number) {
     const t = this.tratamientos.find(x => x.nroTratamiento === nro);
-    if (t && (t as any)._id && confirm('¿Eliminar tratamiento?')) {
-      this.tratamientoService.eliminarTratamiento((t as any)._id).subscribe(() => {
-        this.cargarTratamientos();
-        this.historialTratamientos.unshift({
-          nroTratamiento: t.nroTratamiento,
-          accion: 'Eliminado',
-          fecha: new Date(),
-          descripcion: t.descripcion
-        });
+    if (t && t._id) {
+      this.tratamientoService.eliminarTratamiento(t._id).subscribe({
+        next: (response) => {
+          if (response.status === '1') {
+            this.cargarTratamientos();
+            alert('Tratamiento eliminado correctamente');
+          } else {
+            alert('Error: ' + response.msg);
+          }
+        },
+        error: (error) => {
+          console.error('Error al eliminar tratamiento:', error);
+          alert('Error al eliminar el tratamiento.');
+        }
       });
     }
   }

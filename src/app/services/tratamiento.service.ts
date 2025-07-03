@@ -3,6 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Tratamiento } from '../interfaces';
 
+// Interfaces para las respuestas del backend
+interface ApiResponse<T> {
+  status: string;
+  msg: string;
+  tratamiento?: T;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -22,17 +29,17 @@ export class TratamientoService {
   }
 
   // Crear un nuevo tratamiento
-  crearTratamiento(tratamiento: Tratamiento): Observable<Tratamiento> {
-    return this.http.post<Tratamiento>(this.apiUrl, tratamiento);
+  crearTratamiento(tratamiento: Tratamiento): Observable<ApiResponse<Tratamiento>> {
+    return this.http.post<ApiResponse<Tratamiento>>(this.apiUrl, tratamiento);
   }
 
   // Actualizar un tratamiento existente
-  actualizarTratamiento(id: string, tratamiento: Tratamiento): Observable<Tratamiento> {
-    return this.http.put<Tratamiento>(`${this.apiUrl}/${id}`, tratamiento);
+  actualizarTratamiento(id: string, tratamiento: Tratamiento): Observable<ApiResponse<Tratamiento>> {
+    return this.http.put<ApiResponse<Tratamiento>>(`${this.apiUrl}/${id}`, tratamiento);
   }
 
   // Eliminar un tratamiento
-  eliminarTratamiento(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+  eliminarTratamiento(id: string): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${id}`);
   }
 }

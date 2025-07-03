@@ -33,12 +33,12 @@ export interface Turno {
 }
 
 export interface Tratamiento {
-  _id: any;
+  _id?: string;
   id?: number;
   nroTratamiento: number;
   descripcion: string;
   duracion: string;
-  historial: string;
+  precio: number;
 }
 
 export interface Paciente {
