@@ -1,81 +1,167 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RegisterForm } from '../../interfaces';
 import { RegisterService } from '../../services/register.service';
 
 @Component({
   selector: 'app-registro',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './registro.component.html',
-  styleUrl: './registro.component.css'
+  styleUrl: './registro.component.css',
 })
-export class RegistroComponent{
+export class RegistroComponent {
   currentView: string = 'register';
   isLoading: boolean = false;
-  
-  registerForm : RegisterForm = {
-    nombreUsuario: '',
-    password: '',
-    confirmPassword: '',
-    nombre: '',
-    apellido: '',
-    telefono: '',
-    direccion: '',
-    dni: '',
-    tipoUsuario: 'paciente',
-    obraSocial: '',
-    email: ''
-  };
+  registerForm: FormGroup;
 
-  constructor(private router: Router,
-              private registerService: RegisterService) {
+  constructor(
+    private router: Router,
+    private registerService: RegisterService,
+    private fb: FormBuilder
+  ) {
+    this.registerForm = this.fb.group({
+      nombreUsuario: ['', [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(20),
+        Validators.pattern(/^[a-zA-Z0-9_]+$/)
+      ]],
+      password: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        this.passwordStrengthValidator()
+      ]],
+      confirmPassword: ['', [Validators.required]],
+      nombre: ['', [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(50),
+        Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
+      ]],
+      apellido: ['', [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(50),
+        Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
+      ]],
+      telefono: ['', [
+        Validators.required,
+        Validators.pattern(/^[0-9]{10,15}$/)
+      ]],
+      direccion: ['', [
+        Validators.required,
+        Validators.minLength(10),
+        Validators.maxLength(100)
+      ]],
+      dni: ['', [
+        Validators.required,
+        Validators.pattern(/^[0-9]{7,8}$/)
+      ]],
+      tipoUsuario: ['paciente', [Validators.required]],
+      obraSocial: [''],
+      email: ['', [
+        Validators.required,
+        Validators.email
+      ]]
+    }, { validators: this.passwordMatchValidator });
 
+    // Validación condicional para obra social
+    this.registerForm.get('tipoUsuario')?.valueChanges.subscribe(tipo => {
+      const obraSocialControl = this.registerForm.get('obraSocial');
+      if (tipo === 'paciente') {
+        obraSocialControl?.setValidators([Validators.required]);
+      } else {
+        obraSocialControl?.clearValidators();
+      }
+      obraSocialControl?.updateValueAndValidity();
+    });
   }
 
-  //ngOnInit(): void {}
+  // Validador personalizado para fortaleza de contraseña
+  passwordStrengthValidator(): Validators {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const password = control.value;
+      if (!password) return null;
+
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasNumbers = /\d/.test(password);
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+      const valid = hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar;
+
+      return !valid ? { passwordStrength: true } : null;
+    };
+  }
+
+  // Validador personalizado para confirmar contraseña
+  passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
+    const password = group.get('password');
+    const confirmPassword = group.get('confirmPassword');
+
+    if (!password || !confirmPassword) return null;
+
+    return password.value === confirmPassword.value ? null : { passwordMismatch: true };
+  }
+
+  // Getters para facilitar el acceso en el template
+  get f() {
+    return this.registerForm.controls;
+  }
+
+  get passwordStrengthMessage(): string {
+    const password = this.registerForm.get('password')?.value;
+    if (!password) return '';
+
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    const requirements = [];
+    if (!hasUpperCase) requirements.push('mayúscula');
+    if (!hasLowerCase) requirements.push('minúscula');
+    if (!hasNumbers) requirements.push('número');
+    if (!hasSpecialChar) requirements.push('carácter especial');
+
+    return requirements.length > 0 
+      ? `Falta: ${requirements.join(', ')}` 
+      : 'Contraseña segura';
+  }
 
   register(): void {
-    if (!this.canRegister) return;
-
-    if (this.registerForm.password !== this.registerForm.confirmPassword) {
-      alert('Las contraseñas no coinciden.');
-      return;
-    }
-
-    if (this.registerForm.tipoUsuario === 'paciente' && !this.registerForm.obraSocial) {
-      alert('Los pacientes deben seleccionar una obra social.');
+    if (this.registerForm.invalid) {
+      this.markFormGroupTouched();
       return;
     }
 
     this.isLoading = true;
+    const formData: RegisterForm = this.registerForm.value;
 
-    // Simular registro
-    /*setTimeout(() => {
-      // Aquí normalmente harías una llamada al backend
-      console.log('Usuario registrado:', this.registerForm);
-      
-      alert('¡Usuario registrado exitosamente!');
-      this.router.navigate(['/login']);
-      
-      this.isLoading = false;
-    }, 1000);
-  }*/
-
-       this.registerService.addUsuario(this.registerForm).subscribe(
-      (result: any) => {
+    this.registerService.addUsuario(formData).subscribe({
+      next: (result: any) => {
         console.log(result);
         alert('¡Usuario registrado exitosamente!');
         this.router.navigate(['/login']);
-        this.isLoading = false;
       },
-      (error: any) => {
+      error: (error: any) => {
         console.log(error);
-        alert('Error al registrar usuario');
+        alert('Error al registrar usuario: ' + (error.error?.message || 'Error desconocido'));
+      },
+      complete: () => {
         this.isLoading = false;
       }
-    );
+    });
+  }
+
+  // Marcar todos los campos como touched para mostrar errores
+  markFormGroupTouched(): void {
+    Object.keys(this.registerForm.controls).forEach(key => {
+      const control = this.registerForm.get(key);
+      control?.markAsTouched();
+    });
   }
 
   navigateToLogin(): void {
@@ -86,14 +172,32 @@ export class RegistroComponent{
     this.router.navigate(['/']);
   }
 
-  get canRegister(): boolean {
-    return this.registerForm.nombreUsuario.trim() !== '' &&
-           this.registerForm.password.trim() !== '' &&
-           this.registerForm.confirmPassword.trim() !== '' &&
-           this.registerForm.nombre.trim() !== '' &&
-           this.registerForm.apellido.trim() !== '' &&
-           this.registerForm.dni.trim() !== '' &&
-           this.registerForm.password === this.registerForm.confirmPassword &&
-           (this.registerForm.tipoUsuario !== 'paciente' || this.registerForm.obraSocial.trim() !== '');
+  // Métodos para validación en tiempo real
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.registerForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  getFieldError(fieldName: string): string {
+    const field = this.registerForm.get(fieldName);
+    if (!field || !field.errors) return '';
+
+    if (field.errors['required']) return 'Este campo es obligatorio';
+    if (field.errors['email']) return 'Formato de email inválido';
+    if (field.errors['minlength']) return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
+    if (field.errors['maxlength']) return `Máximo ${field.errors['maxlength'].requiredLength} caracteres`;
+    if (field.errors['pattern']) {
+      switch (fieldName) {
+        case 'nombreUsuario': return 'Solo letras, números y guiones bajos';
+        case 'nombre':
+        case 'apellido': return 'Solo letras y espacios';
+        case 'telefono': return 'Solo números (10-15 dígitos)';
+        case 'dni': return 'Solo números (7-8 dígitos)';
+        default: return 'Formato inválido';
+      }
+    }
+    if (field.errors['passwordStrength']) return 'La contraseña debe tener mayúscula, minúscula, número y carácter especial';
+    
+    return 'Campo inválido';
   }
 }
