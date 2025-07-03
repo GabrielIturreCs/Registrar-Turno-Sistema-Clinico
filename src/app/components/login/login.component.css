@@ -1,17 +1,25 @@
-/* Estilos para login */
-.card {
-  border: none;
-  border-radius: 18px;
-  box-shadow: 0 12px 36px rgba(0, 191, 255, 0.13);
-  background: #fff;
+/* Fondo personalizado para la vista de login */
+.container-fluid {
+  background: linear-gradient(120deg, #046d94 0%, #001a26 100%);
+  min-height: 100vh;
 }
 
+.card {
+  background: rgba(255, 255, 255, 0.18); /* Fondo blanco translúcido */
+  border: 1.5px solid #4fd1ff;
+  border-radius: 20px;
+  box-shadow: 0 12px 48px 0 rgba(4, 109, 148, 0.18), 0 2px 8px #4fd1ff;
+  backdrop-filter: blur(12px); /* Efecto glassmorphism */
+  -webkit-backdrop-filter: blur(12px);
+  transition: box-shadow 0.3s;
+}
 .card-header {
-  border-radius: 18px 18px 0 0 !important;
-  border-bottom: none;
-  padding: 2rem 1.5rem 1rem 1.5rem;
-  background: linear-gradient(90deg, #00bfff 40%, #7ff6ff 100%);
-  box-shadow: 0 2px 8px rgba(0, 191, 255, 0.08);
+  background: linear-gradient(90deg, #046d94 40%, #4fd1ff 100%);
+  box-shadow: 0 2px 8px rgba(4, 109, 148, 0.18);
+  border-radius: 20px 20px 0 0 !important;
+}
+.card-header h3, .card-header p {
+  color: #fff;
 }
 
 .card-header h3 {
@@ -20,11 +28,12 @@
   margin-bottom: 0.25rem;
   color: #ffffff;
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  font-size: 2rem;
 }
 
 .card-header p {
   font-size: 1rem;
-  opacity: 0.9;
+  opacity: 0.93;
   color: #fff;
   text-shadow: 0 0 5px rgba(0, 191, 255, 0.3);
 }
@@ -33,32 +42,55 @@
   padding: 2.2rem 2rem 2rem 2rem;
 }
 
-/* Estilos para formularios */
-.form-control {
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-group .form-control {
+  padding-left: 2.5rem;
+  background: rgba(255,255,255,0.75);
+  color: #00334d;
+  border: 2px solid #4fd1ff;
   border-radius: 12px;
-  border: 2px solid #b3eaff;
-  padding: 0.85rem 1.1rem;
-  font-size: 1.08rem;
-  background: #f8f9fa;
-  transition: all 0.3s cubic-bezier(.4,2,.6,1);
+  box-shadow: none;
+}
+.input-group .input-icon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #046d94;
+  font-size: 1.2rem;
+  opacity: 0.85;
 }
 
+.form-control {
+  border-radius: 12px;
+  border: 2px solid #4fd1ff;
+  padding: 0.85rem 1.1rem;
+  font-size: 1.08rem;
+  background: rgba(255,255,255,0.97);
+  color: #046d94;
+  transition: all 0.3s cubic-bezier(.4,2,.6,1);
+  box-shadow: none;
+}
 .form-control:focus {
-  border-color: #00bfff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 191, 255, 0.18);
   background: #fff;
+  color: #046d94;
+  border-color: #00bfff;
 }
 
 .form-label {
+  color: #009fe3;
   font-weight: 600;
-  color: #00bfff;
   margin-bottom: 0.5rem;
   letter-spacing: 0.5px;
 }
 
 /* Botones */
 .btn {
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 0.85rem 1.5rem;
   font-weight: 600;
   font-size: 1.08rem;
@@ -67,28 +99,23 @@
 }
 
 .btn-primary {
-  background: linear-gradient(90deg, #00bfff 0%, #7ff6ff 100%);
-  border: none;
-  box-shadow: 0 2px 8px #b3eaff;
-  color: #fff !important;
+  background: linear-gradient(90deg, #00bfff 0%, #4fd1ff 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px #4fd1ff;
 }
-
-.btn-primary:hover, .btn-primary:focus {
-  background: linear-gradient(90deg, #7ff6ff 0%, #00bfff 100%);
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 6px 18px #7ff6ff;
-  color: #fff !important;
+.btn-primary:hover {
+  background: linear-gradient(90deg, #4fd1ff 0%, #00bfff 100%);
 }
 
 .btn-link {
-  color: #00bfff;
+  color: #4fd1ff;
   text-decoration: none;
   font-weight: 500;
   font-size: 1rem;
+  transition: color 0.2s;
 }
-
 .btn-link:hover {
-  color: #7ff6ff;
+  color: #00bfff;
   text-decoration: underline;
 }
 
@@ -97,9 +124,15 @@
   color: #ea4335;
   background: #fff;
   font-weight: 600;
+  border-radius: 16px;
   transition: all 0.2s cubic-bezier(.4,2,.6,1);
+  box-shadow: 0 2px 8px #ffe6e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1.08rem;
 }
-
 .btn-outline-danger:hover, .btn-outline-danger:focus {
   background: #ea4335;
   color: #fff;
@@ -117,6 +150,8 @@
   background: #fff;
   border-radius: 50%;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  width: 26px;
+  height: 26px;
 }
 
 /* Spinner */
@@ -130,25 +165,42 @@
   border-radius: 8px;
   font-size: 0.98rem;
   margin-bottom: 1rem;
+  background: #ffe6e6;
+  color: #ea4335;
+  border: 1.5px solid #ea4335;
 }
 
 /* Botón volver con gradiente celeste */
 .btn-back {
-  background: linear-gradient(90deg, #00bfff 0%, #7ff6ff 100%);
+  background: linear-gradient(90deg, #046d94 0%, #4fd1ff 100%);
   color: #fff;
   border: none;
-  box-shadow: 0 2px 8px #b3eaff;
+  box-shadow: 0 2px 8px #4fd1ff;
   border-radius: 50%;
-  transition: background 0.3s, box-shadow 0.3s, color 0.3s;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s, box-shadow 0.3s, color 0.3s, transform 0.2s;
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 10;
 }
 .btn-back:hover, .btn-back:focus {
-  background: linear-gradient(90deg, #7ff6ff 0%, #00bfff 100%);
+  background: linear-gradient(90deg, #4fd1ff 0%, #046d94 100%);
   color: #fff;
-  box-shadow: 0 6px 18px #7ff6ff;
+  box-shadow: 0 6px 18px #4fd1ff;
+  transform: scale(1.08);
 }
 .btn-back i {
   color: #fff;
   margin: 0;
+  font-size: 1.3rem;
 }
 
 /* Animación de entrada fadeInUp igual que home */
@@ -179,6 +231,14 @@
   .card-header {
     padding: 1.2rem 1rem 0.8rem 1rem;
   }
+  .btn-back {
+    top: 10px;
+    left: 10px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+  }
 }
 
 @media (max-width: 400px) {
@@ -190,7 +250,17 @@
   }
 }
 
-body {
-  background: linear-gradient(120deg, #e3f0ff 0%, #fbeee6 60%, #e3f0ff 100%);
-  overflow-x: hidden;
+footer, .navbar {
+  background: linear-gradient(90deg, #046d94 40%, #4fd1ff 100%);
+  color: #fff;
+}
+
+/* Ajuste de sombra para mejor integración */
+.card:hover {
+  box-shadow: 0 20px 64px 0 rgba(4, 109, 148, 0.35), 0 4px 16px #4fd1ff;
+}
+
+/* Ajuste de links y textos secundarios */
+.btn-link, .text-center.mb-3 {
+  color: #4fd1ff;
 }

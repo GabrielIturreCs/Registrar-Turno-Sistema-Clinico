@@ -9,6 +9,7 @@
   overflow: hidden;
   color: #fff;
   padding: 20px 0;
+  background: linear-gradient(120deg, #046d94 0%, #4fd1ff 100%); /* Celeste y azul global */
 }
 
 .hero::before {
@@ -19,11 +20,12 @@
   width: 100%;
   height: 100%;
   background: url('https://ceodont.com/wp-content/uploads/2021/07/gabinete-clinica-dental.jpg') no-repeat center center/cover;
-  filter: blur(4px);
+  filter: blur(4px) brightness(0.85);
   z-index: 1;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
+  opacity: 0.85;
 }
 
 .hero > * {
@@ -36,10 +38,11 @@
   max-width: 800px;
   margin: 0 auto;
   width: 100%;
-  background: rgba(255, 255, 255, 0.75);
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-  padding: 32px 16px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(4,109,148,0.10), 0 2px 8px #b3eaff;
+  padding: 36px 18px;
+  border: 1.5px solid #b3eaff;
 }
 
 .title {
@@ -50,7 +53,7 @@
   text-shadow: 0 2px 8px #ffffff, 0 0 5px rgba(0, 0, 0, 0.5);
   text-align: center;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-  background: linear-gradient(90deg, #00bfff 40%, #7ff6ff 100%);
+  background: linear-gradient(90deg, #046d94 40%, #4fd1ff 100%); /* Celeste y azul global */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -87,30 +90,64 @@
   cursor: pointer;
   font-size: 1.1rem;
   border: none;
+  box-shadow: 0 2px 8px #b3eaff;
 }
 
+/* Botón principal (celeste) */
 .btn.primary, .btn.btn-primary {
   background: linear-gradient(90deg, #00bfff 0%, #7ff6ff 100%);
   color: #fff !important;
   border: none !important;
   box-shadow: 0 2px 8px #b3eaff;
 }
-
 .btn.primary:hover, .btn.btn-primary:hover {
   background: linear-gradient(90deg, #7ff6ff 0%, #00bfff 100%);
   color: #fff !important;
 }
 
+/* Botón secundario (azul claro) */
 .btn.secondary, .btn.btn-outline-primary {
   background: linear-gradient(90deg, #e3f7ff 0%, #b3eaff 100%);
   border: 2px solid #00bfff !important;
   color: #00bfff !important;
 }
-
 .btn.secondary:hover, .btn.btn-outline-primary:hover {
   background: linear-gradient(90deg, #00bfff 0%, #7ff6ff 100%);
   color: #fff !important;
   border: 2px solid #7ff6ff !important;
+}
+
+/* Botón paciente (verde) */
+.btn.paciente {
+  background: linear-gradient(90deg, #4fd17d 0%, #baffc9 100%);
+  color: #fff !important;
+  border: 2px solid #4fd17d !important;
+}
+.btn.paciente:hover {
+  background: linear-gradient(90deg, #baffc9 0%, #4fd17d 100%);
+  color: #046d94 !important;
+}
+
+/* Botón dentista (celeste) */
+.btn.dentista {
+  background: linear-gradient(90deg, #4fd1ff 0%, #b3eaff 100%);
+  color: #fff !important;
+  border: 2px solid #4fd1ff !important;
+}
+.btn.dentista:hover {
+  background: linear-gradient(90deg, #b3eaff 0%, #4fd1ff 100%);
+  color: #046d94 !important;
+}
+
+/* Botón admin (rojo) */
+.btn.admin {
+  background: linear-gradient(90deg, #ff6b6b 0%, #ffd6d6 100%);
+  color: #fff !important;
+  border: 2px solid #ff6b6b !important;
+}
+.btn.admin:hover {
+  background: linear-gradient(90deg, #ffd6d6 0%, #ff6b6b 100%);
+  color: #046d94 !important;
 }
 
 .features {
@@ -120,11 +157,11 @@
 .section-title {
   font-size: 2.5rem;
   margin-bottom: 40px;
-  background: linear-gradient(90deg, #00bfff 40%, #7ff6ff 100%);
+  background: linear-gradient(90deg, #046d94 40%, #4fd1ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  color: #00bfff; /* fallback */
+  color: #046d94; /* fallback */
   text-align: center;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   text-shadow: 0 2px 8px #b3eaff, 0 0 5px rgba(0, 191, 255, 0.13);
@@ -172,7 +209,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  color: #00bfff; /* fallback */
+  color: #010203; /* fallback */
   text-align: center;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
@@ -236,7 +273,7 @@
 }
 
 body {
-  background: linear-gradient(120deg, #e3f0ff 0%, #fbeee6 60%, #e3f0ff 100%);
+  background: linear-gradient(120deg, #e3f0ff 0%, #4fd1ff 60%, #e3f0ff 100%);
   overflow-x: hidden;
 }
 

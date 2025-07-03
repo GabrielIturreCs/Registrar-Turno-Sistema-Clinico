@@ -1,15 +1,17 @@
+<!-- Mejoro la estructura y responsividad del formulario manteniendo los colores -->
 <div
   *ngIf="currentView === 'register'"
-  class="container-fluid d-flex align-items-center justify-content-center bg-light"
+  class="container-fluid min-vh-100 d-flex align-items-center justify-content-center registro-animate"
+  style="overflow-y: auto;"
 >
-  <div class="card shadow-lg" style="max-width: 600px; width: 100%">
-    <div class="card-header text-center bg-success text-white">
+  <div class="card shadow-lg w-100" style="max-width: 600px;">
+    <div class="card-header text-center bg-primary text-white">
       <h3><i class="fas fa-user-plus"></i> Registro de Usuario</h3>
     </div>
     <div class="card-body">
       <form [formGroup]="registerForm" (ngSubmit)="register()">
         <div class="row g-3">
-          <div class="col-md-6 mb-3">
+          <div class="col-12 col-md-6 mb-3">
             <label for="regTipoUsuario" class="form-label fw-bold fs-6">Tipo de Usuario</label>
             <select class="form-select form-select-lg" id="regTipoUsuario" formControlName="tipoUsuario" required>
               <option value="paciente">Paciente</option>
@@ -20,7 +22,7 @@
               <small class="fw-bold">{{ getFieldError('tipoUsuario') }}</small>
             </div>
           </div>
-          <div class="col-md-6 mb-3">
+          <div class="col-12 col-md-6 mb-3">
             <label for="regUsuario" class="form-label fw-bold fs-6">Nombre de Usuario</label>
             <input type="text" class="form-control form-control-lg" id="regUsuario" formControlName="nombreUsuario" required placeholder="Usuario único" />
             <div *ngIf="isFieldInvalid('nombreUsuario')" class="text-danger mt-2">
@@ -29,14 +31,14 @@
           </div>
         </div>
         <div class="row g-3">
-          <div class="col-md-6 mb-3">
+          <div class="col-12 col-md-6 mb-3">
             <label for="regNombre" class="form-label fw-bold fs-6">Nombre</label>
             <input type="text" class="form-control form-control-lg" id="regNombre" formControlName="nombre" required placeholder="Tu nombre" />
             <div *ngIf="isFieldInvalid('nombre')" class="text-danger mt-2">
               <small class="fw-bold">{{ getFieldError('nombre') }}</small>
             </div>
           </div>
-          <div class="col-md-6 mb-3">
+          <div class="col-12 col-md-6 mb-3">
             <label for="regApellido" class="form-label fw-bold fs-6">Apellido</label>
             <input type="text" class="form-control form-control-lg" id="regApellido" formControlName="apellido" required placeholder="Tu apellido" />
             <div *ngIf="isFieldInvalid('apellido')" class="text-danger mt-2">
@@ -44,22 +46,24 @@
             </div>
           </div>
         </div>
-        <div class="col-md-6 mb-3" *ngIf="registerForm.get('tipoUsuario')?.value === 'dentista'">
-          <label for="regLegajo" class="form-label fw-bold fs-6">Legajo</label>
-          <input type="text" class="form-control form-control-lg" id="regLegajo" formControlName="legajo" required placeholder="Legajo" />
-          <div *ngIf="isFieldInvalid('legajo')" class="text-danger mt-2">
-            <small class="fw-bold">{{ getFieldError('legajo') }}</small>
+        <div class="row g-3" *ngIf="registerForm.get('tipoUsuario')?.value === 'dentista'">
+          <div class="col-12 mb-3">
+            <label for="regLegajo" class="form-label fw-bold fs-6">Legajo</label>
+            <input type="text" class="form-control form-control-lg" id="regLegajo" formControlName="legajo" required placeholder="Legajo" />
+            <div *ngIf="isFieldInvalid('legajo')" class="text-danger mt-2">
+              <small class="fw-bold">{{ getFieldError('legajo') }}</small>
+            </div>
           </div>
         </div>
         <div class="row g-3">
-          <div class="col-md-6 mb-3">
+          <div class="col-12 col-md-6 mb-3">
             <label for="regDni" class="form-label fw-bold fs-6">DNI</label>
             <input type="text" class="form-control form-control-lg" id="regDni" formControlName="dni" required placeholder="12345678" />
             <div *ngIf="isFieldInvalid('dni')" class="text-danger mt-2">
               <small class="fw-bold">{{ getFieldError('dni') }}</small>
             </div>
           </div>
-          <div class="col-md-6 mb-3">
+          <div class="col-12 col-md-6 mb-3">
             <label for="regTelefono" class="form-label fw-bold fs-6">Teléfono</label>
             <input type="tel" class="form-control form-control-lg" id="regTelefono" formControlName="telefono" placeholder="123456789" />
             <div *ngIf="isFieldInvalid('telefono')" class="text-danger mt-2">
@@ -67,19 +71,21 @@
             </div>
           </div>
         </div>
-        <div class="mb-3" *ngIf="registerForm.get('tipoUsuario')?.value === 'paciente'">
-          <label for="regObraSocial" class="form-label fw-bold fs-6">Obra Social</label>
-          <select class="form-select form-select-lg" id="regObraSocial" formControlName="obraSocial" [required]="registerForm.get('tipoUsuario')?.value === 'paciente'">
-            <option value="">Selecciona tu obra social</option>
-            <option value="OSDE">OSDE</option>
-            <option value="Swiss Medical">Swiss Medical</option>
-            <option value="Galeno">Galeno</option>
-            <option value="Medicus">Medicus</option>
-            <option value="IOMA">IOMA</option>
-            <option value="Particular">Particular</option>
-          </select>
-          <div *ngIf="isFieldInvalid('obraSocial')" class="text-danger mt-2">
-            <small class="fw-bold">{{ getFieldError('obraSocial') }}</small>
+        <div class="row g-3" *ngIf="registerForm.get('tipoUsuario')?.value === 'paciente'">
+          <div class="col-12 mb-3">
+            <label for="regObraSocial" class="form-label fw-bold fs-6">Obra Social</label>
+            <select class="form-select form-select-lg" id="regObraSocial" formControlName="obraSocial" [required]="registerForm.get('tipoUsuario')?.value === 'paciente'">
+              <option value="">Selecciona tu obra social</option>
+              <option value="OSDE">OSDE</option>
+              <option value="Swiss Medical">Swiss Medical</option>
+              <option value="Galeno">Galeno</option>
+              <option value="Medicus">Medicus</option>
+              <option value="IOMA">IOMA</option>
+              <option value="Particular">Particular</option>
+            </select>
+            <div *ngIf="isFieldInvalid('obraSocial')" class="text-danger mt-2">
+              <small class="fw-bold">{{ getFieldError('obraSocial') }}</small>
+            </div>
           </div>
         </div>
         <div class="mb-3">
