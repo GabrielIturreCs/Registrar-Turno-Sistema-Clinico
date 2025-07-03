@@ -370,10 +370,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const userStr = localStorage.getItem('user');
       if (userStr) {
         this.user = JSON.parse(userStr);
+        // Asegurar que el rol esté correctamente seteado en localStorage
+        if (this.user?.tipoUsuario) {
+          localStorage.setItem('rol', this.user.tipoUsuario);
+        }
         console.log('Dashboard: Usuario cargado:', this.user);
         console.log('Dashboard: Nombre del usuario:', this.user?.nombre);
         console.log('Dashboard: Tipo de usuario:', this.user?.tipoUsuario);
-        
         // Redirigir pacientes a su vista específica
         if (this.user?.tipoUsuario === 'paciente') {
           this.router.navigate(['/vistaPaciente']);
