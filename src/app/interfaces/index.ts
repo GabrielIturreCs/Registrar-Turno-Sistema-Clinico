@@ -70,6 +70,7 @@ export interface RegisterForm {
   tipoUsuario: string;
   obraSocial: string;
   email: string;
+  legajo?: string;
 }
 
 export interface TurnoForm {
