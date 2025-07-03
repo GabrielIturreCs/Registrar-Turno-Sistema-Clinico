@@ -2,16 +2,16 @@
    VARIABLES CSS GLOBALES
    ====================== */
 :root {
-  --primary-color: #00bfff;
-  --primary-light: #7ff6ff;
-  --primary-dark: #0099cc;
-  --secondary-color: #28a745;
+  --primary-color: #1f6b84;
+  --primary-light: #143538;
+  --primary-dark: #000000;
+  --secondary-color: #1c9138;
   --warning-color: #ffc107;
   --danger-color: #dc3545;
-  --info-color: #17a2b8;
+  --info-color: #fcfcfc;
   --light-color: #f8f9fa;
   --dark-color: #343a40;
-  --gradient-bg: linear-gradient(135deg, #e3f0ff 0%, #fbeee6 60%, #e3f0ff 100%);
+  --gradient-bg: linear-gradient(135deg, #000000 0%, #2494a5 60%, #e3f0ff 100%);
   --card-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   --card-hover-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
   --border-radius: 12px;
@@ -21,55 +21,46 @@
 /* ======================
    DASHBOARD DEL PACIENTE
    ====================== */
+/* Fondo personalizado para la vista de paciente, igual que login */
 .patient-dashboard {
+  background: linear-gradient(120deg, #2495af 0%, #001a26 100%);
   min-height: 100vh;
-  background: var(--gradient-bg);
-  background-attachment: fixed;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* ======================
-   TARJETA DE BIENVENIDA
-   ====================== */
+/* Tarjeta principal con glassmorphism */
+.welcome-card, .quick-action-card, .metric-card, .next-appointment-card, .recent-appointments, .frequent-treatments, .stat-card {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  border: 1.5px solid #f1fef6;
+  border-radius: 20px;
+  box-shadow: 0 12px 48px 0 rgba(19, 134, 40, 0.18), 0 2px 8px #138628;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: box-shadow 0.3s;
+}
+
 .welcome-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
-  border-radius: var(--border-radius);
   padding: 2rem;
-  box-shadow: var(--card-shadow);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  position: relative;
-  overflow: hidden;
 }
 
-.welcome-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
-}
-
-.welcome-title {
-  color: var(--primary-color);
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  font-size: 2rem;
+/* Encabezados y títulos */
+.welcome-title, .metric-number, .treatment-name, .treatment-name-item {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .welcome-subtitle {
-  color: #6c757d;
+  color: #031116;
   font-size: 1.1rem;
   margin: 0;
 }
 
+/* Avatar grande */
 .user-avatar-large {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  background: linear-gradient(135deg, #0b8a13, #020203);
   color: white;
   display: flex;
   align-items: center;
@@ -84,48 +75,21 @@
    ACCIONES RÁPIDAS
    ====================== */
 .quick-action-card {
-  background: white;
-  border-radius: var(--border-radius);
-  padding: 2rem 1.5rem;
-  cursor: pointer;
-  transition: var(--transition);
-  border: 2px solid transparent;
-  position: relative;
-  overflow: hidden;
-  text-decoration: none;
-  color: inherit;
-}
-
-.quick-action-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
   background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-  opacity: 0;
-  transition: var(--transition);
-  z-index: 1;
+  border: 1.5px solid #4fd1ff;
+  border-radius: 20px;
+  box-shadow: 0 12px 48px 0 rgba(4, 109, 148, 0.10), 0 2px 8px #4fd1ff;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: box-shadow 0.35s cubic-bezier(.4,2,.6,1), transform 0.35s cubic-bezier(.4,2,.6,1), background 0.3s;
+  cursor: pointer;
+  color: #ffffff;
 }
-
-.quick-action-card:hover::before {
-  opacity: 0.05;
-}
-
 .quick-action-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--card-hover-shadow);
-  border-color: var(--primary-color);
-  color: inherit;
-  text-decoration: none;
+  box-shadow: 0 20px 64px 0 rgba(4, 109, 148, 0.18), 0 4px 16px #4fd1ff;
+  transform: translateY(-4px) scale(1.02);
+  background: linear-gradient(135deg, #e3f7ff 60%, #b3eaff 100%);
 }
-
-.quick-action-card > * {
-  position: relative;
-  z-index: 2;
-}
-
 .action-icon {
   width: 80px;
   height: 80px;
@@ -134,39 +98,29 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.5rem;
-  font-size: 2rem;
-  color: white;
-  transition: var(--transition);
+  font-size: 2.5rem;
+  color: #fff;
+  background: linear-gradient(135deg, #143a5a 0%, #4fd1ff 100%);
+  box-shadow: 0 2px 8px #4fd1ff;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
-
-.action-icon.bg-primary {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-}
-
-.action-icon.bg-info {
-  background: linear-gradient(135deg, var(--info-color), #5bc0de);
-}
-
-.action-icon.bg-success {
-  background: linear-gradient(135deg, var(--secondary-color), #4caf50);
-}
-
 .quick-action-card:hover .action-icon {
   transform: scale(1.1);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-}
-
+  box-shadow: 0 8px 25px rgba(4, 109, 148, 0.18);
+}d
 .quick-action-card h5 {
-  font-weight: 600;
-  color: var(--dark-color);
+  font-weight: 700;
+  color: #ffffff;
   margin-bottom: 0.8rem;
   font-size: 1.2rem;
 }
-
 .quick-action-card p {
-  color: #6c757d;
+  color: #ffffff;
   margin: 0;
   font-size: 0.95rem;
+}
+.quick-action-card i {
+  color: #fff !important;
 }
 
 /* ======================
@@ -265,6 +219,12 @@
   width: 100%;
   height: 4px;
   background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+}
+
+
+
+.next-appointment-card h6 {
+  color: #fff !important;
 }
 
 .appointment-header {
@@ -1104,52 +1064,351 @@
    NAVBAR STYLING FOR PATIENT
    ====================== */
 .navbar {
+  background: linear-gradient(90deg, #24af5b 0%, #138628 100%) !important;
+  color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(19, 134, 40, 0.18), 0 2px 8px #138628;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid #08451f;
+  padding: 0.7rem 2rem;
 }
 
 .navbar-brand {
   font-size: 1.5rem;
+  color: #fff !important;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(0,0,0,0.18);
 }
 
 .navbar-text {
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: #fff !important;
+  font-size: 1.08rem;
+  font-weight: 500;
 }
 
-.btn-outline-light {
-  border-color: rgba(255, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.9);
+.badge.bg-success {
+  background: linear-gradient(90deg, #24af5b 0%, #138628 100%) !important;
+  color: #fff !important;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #138628;
+  padding: 0.4em 0.8em;
+  font-size: 0.95em;
 }
 
-.btn-outline-light:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
-  color: white;
+.btn-outline-light.btn-sm {
+  border: 2px solid #fff;
+  color: #fff;
+  background: transparent;
+  font-weight: 600;
+  border-radius: 14px;
+  transition: all 0.2s cubic-bezier(.4,2,.6,1);
+  box-shadow: 0 2px 8px #138628;
+  font-size: 1.08rem;
+  padding: 0.5rem 1.2rem;
+}
+.btn-outline-light.btn-sm:hover, .btn-outline-light.btn-sm:focus {
+  background: #fff;
+  color: #138628;
+  border-color: #138628;
+  box-shadow: 0 4px 12px #138628;
 }
 
 /* ======================
    NAVIGATION MENU STYLING
    ====================== */
 .btn-group .btn {
-  flex: 1;
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-  font-weight: 500;
-  transition: var(--transition);
+  border-color: #138628;
+  color: #138628;
+  font-weight: 600;
+  background: rgba(255,255,255,0.7);
+  border-radius: 0 !important;
+  transition: all 0.3s cubic-bezier(.4,2,.6,1);
+  box-shadow: none;
+  font-size: 1.08rem;
+  padding: 1rem 0.5rem;
+}
+.btn-group .btn:hover, .btn-group .btn.active {
+  background: linear-gradient(90deg, #24af5b 0%, #138628 100%);
+  color: #fff;
+  border-color: #138628;
+  font-weight: 700;
+  box-shadow: 0 2px 8px #138628;
+  z-index: 2;
+}
+.btn-group {
+  background: rgba(255,255,255,0.18);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px #138628;
+  overflow: hidden;
 }
 
-.btn-group .btn:hover {
-  background-color: var(--primary-color);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 191, 255, 0.3);
+.btn-group .btn {
+  background: linear-gradient(90deg, #1276a3 0%, #4fd1ff 100%) !important;
+  color: #fff !important;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  border-color: #4fd1ff !important;
+  box-shadow: 0 2px 8px #4fd1ff;
+}
+
+/* Mejoras en tarjetas */
+.quick-action-card,
+.metric-card,
+.next-appointment-card,
+.recent-appointments,
+.frequent-treatments {
+  box-shadow: var(--card-shadow);
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(0, 191, 255, 0.07);
+}
+
+.quick-action-card:focus,
+.metric-card:focus,
+.next-appointment-card:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Botones y badges */
+.status-badge,
+.status-badge-simple {
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+  box-shadow: 0 2px 8px rgba(19,134,40,0.08);
+}
+.status-badge.reserved, .status-badge-simple.reserved {
+  background: linear-gradient(135deg, #24af5b 0%, #138628 100%);
+  color: #fff;
+  border: 1.5px solid #138628;
+}
+.status-badge.completed {
+  background: linear-gradient(135deg, #1c9138, #4caf50);
+  color: #fff;
+  border: 1.5px solid #1c9138;
+}
+.status-badge.cancelled {
+  background: linear-gradient(135deg, #ea4335, #ff6b6b);
+  color: #fff;
+  border: 1.5px solid #ea4335;
+}
+
+/* Mejoras responsive */
+@media (max-width: 600px) {
+  .welcome-title {
+    font-size: clamp(1.1rem, 4vw, 1.5rem);
+  }
+  .quick-action-card,
+  .metric-card,
+  .recent-appointments,
+  .frequent-treatments {
+    padding: 1rem;
+  }
+}
+
+/* Mejoras en hover */
+.quick-action-card:hover,
+.metric-card:hover,
+.next-appointment-card:hover {
+  box-shadow: var(--card-hover-shadow);
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* Mejor contraste en textos */
+.welcome-title,
+.metric-number,
+.treatment-name,
+.treatment-name-item {
+  color: #1a1a1a;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.card, .metric-card, .next-appointment-card, .recent-appointments, .frequent-treatments, .stat-card {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  border: 1.5px solid #4fd1ff;
+  border-radius: 20px;
+  box-shadow: 0 12px 48px 0 rgba(4, 109, 148, 0.10), 0 2px 8px #4fd1ff;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: box-shadow 0.35s cubic-bezier(.4,2,.6,1), transform 0.35s cubic-bezier(.4,2,.6,1), background 0.3s;
+  color: #046d94;
+}
+.card-header {
+  background: linear-gradient(90deg, #046d94 40%, #4fd1ff 100%);
+  box-shadow: 0 2px 8px rgba(4, 109, 148, 0.18);
+  border-radius: 20px 20px 0 0 !important;
+  color: #fff;
+  padding: 1.2rem 1rem 0.8rem 1rem;
+}
+.card-header h5 {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 0;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  font-size: 1.2rem;
+}
+.card-body {
+  padding: 2.2rem 2rem 2rem 2rem;
+}
+
+.table {
+  background: transparent;
+  color: #046d94;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.table th {
+  color: #138628;
+  font-weight: 600;
+  background: rgba(255,255,255,0.7);
+  border: none;
+}
+.table td {
+  background: rgba(255,255,255,0.85);
+  border: none;
+}
+.table-hover tbody tr:hover {
+  background: #e3ffe9;
+}
+
+.btn-outline-success.btn-sm, .btn-outline-primary.btn-sm {
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 1.08rem;
+  border: 2px solid #138628;
+  color: #138628;
+  background: #fff;
+  transition: all 0.2s cubic-bezier(.4,2,.6,1);
+  box-shadow: 0 2px 8px #138628;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-outline-success.btn-sm:hover, .btn-outline-primary.btn-sm:hover {
+  background: #138628;
+  color: #fff;
+  border-color: #08451f;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #24af5b 0%, #138628 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px #138628;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 1.08rem;
+  border: none;
+}
+.btn-primary:hover {
+  background: linear-gradient(90deg, #138628 0%, #24af5b 100%);
+}
+
+.spinner-border.text-primary {
+  color: #4fd1ff !important;
+}
+
+/* Ajuste para iconos y textos vacíos */
+.text-muted {
+  color: #4fd1ff !important;
+}
+
+h6 {
+  color: #046d94;
+  font-weight: 700;
+}
+
+.action-icon, .appointment-icon, .treatment-icon, .stat-icon {
+  background: linear-gradient(135deg, #24af5b, #138628);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  box-shadow: 0 2px 8px #138628;
+}
+
+/* Animación de entrada suave para tarjetas y secciones */
+@keyframes fadeInUpGreen {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-card,
+.quick-action-card,
+.metric-card,
+.next-appointment-card,
+.recent-appointments,
+.frequent-treatments,
+.stat-card,
+.card,
+.btn-group {
+  animation: fadeInUpGreen 0.9s cubic-bezier(.4,2,.6,1) both;
+}
+
+.quick-action-card,
+.metric-card,
+.next-appointment-card,
+.recent-appointments,
+.frequent-treatments,
+.stat-card,
+.card {
+  transition: box-shadow 0.35s cubic-bezier(.4,2,.6,1), transform 0.35s cubic-bezier(.4,2,.6,1), background 0.3s;
+}
+
+.quick-action-card:hover,
+.metric-card:hover,
+.next-appointment-card:hover,
+.recent-appointments:hover,
+.frequent-treatments:hover,
+.stat-card:hover,
+.card:hover {
+  box-shadow: 0 20px 64px 0 rgba(19, 134, 40, 0.35), 0 4px 16px #138628;
+  transform: translateY(-4px) scale(1.02);
+}
+
+.btn-group .btn {
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s, font-weight 0.2s;
+}
+
+.btn-group .btn:hover, .btn-group .btn.active {
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s, font-weight 0.2s;
+  transform: scale(1.03);
 }
 
 .btn-group .btn.active {
-  background-color: rgba(0, 191, 255, 0.1);
-  color: var(--primary-color);
-  border-color: var(--primary-color);
-  border-width: 2px;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 191, 255, 0.2);
+  background: linear-gradient(90deg, #1276a3 0%, #4fd1ff 100%) !important;
+  color: #fff !important;
+  border-color: #4fd1ff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px #4fd1ff;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+.action-icon.bg-primary {
+  background: linear-gradient(135deg, #1276a3 0%, #4fd1ff 100%) !important;
+}
+.action-icon.bg-info {
+  background: linear-gradient(135deg, #ffe259 0%, #ffa751 100%) !important;
+}
+
+.text-white-force {
+  color: #fff !important;
 }

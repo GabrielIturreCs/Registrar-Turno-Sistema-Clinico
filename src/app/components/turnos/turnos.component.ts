@@ -49,6 +49,10 @@ export class TurnosComponent implements OnInit {
 
   tratamientos: Tratamiento[] = [];
 
+  selectedTurnoParaCancelar: any = null;
+  showCancelModal = false;
+  showSuccessModal = false;
+
   constructor(
     private router: Router,
     private fb: FormBuilder,
@@ -318,18 +322,34 @@ export class TurnosComponent implements OnInit {
   }
 
   cancelarTurno(turno: Turno): void {
-    if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
-      const turnoId = turno._id || turno.id?.toString() || '';
+    this.selectedTurnoParaCancelar = turno;
+    this.showCancelModal = true;
+  }
+
+  closeCancelModal() {
+    this.showCancelModal = false;
+    this.selectedTurnoParaCancelar = null;
+  }
+
+  confirmCancelTurno() {
+    if (this.selectedTurnoParaCancelar) {
+      const turnoId = this.selectedTurnoParaCancelar._id || this.selectedTurnoParaCancelar.id?.toString() || '';
       if (turnoId) {
         this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
           next: () => {
-            alert('Turno cancelado exitosamente');
+            this.showSuccessModal = true;
             // Force page reload to ensure fresh data
             setTimeout(() => {
               window.location.reload();
             }, 500);
+            this.showCancelModal = false;
+            this.selectedTurnoParaCancelar = null;
           },
-          error: () => alert('Error al cancelar el turno')
+          error: () => {
+            alert('Error al cancelar el turno');
+            this.showCancelModal = false;
+            this.selectedTurnoParaCancelar = null;
+          }
         });
       }
     }
@@ -425,5 +445,9 @@ export class TurnosComponent implements OnInit {
       case 'cancelado': return 'badge bg-danger';
       default: return 'badge bg-secondary';
     }
+  }
+
+  closeSuccessModal() {
+    this.showSuccessModal = false;
   }
 }

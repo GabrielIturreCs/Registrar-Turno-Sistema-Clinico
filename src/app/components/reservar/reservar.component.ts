@@ -78,6 +78,7 @@ export class ReservarComponent implements OnInit {
 
   tratamientos: Tratamiento[] = [];
   pacientes: Paciente[] = [];
+  showCancelReservaModal: boolean = false;
 
   constructor(
     private router: Router,
@@ -687,11 +688,18 @@ export class ReservarComponent implements OnInit {
 
   // Cancelar reserva y volver al inicio
   cancelarReserva(): void {
-    // Confirmar si realmente quiere cancelar
-    if (confirm('¿Estás seguro de que quieres cancelar la reserva? Se perderán todos los datos ingresados.')) {
-      this.resetWizard();
-      this.volverAlInicio();
-    }
+    // Mostrar modal personalizado en vez de confirm()
+    this.showCancelReservaModal = true;
+  }
+
+  closeCancelReservaModal(): void {
+    this.showCancelReservaModal = false;
+  }
+
+  confirmCancelReserva(): void {
+    this.showCancelReservaModal = false;
+    this.resetWizard();
+    this.volverAlInicio();
   }
 
   // Método para obtener el pacienteId correcto

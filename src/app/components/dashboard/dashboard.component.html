@@ -1,5 +1,10 @@
 <!-- Dashboard Principal -->
-<div class="container-fluid dashboard-container py-4">
+<div class="container-fluid dashboard-container py-4" 
+     [ngClass]="{
+       'admin-dashboard': user?.tipoUsuario === 'administrador' && !isPacienteView,
+       'dentist-dashboard': user?.tipoUsuario === 'dentista',
+       'paciente-dashboard': user?.tipoUsuario === 'paciente'
+     }">
   <div *ngIf="user?.tipoUsuario === 'paciente'" class="dashboard-bg-blur"></div>
   
   <!-- Header para vista de paciente específico -->

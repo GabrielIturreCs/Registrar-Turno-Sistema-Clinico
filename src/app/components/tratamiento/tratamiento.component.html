@@ -102,21 +102,24 @@
     </div>
   </div>
 
-  <!-- Modal de confirmación para eliminar -->
-  <div class="modal fade" [ngClass]="{'show d-block': showDeleteModal}" [style.display]="showDeleteModal ? 'block' : 'none'" tabindex="-1" aria-modal="true" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content shadow-lg">
-        <div class="modal-header bg-danger text-white">
-          <h5 class="modal-title fw-semibold">Confirmar eliminación</h5>
-          <button type="button" class="btn-close" (click)="showDeleteModal = false; tratamientoAEliminar = null;" aria-label="Close"></button>
+  <!-- Modal de confirmación para eliminar (custom) -->
+  <div class="modal-overlay" [class.show]="showDeleteModal">
+    <div class="modal-container">
+      <div class="modal-header bg-danger text-white">
+        <span class="modal-title">¿Eliminar tratamiento?</span>
+        <button class="btn-close-modal" (click)="showDeleteModal = false; tratamientoAEliminar = null;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body modal-confirmacion">
+        <div class="icono-confirmacion confirmar">
+          <i class="fas fa-exclamation-triangle"></i>
         </div>
-        <div class="modal-body">
-          <p>¿Estás seguro de que quieres eliminar el tratamiento <strong>{{ tratamientoAEliminar }}</strong>?</p>
-        </div>
-        <div class="modal-footer border-0">
-          <button type="button" class="btn btn-secondary" (click)="showDeleteModal = false; tratamientoAEliminar = null;">Cancelar</button>
-          <button type="button" class="btn btn-danger" (click)="eliminarPorNro(tratamientoAEliminar!); showDeleteModal = false; tratamientoAEliminar = null;">Eliminar</button>
-        </div>
+        <p>¿Estás seguro de que quieres eliminar el tratamiento <strong>{{ tratamientoAEliminar }}</strong>?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal btn-cancelar-modal" (click)="showDeleteModal = false; tratamientoAEliminar = null;">Cancelar</button>
+        <button class="btn-modal btn-confirmar" (click)="eliminarPorNro(tratamientoAEliminar!); showDeleteModal = false; tratamientoAEliminar = null;">Eliminar</button>
       </div>
     </div>
   </div>
