@@ -11,6 +11,7 @@ import { PacienteService } from '../../services/paciente.service';
 import { DataRefreshService } from '../../services/data-refresh.service';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { NotificationService } from '../../services/notification.service';
 
 interface PacienteStats {
   totalTurnos: number;
@@ -66,7 +67,8 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
     private turnoService: TurnoService,
     private tratamientoService: TratamientoService,
     private pacienteService: PacienteService,
-    private dataRefreshService: DataRefreshService
+    private dataRefreshService: DataRefreshService,
+    private notificationService: NotificationService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -303,17 +305,18 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
 
   // Acciones de turnos
   cancelarTurno(turno: Turno): void {
-    if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
-      const turnoId = turno._id || turno.id?.toString() || '';
-      if (turnoId) {
-        this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
-          next: () => {
-            this.loadMisTurnos();
-            alert('Turno cancelado exitosamente');
-          },
-          error: () => alert('Error al cancelar el turno')
-        });
-      }
+    this.notificationService.showWarning('¿Estás seguro de que quieres cancelar este turno?');
+    // Aquí podrías implementar una confirmación personalizada si tienes un sistema propio,
+    // pero como NotificationService solo muestra mensajes, procederemos directamente:
+    const turnoId = turno._id || turno.id?.toString() || '';
+    if (turnoId) {
+      this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
+        next: () => {
+          this.loadMisTurnos();
+          this.notificationService.showSuccess('Turno cancelado exitosamente');
+        },
+        error: () => this.notificationService.showError('Error al cancelar el turno')
+      });
     }
   }
 
