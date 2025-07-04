@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { User } from '../../interfaces';
 import { LoginForm } from '../../interfaces';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 
 /*interface User {
   id: number;
@@ -39,7 +40,11 @@ export class LoginComponent implements OnInit {
     ]
   };*/
 
-  constructor(private router: Router,private authService:AuthService) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {}
 
@@ -92,15 +97,21 @@ export class LoginComponent implements OnInit {
               localStorage.setItem('token', 'fake-token'); // O el token real si tu backend lo envía
               localStorage.setItem('rol', res.tipoUsuario);
               localStorage.setItem('user', JSON.stringify(res));
+              
+              // Mostrar notificación de éxito
+              this.notificationService.showSuccess(`¡Bienvenido ${res.nombre}!`);
+              
               // Redirigir según el tipo de usuario
               this.redirectByUserType(res.tipoUsuario);
             } else {
               this.msglogin = res.msg || 'Usuario o contraseña incorrectos.';
+              this.notificationService.showError(res.msg || 'Usuario o contraseña incorrectos.');
             }
             this.isLoading = false;
           },
           (error) => {
             this.msglogin = 'Error de conexión con el servidor.';
+            this.notificationService.showError('Error de conexión con el servidor. Por favor, inténtelo de nuevo.');
             this.isLoading = false;
           }
         );

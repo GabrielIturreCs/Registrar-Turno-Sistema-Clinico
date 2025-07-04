@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractContro
 import { Router } from '@angular/router';
 import { RegisterForm } from '../../interfaces';
 import { RegisterService } from '../../services/register.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-registro',
@@ -19,7 +20,8 @@ export class RegistroComponent {
   constructor(
     private router: Router,
     private registerService: RegisterService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private notificationService: NotificationService
   ) {
     this.registerForm = this.fb.group({
       nombreUsuario: ['', [
@@ -153,6 +155,7 @@ export class RegistroComponent {
   register(): void {
     if (this.registerForm.invalid) {
       this.markFormGroupTouched();
+      this.notificationService.showWarning('Por favor, complete todos los campos correctamente.');
       return;
     }
 
@@ -162,12 +165,13 @@ export class RegistroComponent {
     this.registerService.addUsuario(formData).subscribe({
       next: (result: any) => {
         console.log(result);
-        alert('¡Usuario registrado exitosamente!');
+        this.notificationService.showSuccess('¡Usuario registrado exitosamente! Ahora puede iniciar sesión.');
         this.router.navigate(['/login']);
       },
       error: (error: any) => {
         console.log(error);
-        alert('Error al registrar usuario: ' + (error.error?.message || 'Error desconocido'));
+        const errorMessage = error.error?.msg || error.error?.message || 'Error desconocido al registrar usuario';
+        this.notificationService.showError('Error al registrar usuario: ' + errorMessage);
       },
       complete: () => {
         this.isLoading = false;

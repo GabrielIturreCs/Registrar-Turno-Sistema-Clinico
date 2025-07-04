@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LoginForm } from '../interfaces';
 import { environment } from '../environments/environment';
 import { User } from '../interfaces';
+import { NotificationService } from './notification.service';
 
 /*export interface User {
   id: number;
@@ -36,7 +37,11 @@ export class AuthService {
 
   hostBase: string;
 
-  constructor(private router: Router,private _http: HttpClient) {
+  constructor(
+    private router: Router,
+    private _http: HttpClient,
+    private notificationService: NotificationService
+  ) {
     this.hostBase = `${environment.apiUrl}/usuario/`;
     this.loadUserFromStorage();
   }

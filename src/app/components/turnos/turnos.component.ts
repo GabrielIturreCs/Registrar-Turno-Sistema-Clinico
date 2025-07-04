@@ -7,6 +7,7 @@ import { ChatbotService } from '../../services/ChatBot.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
 import { TurnoService } from '../../services/turno.service';
 import { PacienteService } from '../../services/paciente.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-turnos',
@@ -58,7 +59,8 @@ export class TurnosComponent implements OnInit {
     private fb: FormBuilder,
     private chatbotService: ChatbotService,
     private turnoService: TurnoService,
-    private pacienteService: PacienteService
+    private pacienteService: PacienteService,
+    private notificationService: NotificationService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -300,7 +302,7 @@ export class TurnosComponent implements OnInit {
       next: (response) => {
         console.log('Turno creado exitosamente:', response);
         this.isLoading = false;
-        alert('Turno registrado exitosamente');
+        this.notificationService.showSuccess('Turno registrado exitosamente');
         
         // Force page reload to ensure fresh data
         setTimeout(() => {
@@ -310,7 +312,8 @@ export class TurnosComponent implements OnInit {
       error: (error) => {
         console.error('Error al registrar turno:', error);
         this.isLoading = false;
-        alert('Error al registrar el turno');
+        const errorMessage = error.error?.msg || 'Error al registrar el turno';
+        this.notificationService.showError(errorMessage);
       }
     });
   }
@@ -346,8 +349,9 @@ export class TurnosComponent implements OnInit {
             this.showCancelModal = false;
             this.selectedTurnoParaCancelar = null;
           },
-          error: () => {
-            alert('Error al cancelar el turno');
+          error: (error) => {
+            const errorMessage = error.error?.msg || 'Error al cancelar el turno';
+            this.notificationService.showError(errorMessage);
             this.showCancelModal = false;
             this.selectedTurnoParaCancelar = null;
           }

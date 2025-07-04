@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Turno, Tratamiento, Paciente } from '../interfaces';
 import { tap } from 'rxjs/operators';
 import { environment } from '../environments/environment';
+import { NotificationService } from './notification.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,10 @@ export class TurnoService {
   private turnosSubject = new BehaviorSubject<Turno[]>([]);
   public turnos$ = this.turnosSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private notificationService: NotificationService
+  ) {
     this.loadTurnos();
   }
 

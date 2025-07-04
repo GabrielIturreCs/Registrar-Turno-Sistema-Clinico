@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Paciente, RegisterForm } from '../../interfaces';
 import { PacienteService } from '../../services/paciente.service';
 import { RegisterService } from '../../services/register.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-pacientes',
@@ -59,7 +60,8 @@ export class PacientesComponent implements OnInit {
   constructor(
     private pacienteService: PacienteService,
     private registerService: RegisterService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -126,7 +128,7 @@ export class PacientesComponent implements OnInit {
       const pacienteId = (paciente as any)._id || paciente.id;
       
       if (!pacienteId) {
-        alert('Error: No se puede identificar el paciente para eliminar');
+        this.notificationService.showError('Error: No se puede identificar el paciente para eliminar');
         return;
       }
 
@@ -135,12 +137,12 @@ export class PacientesComponent implements OnInit {
       this.pacienteService.deletePaciente(pacienteId.toString()).subscribe({
         next: () => {
           console.log('Paciente eliminado exitosamente');
-          alert('Paciente eliminado exitosamente');
+          this.notificationService.showSuccess('Paciente eliminado exitosamente');
           this.loadPacientes(); // Recargar la lista
         },
         error: (error) => {
           console.error('Error al eliminar paciente:', error);
-          alert('Error al eliminar el paciente. Por favor, intenta nuevamente.');
+          this.notificationService.showError('Error al eliminar el paciente. Por favor, intenta nuevamente.');
         }
       });
     }
@@ -175,12 +177,12 @@ export class PacientesComponent implements OnInit {
 
   createPaciente(): void {
     if (!this.isValidForm()) {
-      alert('Por favor, completa todos los campos obligatorios');
+      this.notificationService.showWarning('Por favor, completa todos los campos obligatorios');
       return;
     }
 
     if (this.pacienteForm.password !== this.pacienteForm.confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      this.notificationService.showError('Las contraseñas no coinciden');
       return;
     }
 
@@ -207,7 +209,7 @@ export class PacientesComponent implements OnInit {
         console.log('Usuario y paciente creados exitosamente:', response);
         this.isCreating = false;
         this.closeModal();
-        alert('Paciente creado exitosamente. Se ha creado una cuenta de usuario para el paciente.');
+        this.notificationService.showSuccess('Paciente creado exitosamente. Se ha creado una cuenta de usuario para el paciente.');
         
         // Force page reload to ensure fresh data
         setTimeout(() => {
@@ -219,9 +221,9 @@ export class PacientesComponent implements OnInit {
         this.isCreating = false;
         
         if (error.status === 400) {
-          alert('Error: Verifica que el nombre de usuario no esté en uso y que todos los datos sean válidos.');
+          this.notificationService.showError('Error: Verifica que el nombre de usuario no esté en uso y que todos los datos sean válidos.');
         } else {
-          alert('Error al crear el paciente. Por favor, intenta nuevamente.');
+          this.notificationService.showError('Error al crear el paciente. Por favor, intenta nuevamente.');
         }
       }
     });

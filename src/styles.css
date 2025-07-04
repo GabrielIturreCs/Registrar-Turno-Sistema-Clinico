@@ -60,3 +60,42 @@ input:focus, select:focus, textarea:focus {
     background: #046d94;
     border-radius: 5px;
 }
+
+/* Angular Material Snackbar Styles */
+.snackbar-success {
+    background: #4caf50 !important;
+    color: white !important;
+}
+
+.snackbar-error {
+    background: #f44336 !important;
+    color: white !important;
+}
+
+.snackbar-warning {
+    background: #ff9800 !important;
+    color: white !important;
+}
+
+.snackbar-info {
+    background: #2196f3 !important;
+    color: white !important;
+}
+
+.mat-mdc-snack-bar-container {
+    --mdc-snackbar-container-shape: 8px;
+    --mdc-snackbar-supporting-text-color: white;
+    --mdc-snackbar-supporting-text-font-family: 'Segoe UI', Arial, sans-serif;
+    --mdc-snackbar-supporting-text-font-size: 14px;
+    --mdc-snackbar-supporting-text-font-weight: 400;
+    --mdc-snackbar-supporting-text-line-height: 20px;
+}
+
+.mat-mdc-snack-bar-action {
+    --mdc-text-button-label-text-color: white;
+    --mdc-text-button-label-text-font-weight: 600;
+}
+
+.mat-mdc-snack-bar-action:hover {
+    --mdc-text-button-label-text-color: #e0e0e0;
+}

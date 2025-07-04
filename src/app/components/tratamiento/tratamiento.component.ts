@@ -3,6 +3,7 @@ import { TratamientoService } from '../../services/tratamiento.service';
 import { Tratamiento } from '../../interfaces';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-tratamiento',
@@ -24,7 +25,11 @@ export class TratamientoComponent implements OnInit {
   filteredTratamientos: Tratamiento[] = [];
   loading: boolean = false;
 
-  constructor(private tratamientoService: TratamientoService, private fb: FormBuilder) {
+  constructor(
+    private tratamientoService: TratamientoService, 
+    private fb: FormBuilder,
+    private notificationService: NotificationService
+  ) {
     this.formulario = this.fb.group({
       nroTratamiento: ['', Validators.required],
       descripcion: ['', Validators.required],
@@ -77,14 +82,14 @@ export class TratamientoComponent implements OnInit {
             if (response.status === '1') {
               this.cargarTratamientos();
               this.cancelar();
-              alert('Tratamiento actualizado correctamente');
+              this.notificationService.showSuccess('Tratamiento actualizado correctamente');
             } else {
-              alert('Error: ' + response.msg);
+              this.notificationService.showError('Error: ' + response.msg);
             }
           },
           error: (error) => {
             console.error('Error al actualizar tratamiento:', error);
-            alert('Error al actualizar el tratamiento. Verifique los datos e intente nuevamente.');
+            this.notificationService.showError('Error al actualizar el tratamiento. Verifique los datos e intente nuevamente.');
           }
         });
       }
@@ -94,14 +99,14 @@ export class TratamientoComponent implements OnInit {
           if (response.status === '1') {
             this.cargarTratamientos();
             this.cancelar();
-            alert('Tratamiento creado correctamente');
+            this.notificationService.showSuccess('Tratamiento creado correctamente');
           } else {
-            alert('Error: ' + response.msg);
+            this.notificationService.showError('Error: ' + response.msg);
           }
         },
         error: (error) => {
           console.error('Error al crear tratamiento:', error);
-          alert('Error al crear el tratamiento. Verifique los datos e intente nuevamente.');
+          this.notificationService.showError('Error al crear el tratamiento. Verifique los datos e intente nuevamente.');
         }
       });
     }
@@ -128,14 +133,14 @@ export class TratamientoComponent implements OnInit {
         next: (response) => {
           if (response.status === '1') {
             this.cargarTratamientos();
-            alert('Tratamiento eliminado correctamente');
+            this.notificationService.showSuccess('Tratamiento eliminado correctamente');
           } else {
-            alert('Error: ' + response.msg);
+            this.notificationService.showError('Error: ' + response.msg);
           }
         },
         error: (error) => {
           console.error('Error al eliminar tratamiento:', error);
-          alert('Error al eliminar el tratamiento.');
+          this.notificationService.showError('Error al eliminar el tratamiento.');
         }
       });
     }

@@ -9,6 +9,7 @@ import { PacienteService } from '../../services/paciente.service';
 import { DataRefreshService } from '../../services/data-refresh.service';
 import { MercadoPagoService } from '../../services/mercadopago.service';
 import { Tratamiento } from '../../interfaces';
+import { NotificationService } from '../../services/notification.service';
 
 interface User {
   id: number;
@@ -93,7 +94,8 @@ export class ReservarComponent implements OnInit {
     private turnoService: TurnoService,
     private pacienteService: PacienteService,
     private dataRefreshService: DataRefreshService,
-    private mercadoPagoService: MercadoPagoService
+    private mercadoPagoService: MercadoPagoService,
+    private notificationService: NotificationService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -355,15 +357,16 @@ export class ReservarComponent implements OnInit {
     this.turnoService.createTurno(turnoData).subscribe({
       next: () => {
         this.isLoading = false;
-        alert('¡Turno registrado exitosamente!');
+        this.notificationService.showSuccess('¡Turno registrado exitosamente!');
         // Trigger refresh for patient dashboard
         // Trigger refresh for patient dashboard
         this.dataRefreshService.triggerRefresh('vistaPaciente');
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
+      error: (error) => {
         this.isLoading = false;
-        alert('Error al registrar el turno');
+        const errorMessage = error.error?.msg || 'Error al registrar el turno';
+        this.notificationService.showError(errorMessage);
       }
     });
   }
@@ -606,7 +609,7 @@ export class ReservarComponent implements OnInit {
     const pacienteId = await this.getPacienteId();
     if (!pacienteId) {
       this.isLoading = false;
-      alert('Error: No se pudo obtener el ID del paciente');
+      this.notificationService.showError('Error: No se pudo obtener el ID del paciente');
       return;
     }
     // Obtener el email del paciente
@@ -615,7 +618,7 @@ export class ReservarComponent implements OnInit {
     );
     if (!paciente) {
       this.isLoading = false;
-      alert('Error: No se pudo obtener la información del paciente');
+      this.notificationService.showError('Error: No se pudo obtener la información del paciente');
       return;
     }
     // Obtener el monto del tratamiento
@@ -658,13 +661,15 @@ export class ReservarComponent implements OnInit {
           },
           error: (error: any) => {
             this.isLoading = false;
-            alert('Error al procesar el pago. Por favor, intenta nuevamente.');
+            const errorMessage = error.error?.msg || 'Error al procesar el pago. Por favor, intenta nuevamente.';
+            this.notificationService.showError(errorMessage);
           }
         });
       },
       error: (error: any) => {
         this.isLoading = false;
-        alert('Error al registrar el turno. Por favor, intenta nuevamente.');
+        const errorMessage = error.error?.msg || 'Error al registrar el turno. Por favor, intenta nuevamente.';
+        this.notificationService.showError(errorMessage);
       }
     });
   }
