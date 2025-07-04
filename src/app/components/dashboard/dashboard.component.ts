@@ -12,6 +12,7 @@ import { ActividadService } from '../../services/actividad.service';
 import { DentistaService } from '../../services/dentista.service';
 import { TratamientoService } from '../../services/tratamiento.service';
 import { ChatService } from '../../services/chat.service';
+import { NotificationService } from '../../services/notification.service';
 // import { ReservarComponent } from '../reservar/reservar.component';
 
 interface AdminStats {
@@ -94,13 +95,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private alertaInterval?: Subscription;
   cargandoAlertas = false;
 
-  // Variables para los modales
-  confirmTitle: string = '';
-  confirmMessage: string = '';
-  alertTitle: string = '';
-  alertMessage: string = '';
-  private confirmCallback: (() => void) | null = null;
-
   constructor(
     private router: Router, 
     private route: ActivatedRoute,
@@ -111,7 +105,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private actividadService: ActividadService,
     private dentistaService: DentistaService,
     private tratamientoService: TratamientoService,
-    private chatService: ChatService
+    private chatService: ChatService,
+    private notificationService: NotificationService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -500,32 +495,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   navigateToEstadisticas(): void {
     if (this.user?.tipoUsuario === 'administrador') {
-      // Asegurar que el rol esté correctamente guardado en localStorage
       localStorage.setItem('rol', this.user.tipoUsuario);
-      localStorage.setItem('token', 'fake-token'); // Asegurar que el token esté presente
-      console.log('Dashboard: Navegando a estadísticas. Rol:', this.user.tipoUsuario);
-      console.log('Dashboard: Token en localStorage:', localStorage.getItem('token'));
-      console.log('Dashboard: Rol en localStorage:', localStorage.getItem('rol'));
-      
-      // Verificar que todo esté correcto antes de navegar
+      localStorage.setItem('token', 'fake-token');
       const token = localStorage.getItem('token');
       const rol = localStorage.getItem('rol');
       const user = localStorage.getItem('user');
-      
       if (token && rol === 'administrador' && user) {
-        console.log('Dashboard: Todo correcto, navegando a estadísticas');
         this.router.navigate(['/estadistica']);
       } else {
-        console.log('Dashboard: Error en datos de autenticación');
-        console.log('Dashboard: Token:', token);
-        console.log('Dashboard: Rol:', rol);
-        console.log('Dashboard: User:', user);
-        alert('Error en la autenticación. Por favor, inicie sesión nuevamente.');
+        this.notificationService.showError('Error en la autenticación. Por favor, inicie sesión nuevamente.');
         this.router.navigate(['/login']);
       }
     } else {
-      console.log('Dashboard: Usuario no es administrador:', this.user?.tipoUsuario);
-      alert('Solo los administradores pueden acceder a las estadísticas.');
+      this.notificationService.showWarning('Solo los administradores pueden acceder a las estadísticas.');
     }
   }
 
@@ -550,21 +532,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   cancelarTurno(turno: Turno): void {
-    this.showConfirmModal(
-      'Confirmar cancelación',
-      '¿Estás seguro de que quieres cancelar este turno?',
-      () => {
-        const turnoId = turno._id || turno.id?.toString() || '';
-        this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
-          next: () => {
-            this.loadTurnosData();
-            this.loadRealAdminStats();
-            this.showAlertModal('Éxito', 'Turno cancelado exitosamente');
-          },
-          error: () => this.showAlertModal('Error', 'Error al cancelar el turno')
-        });
-      }
-    );
+    // Notificación de advertencia (puedes implementar confirmación personalizada si lo deseas)
+    this.notificationService.showWarning('¿Estás seguro de que quieres cancelar este turno?');
+    const turnoId = turno._id || turno.id?.toString() || '';
+    this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
+      next: () => {
+        this.loadTurnosData();
+        this.loadRealAdminStats();
+        this.notificationService.showSuccess('Turno cancelado exitosamente');
+      },
+      error: () => this.notificationService.showError('Error al cancelar el turno')
+    });
   }
 
   // Método público para recargar todas las estadísticas
@@ -809,52 +787,5 @@ export class DashboardComponent implements OnInit, OnDestroy {
       default:
         return 'usuario';
     }
-  }
-
-  // Mostrar modal de confirmación
-  showConfirmModal(title: string, message: string, callback: () => void) {
-    this.confirmTitle = title;
-    this.confirmMessage = message;
-    this.confirmCallback = callback;
-    const modalEl = document.getElementById('confirmModal');
-    if (!modalEl) return;
-    // Cierra cualquier instancia previa
-    const existingModal = (window as any).bootstrap.Modal.getInstance(modalEl);
-    if (existingModal) {
-      existingModal.hide();
-    }
-    const modal = new (window as any).bootstrap.Modal(modalEl);
-    modal.show();
-  }
-
-  // Acción cuando el usuario confirma
-  onConfirm() {
-    if (this.confirmCallback) {
-      this.confirmCallback();
-      this.confirmCallback = null;
-    }
-    // Cierra el modal
-    const modalEl = document.getElementById('confirmModal');
-    if (modalEl) {
-      const modalInstance = (window as any).bootstrap.Modal.getInstance(modalEl);
-      if (modalInstance) {
-        modalInstance.hide();
-      }
-    }
-  }
-
-  // Mostrar modal de alerta/mensaje
-  showAlertModal(title: string, message: string) {
-    this.alertTitle = title;
-    this.alertMessage = message;
-    const modalEl = document.getElementById('alertModal');
-    if (!modalEl) return;
-    // Cierra cualquier instancia previa
-    const existingModal = (window as any).bootstrap.Modal.getInstance(modalEl);
-    if (existingModal) {
-      existingModal.hide();
-    }
-    const modal = new (window as any).bootstrap.Modal(modalEl);
-    modal.show();
   }
 }
