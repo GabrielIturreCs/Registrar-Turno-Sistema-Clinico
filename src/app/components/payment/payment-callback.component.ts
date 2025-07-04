@@ -16,8 +16,17 @@ import { NotificationService } from '../../services/notification.service';
             <div class="card shadow">
               <div class="card-body text-center py-5">
                 
+                <!-- Loading -->
+                <div *ngIf="loading" class="loading-content">
+                  <div class="spinner-border text-primary mb-4" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                  </div>
+                  <h3 class="text-muted mb-3">Procesando pago...</h3>
+                  <p class="text-muted">Por favor espera mientras verificamos tu pago.</p>
+                </div>
+
                 <!-- Success -->
-                <div *ngIf="status === 'success'" class="success-content">
+                <div *ngIf="!loading && status === 'success'" class="success-content">
                   <div class="icon-success mb-4">
                     <i class="fas fa-check-circle fa-4x text-success"></i>
                   </div>
@@ -33,7 +42,7 @@ import { NotificationService } from '../../services/notification.service';
                 </div>
 
                 <!-- Pending -->
-                <div *ngIf="status === 'pending'" class="pending-content">
+                <div *ngIf="!loading && status === 'pending'" class="pending-content">
                   <div class="icon-pending mb-4">
                     <i class="fas fa-clock fa-4x text-warning"></i>
                   </div>
@@ -49,7 +58,7 @@ import { NotificationService } from '../../services/notification.service';
                 </div>
 
                 <!-- Failure -->
-                <div *ngIf="status === 'failure'" class="failure-content">
+                <div *ngIf="!loading && status === 'failure'" class="failure-content">
                   <div class="icon-failure mb-4">
                     <i class="fas fa-times-circle fa-4x text-danger"></i>
                   </div>
