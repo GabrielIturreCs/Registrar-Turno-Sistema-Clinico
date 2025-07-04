@@ -133,7 +133,7 @@ export class TurnoService {
 
   // Obtener pacientes
   getPacientes(): Observable<Paciente[]> {
-    return this.http.get<Paciente[]>(`${environment.apiUrl}/pacientes`, { 
+    return this.http.get<Paciente[]>(`${environment.apiUrl}/paciente`, { 
       headers: this.getHeaders() 
     });
   }
