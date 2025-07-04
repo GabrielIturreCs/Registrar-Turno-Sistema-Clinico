@@ -22,11 +22,11 @@ import { CommonModule } from '@angular/common';
                   <h3 class="text-success mb-3">¡Pago Exitoso!</h3>
                   <p class="text-muted mb-4">
                     Tu pago ha sido procesado correctamente. 
-                    El turno ha sido confirmado.
+                    El turno ha sido confirmado y está listo.
                   </p>
                   <button class="btn btn-success" (click)="redirectToUserDashboard()">
-                    <i class="fas fa-arrow-right me-2"></i>
-                    Continuar
+                    <i class="fas fa-check me-2"></i>
+                    Ver Turno Confirmado
                   </button>
                 </div>
 
@@ -126,13 +126,25 @@ export class PaymentCallbackComponent implements OnInit {
   }
 
   redirectToUserDashboard(): void {
-    // Redirigir según el parámetro return
-    if (this.returnUrl === 'vistaPaciente') {
-      this.router.navigate(['/vistaPaciente']);
-    } else if (this.returnUrl === 'dashboard') {
-      this.router.navigate(['/dashboard']);
+    // Si el pago fue exitoso, redirigir al paso 5 del wizard de reserva
+    if (this.status === 'success') {
+      // Marcar que viene de pago exitoso
+      sessionStorage.setItem('payment_success', 'true');
+      this.router.navigate(['/reservarTurno'], { 
+        queryParams: { 
+          step: '5',
+          paymentSuccess: 'true'
+        }
+      });
     } else {
-      this.router.navigate(['/']);
+      // Para otros casos, redirigir según el parámetro return
+      if (this.returnUrl === 'vistaPaciente') {
+        this.router.navigate(['/vistaPaciente']);
+      } else if (this.returnUrl === 'dashboard') {
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.router.navigate(['/']);
+      }
     }
   }
 

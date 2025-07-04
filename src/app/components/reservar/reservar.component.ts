@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ChatbotService } from '../../services/ChatBot.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
 import { TurnoService } from '../../services/turno.service';
@@ -41,6 +41,10 @@ export class ReservarComponent implements OnInit {
   // Wizard Steps
   currentStep: number = 1;
   totalSteps: number = 5;
+  
+  // Estado del pago
+  paymentSuccess: boolean = false;
+  redirectCountdown: number = 8;
   
   // Para dentistas/administradores - selección de paciente
   selectedPaciente: Paciente | null = null;
@@ -83,6 +87,7 @@ export class ReservarComponent implements OnInit {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private fb: FormBuilder,
     private chatbotService: ChatbotService,
     private turnoService: TurnoService,
@@ -105,6 +110,9 @@ export class ReservarComponent implements OnInit {
     
     // Verificar si hay parámetros de pago de Mercado Pago
     this.procesarResultadoPago();
+    
+    // Manejar el regreso desde el pago exitoso
+    this.handlePaymentReturn();
     
     // Ajustar total de pasos según el tipo de usuario
     if (this.user?.tipoUsuario === 'dentista' || this.user?.tipoUsuario === 'administrador') {
@@ -782,5 +790,62 @@ export class ReservarComponent implements OnInit {
       // Fallback: usar el pacienteId del formulario si existe
       return this.turnoForm.pacienteId || null;
     }
+  }
+
+  // Método para manejar el regreso desde el pago exitoso
+  handlePaymentReturn(): void {
+    // Verificar si viene de pago exitoso
+    const paymentSuccess = sessionStorage.getItem('payment_success');
+    
+    // También verificar parámetros de query
+    this.route.queryParams.subscribe(params => {
+      if (params['paymentSuccess'] === 'true' || params['step'] === '5' || paymentSuccess === 'true') {
+        // Marcar como pago exitoso
+        this.paymentSuccess = true;
+        
+        // Ir al paso 5 (turno listo)
+        this.currentStep = this.shouldSelectPaciente ? 6 : 5;
+        
+        // Recuperar información del turno desde sessionStorage
+        const turnoInfoStr = sessionStorage.getItem('turno_pendiente');
+        if (turnoInfoStr) {
+          try {
+            const turnoInfo = JSON.parse(turnoInfoStr);
+            // Restaurar la información del turno
+            this.selectedDate = turnoInfo.fecha;
+            this.selectedTime = turnoInfo.hora;
+            this.selectedTreatment = turnoInfo.tratamiento;
+            if (turnoInfo.paciente) {
+              this.selectedPaciente = turnoInfo.paciente;
+            }
+            
+            // Limpiar sessionStorage
+            sessionStorage.removeItem('turno_pendiente');
+            sessionStorage.removeItem('payment_success');
+            
+            // Actualizar datos
+            this.dataRefreshService.triggerRefresh('vistaPaciente');
+            this.turnoService.refreshTurnos();
+            
+            console.log('Turno confirmado exitosamente');
+          } catch (error) {
+            console.error('Error al restaurar información del turno:', error);
+          }
+        }
+        
+        // Agregar timeout para redirección automática tras 8 segundos
+        setTimeout(() => {
+          this.volverAlInicio();
+        }, 8000);
+        
+        // Iniciar contador regresivo
+        const countdown = setInterval(() => {
+          this.redirectCountdown--;
+          if (this.redirectCountdown <= 0) {
+            clearInterval(countdown);
+          }
+        }, 1000);
+      }
+    });
   }
 }
