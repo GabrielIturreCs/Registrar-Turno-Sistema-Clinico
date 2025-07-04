@@ -960,3 +960,17 @@
   color: var(--primary-color);
   font-weight: 700;
 }
+
+h4, h5, h6, .section-title, .fw-bold {
+  color: #00334d !important; /* O el color que prefieras */
+}
+
+.modal .form-label,
+.modal .card-header h6 {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  background-clip: unset !important;
+  color: #00334d !important; /* O el color oscuro que prefieras */
+  font-weight: 800;
+}
