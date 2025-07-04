@@ -231,7 +231,7 @@ export class EstadisticaComponent implements OnInit, OnDestroy {
     this.turnosRecientes = filteredTurnos
       .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
       .slice(0, 10);
-
+/*
     // Actualizar gráfico de barras
     this.barChartData.labels = this.estadisticasPorTratamiento.map(e => e.tratamiento);
     this.barChartData.datasets[0].data = this.estadisticasPorTratamiento.map(e => e.cantidad);
@@ -241,7 +241,27 @@ export class EstadisticaComponent implements OnInit, OnDestroy {
       this.estadisticas.reservados,
       this.estadisticas.completados,
       this.estadisticas.cancelados
-    ];
+    ];*/
+    this.barChartData = {
+  labels: this.estadisticasPorTratamiento.map(e => e.tratamiento),
+  datasets: [
+    { data: this.estadisticasPorTratamiento.map(e => e.cantidad), label: 'Cantidad de Turnos' }
+  ]
+};
+
+// Actualizar gráfico de torta (reasigna el objeto)
+this.pieChartData = {
+  labels: ['Reservados', 'Completados', 'Cancelados'],
+  datasets: [
+    { data: [
+        this.estadisticas.reservados,
+        this.estadisticas.completados,
+        this.estadisticas.cancelados
+      ],
+      backgroundColor: ['#00bfff', '#28a745', '#dc3545']
+    }
+  ]
+};
   }
 
   
@@ -310,6 +330,7 @@ export class EstadisticaComponent implements OnInit, OnDestroy {
       this.fechaHasta
     );
   }
+
 
   getStatusClass(estado: string): string {
     switch (estado) {
