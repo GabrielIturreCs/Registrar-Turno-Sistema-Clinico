@@ -122,8 +122,9 @@ export class AgendaComponent implements OnInit {
   }
 
   exportarAgenda(): void {
-    // Aquí podrías generar un PDF o Excel con la agenda
-    alert('Función de exportación - En desarrollo');
+    // alert('Función de exportación - En desarrollo');
+    const modal = new (window as any).bootstrap.Modal(document.getElementById('exportModal'));
+    modal.show();
   }
 
   reservarTurno(turno: Turno): void {
