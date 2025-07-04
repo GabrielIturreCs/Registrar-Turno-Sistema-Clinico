@@ -1,5 +1,2 @@
-# Handle Angular routing
+# Redirects for Angular SPA on Render
 /*    /index.html   200
-
-# Handle assets
-/assets/*    /assets/:splat   200
