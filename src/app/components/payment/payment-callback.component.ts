@@ -104,11 +104,14 @@ import { NotificationService } from '../../services/notification.service';
 export class PaymentCallbackComponent implements OnInit {
   status: 'success' | 'pending' | 'failure' = 'success';
   returnUrl: string = '/';
+  loading: boolean = true;
+  userType: string = 'paciente';
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private paymentCookieService: PaymentCookieService
+    private cookiePaymentService: CookiePaymentService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -125,46 +128,70 @@ export class PaymentCallbackComponent implements OnInit {
     // Obtener parámetros de la URL
     this.route.queryParams.subscribe(params => {
       this.returnUrl = params['return'] || '/';
+      this.userType = params['userType'] || 'paciente';
       
-      // Obtener información adicional del pago
-      const userType = params['userType'];
-      const reference = params['ref'];
-      
-      // Guardar información del pago en sessionStorage
-      if (this.status === 'success' && reference) {
-        sessionStorage.setItem('payment_reference', reference);
-        sessionStorage.setItem('payment_user_type', userType || 'paciente');
+      // Verificar estado del pago desde cookies
+      this.checkPaymentStatusFromCookies();
+    });
+  }
+
+  checkPaymentStatusFromCookies(): void {
+    this.cookiePaymentService.checkPaymentStatus().subscribe({
+      next: (response) => {
+        if (response.success && response.paymentStatus) {
+          console.log('✅ Estado de pago desde cookies:', response.paymentStatus);
+          
+          // Actualizar el estado según la cookie
+          this.status = response.paymentStatus.status as any;
+          this.userType = response.paymentStatus.userType;
+          
+          // Limpiar datos locales obsoletos
+          this.cookiePaymentService.clearLocalPaymentData();
+          
+          // Mostrar notificación apropiada
+          this.showPaymentNotification();
+          
+        } else {
+          console.log('ℹ️ No se encontró estado de pago en cookies');
+        }
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('❌ Error al verificar estado de pago:', error);
+        this.loading = false;
       }
     });
   }
 
-  redirectToUserDashboard(): void {
-    // Verificar si el usuario está autenticado
-    const userStr = localStorage.getItem('user');
-    if (!userStr) {
-      // Si no hay usuario, redirigir al login
-      this.router.navigate(['/login']);
-      return;
+  showPaymentNotification(): void {
+    switch (this.status) {
+      case 'success':
+        this.notificationService.showSuccess(
+          '¡Pago exitoso! Tu turno ha sido confirmado.'
+        );
+        break;
+      case 'pending':
+        this.notificationService.showInfo(
+          'Tu pago está siendo procesado. Te notificaremos cuando se confirme.'
+        );
+        break;
+      case 'failure':
+        this.notificationService.showError(
+          'Ha ocurrido un error al procesar tu pago. Por favor, intenta nuevamente.'
+        );
+        break;
     }
+  }
 
-    // Si el pago fue exitoso, manejar la redirección al step 5
+  redirectToUserDashboard(): void {
+    // Limpiar cualquier dato local residual
+    this.cookiePaymentService.clearLocalPaymentData();
+    
+    // Redirigir según el tipo de usuario
+    const dashboardRoute = this.cookiePaymentService.getDashboardRoute(this.userType);
+    
     if (this.status === 'success') {
-      // Marcar el pago como exitoso en cookies seguras
-      this.route.queryParams.subscribe(params => {
-        const paymentId = params['collection_id'] || params['payment_id'] || 'unknown';
-        const reference = params['ref'] || params['external_reference'];
-        
-        this.paymentCookieService.markPaymentSuccess(paymentId, 'approved').subscribe({
-          next: () => {
-            console.log('✅ Pago marcado como exitoso en cookies');
-          },
-          error: (error) => {
-            console.error('❌ Error al marcar pago en cookies:', error);
-          }
-        });
-      });
-      
-      // Redirigir al wizard de reserva paso 5
+      // Para pagos exitosos, redirigir al wizard paso 5
       this.router.navigate(['/reservarTurno'], { 
         queryParams: { 
           step: '5',
@@ -172,29 +199,16 @@ export class PaymentCallbackComponent implements OnInit {
         }
       });
     } else {
-      // Para pagos fallidos o cancelados, limpiar cookies y redirigir al dashboard
-      this.paymentCookieService.clearPaymentData().subscribe({
-        next: () => {
-          console.log('✅ Cookies de pago limpiadas después de fallo/cancelación');
-        },
-        error: (error) => {
-          console.error('❌ Error al limpiar cookies:', error);
-        }
-      });
-      
-      // Redirigir según el tipo de usuario
-      if (this.returnUrl === 'vistaPaciente') {
-        this.router.navigate(['/vistaPaciente']);
-      } else if (this.returnUrl === 'dashboard') {
-        this.router.navigate(['/dashboard']);
-      } else {
-        this.router.navigate(['/']);
-      }
+      // Para otros casos, redirigir al dashboard correspondiente
+      this.router.navigate([dashboardRoute]);
     }
   }
 
   retryPayment(): void {
-    // Volver a la página de reservar turno
+    // Limpiar datos locales
+    this.cookiePaymentService.clearLocalPaymentData();
+    
+    // Volver al wizard de reserva
     this.router.navigate(['/reservarTurno']);
   }
 }

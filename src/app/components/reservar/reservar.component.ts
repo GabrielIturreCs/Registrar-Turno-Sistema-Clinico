@@ -8,7 +8,7 @@ import { TurnoService } from '../../services/turno.service';
 import { PacienteService } from '../../services/paciente.service';
 import { DataRefreshService } from '../../services/data-refresh.service';
 import { MercadoPagoService } from '../../services/mercadopago.service';
-import { PaymentCookieService } from '../../services/payment-cookie.service';
+import { CookiePaymentService } from '../../services/cookie-payment.service';
 import { Tratamiento } from '../../interfaces';
 import { NotificationService } from '../../services/notification.service';
 
@@ -96,7 +96,7 @@ export class ReservarComponent implements OnInit {
     private pacienteService: PacienteService,
     private dataRefreshService: DataRefreshService,
     private mercadoPagoService: MercadoPagoService,
-    private paymentCookieService: PaymentCookieService,
+    private cookiePaymentService: CookiePaymentService,
     private notificationService: NotificationService
   ) {
     this.chatForm = this.fb.group({
@@ -661,21 +661,12 @@ export class ReservarComponent implements OnInit {
               userType: userType
             };
             
-            // Guardar en cookies seguras del backend
-            this.paymentCookieService.setPaymentData(turnoInfo, userType, turnoId).subscribe({
-              next: (cookieResponse) => {
-                console.log('✅ Información guardada en cookies seguras:', cookieResponse);
-                // Redirigir a MercadoPago
-                this.mercadoPagoService.redirectToPayment(response.init_point);
-              },
-              error: (cookieError) => {
-                console.error('❌ Error al guardar en cookies:', cookieError);
-                // Como fallback, usar sessionStorage
-                sessionStorage.setItem('turno_pendiente', JSON.stringify(turnoInfo));
-                localStorage.setItem('turno_info_backup', JSON.stringify(turnoInfo));
-                this.mercadoPagoService.redirectToPayment(response.init_point);
-              }
-            });
+            // Guardar información de respaldo en caso de error
+            sessionStorage.setItem('turno_pendiente', JSON.stringify(turnoInfo));
+            localStorage.setItem('turno_info_backup', JSON.stringify(turnoInfo));
+            
+            // Redirigir a MercadoPago (las cookies se manejan en el backend)
+            this.mercadoPagoService.redirectToPayment(response.init_point);
           },
           error: (error: any) => {
             this.isLoading = false;
@@ -824,14 +815,12 @@ export class ReservarComponent implements OnInit {
 
   // Método para manejar el regreso desde el pago exitoso
   handlePaymentReturn(): void {
-    // Primero verificar cookies seguras del backend
-    this.paymentCookieService.getPaymentData().subscribe({
+    // Verificar cookies seguras del backend
+    this.cookiePaymentService.checkPaymentStatus().subscribe({
       next: (response) => {
-        if (response.success && response.data) {
-          console.log('✅ Información recuperada desde cookies seguras:', response.data);
-          this.processPaymentReturn(response.data.turnoInfo, true);
-          // Limpiar cookies después de usar la información
-          this.paymentCookieService.clearPaymentData().subscribe();
+        if (response.success && response.turnoInfo) {
+          console.log('✅ Información recuperada desde cookies seguras:', response.turnoInfo);
+          this.processPaymentReturn(response.turnoInfo, true);
           return;
         }
         
