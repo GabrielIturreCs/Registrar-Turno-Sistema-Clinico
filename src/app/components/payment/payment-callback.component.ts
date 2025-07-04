@@ -119,17 +119,49 @@ export class PaymentCallbackComponent implements OnInit {
       this.status = 'failure';
     }
 
-    // Obtener la URL de retorno
+    // Obtener parámetros de la URL
     this.route.queryParams.subscribe(params => {
       this.returnUrl = params['return'] || '/';
+      
+      // Obtener información adicional del pago
+      const userType = params['userType'];
+      const reference = params['ref'];
+      
+      // Guardar información del pago en sessionStorage
+      if (this.status === 'success' && reference) {
+        sessionStorage.setItem('payment_reference', reference);
+        sessionStorage.setItem('payment_user_type', userType || 'paciente');
+      }
     });
   }
 
   redirectToUserDashboard(): void {
+    // Verificar si el usuario está autenticado
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      // Si no hay usuario, redirigir al login
+      this.router.navigate(['/login']);
+      return;
+    }
+
     // Si el pago fue exitoso, redirigir al paso 5 del wizard de reserva
     if (this.status === 'success') {
-      // Marcar que viene de pago exitoso
+      // Marcar que viene de pago exitoso y persistir en localStorage también
       sessionStorage.setItem('payment_success', 'true');
+      localStorage.setItem('payment_success', 'true');
+      
+      // Recuperar información del turno guardada
+      const turnoInfoStr = sessionStorage.getItem('turno_pendiente');
+      if (turnoInfoStr) {
+        try {
+          const turnoInfo = JSON.parse(turnoInfoStr);
+          // Guardar en localStorage también para mayor persistencia
+          localStorage.setItem('turno_info_success', JSON.stringify(turnoInfo));
+        } catch (error) {
+          console.error('Error al procesar información del turno:', error);
+        }
+      }
+      
       this.router.navigate(['/reservarTurno'], { 
         queryParams: { 
           step: '5',

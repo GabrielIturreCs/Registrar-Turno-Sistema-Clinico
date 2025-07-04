@@ -353,8 +353,8 @@
               <strong>¡Pago procesado exitosamente!</strong> Tu reserva está completamente confirmada.
               <br>
               <small class="text-muted">
-                <i class="fas fa-clock me-1"></i>
-                Serás redirigido automáticamente en {{ redirectCountdown }} segundos...
+                <i class="fas fa-info-circle me-1"></i>
+                Tu turno está listo. Puedes volver a tu dashboard cuando gustes.
               </small>
             </div>
             
@@ -392,7 +392,8 @@
               <button 
                 class="btn btn-primary btn-lg px-5" 
                 (click)="volverAlInicio()">
-                <i class="fas fa-home"></i> Volver al Inicio
+                <i class="fas fa-arrow-left me-2"></i>
+                {{ user?.tipoUsuario === 'paciente' ? 'Volver a Mi Panel' : 'Volver al Dashboard' }}
               </button>
               
               <button 

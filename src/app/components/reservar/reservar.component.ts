@@ -646,17 +646,22 @@ export class ReservarComponent implements OnInit {
           userType
         ).subscribe({
           next: (response: any) => {
-            // Guardar información del turno en sessionStorage
+            // Guardar información del turno en sessionStorage y localStorage
             const turnoInfo = {
               pacienteId: pacienteId,
               fecha: this.selectedDate,
               hora: this.selectedTime,
-              tratamientoId: this.selectedTreatment?._id || this.selectedTreatment?.id,
+              tratamiento: this.selectedTreatment,
+              paciente: paciente,
               monto: monto,
               descripcion: descripcion,
-              turnoId: turnoId
+              turnoId: turnoId,
+              userType: userType
             };
             sessionStorage.setItem('turno_pendiente', JSON.stringify(turnoInfo));
+            localStorage.setItem('turno_info_backup', JSON.stringify(turnoInfo));
+            
+            // Redirigir a MercadoPago
             this.mercadoPagoService.redirectToPayment(response.init_point);
           },
           error: (error: any) => {
@@ -680,37 +685,44 @@ export class ReservarComponent implements OnInit {
     console.log('User:', this.user);
     console.log('User tipo:', this.user?.tipoUsuario);
     
-    // Clear any refresh flags
+    // Clear any refresh flags and backup data
     sessionStorage.removeItem('reservar-step1-refreshed');
+    localStorage.removeItem('turno_info_backup');
     
     // Trigger refresh for patient dashboard before navigation
     this.dataRefreshService.triggerRefresh('vistaPaciente');
     
-    // Add a small delay to ensure navigation is reliable
-    setTimeout(() => {
-      if (this.user?.tipoUsuario === 'paciente') {
-        console.log('Navigating to /vistaPaciente');
-        this.router.navigate(['/vistaPaciente']).then(
-          (success) => {
-            if (success) {
-              console.log('Navigation successful');
-              // Removed automatic page reload as it interferes with navigation
-            }
+    // Navegar según el tipo de usuario
+    if (this.user?.tipoUsuario === 'paciente') {
+      console.log('Navigating to /vistaPaciente');
+      this.router.navigate(['/vistaPaciente']).then(
+        (success) => {
+          if (success) {
+            console.log('Navigation successful');
+            this.notificationService.showSuccess('¡Bienvenido de vuelta! Tu turno ha sido confirmado.');
           }
-        ).catch((error: any) => {
-          console.error('Navigation to /vistaPaciente failed:', error);
-          // Use router navigation instead of hard navigation
-          this.router.navigate(['/vistaPaciente']);
-        });
-      } else {
-        // Para dentistas y administradores
-        console.log('Attempting navigation to /dashboard');
-        this.router.navigate(['/dashboard']).catch((error: any) => {
-          console.error('Navigation to /dashboard failed:', error);
-          window.location.href = '/dashboard';
-        });
-      }
-    }, 200);
+        }
+      ).catch((error: any) => {
+        console.error('Navigation to /vistaPaciente failed:', error);
+        // Fallback navigation
+        this.router.navigate(['/vistaPaciente']);
+      });
+    } else {
+      // Para dentistas y administradores
+      console.log('Navigating to /dashboard');
+      this.router.navigate(['/dashboard']).then(
+        (success) => {
+          if (success) {
+            console.log('Navigation successful');
+            this.notificationService.showSuccess('Turno registrado exitosamente en el sistema.');
+          }
+        }
+      ).catch((error: any) => {
+        console.error('Navigation to /dashboard failed:', error);
+        // Fallback navigation
+        this.router.navigate(['/dashboard']);
+      });
+    }
   }
 
   // Start a new booking
@@ -800,7 +812,7 @@ export class ReservarComponent implements OnInit {
   // Método para manejar el regreso desde el pago exitoso
   handlePaymentReturn(): void {
     // Verificar si viene de pago exitoso
-    const paymentSuccess = sessionStorage.getItem('payment_success');
+    const paymentSuccess = sessionStorage.getItem('payment_success') || localStorage.getItem('payment_success');
     
     // También verificar parámetros de query
     this.route.queryParams.subscribe(params => {
@@ -811,8 +823,12 @@ export class ReservarComponent implements OnInit {
         // Ir al paso 5 (turno listo)
         this.currentStep = this.shouldSelectPaciente ? 6 : 5;
         
-        // Recuperar información del turno desde sessionStorage
-        const turnoInfoStr = sessionStorage.getItem('turno_pendiente');
+        // Recuperar información del turno desde sessionStorage o localStorage
+        let turnoInfoStr = sessionStorage.getItem('turno_pendiente');
+        if (!turnoInfoStr) {
+          turnoInfoStr = localStorage.getItem('turno_info_success');
+        }
+        
         if (turnoInfoStr) {
           try {
             const turnoInfo = JSON.parse(turnoInfoStr);
@@ -824,32 +840,28 @@ export class ReservarComponent implements OnInit {
               this.selectedPaciente = turnoInfo.paciente;
             }
             
-            // Limpiar sessionStorage
+            // Limpiar storage
             sessionStorage.removeItem('turno_pendiente');
             sessionStorage.removeItem('payment_success');
+            localStorage.removeItem('payment_success');
+            localStorage.removeItem('turno_info_success');
             
             // Actualizar datos
             this.dataRefreshService.triggerRefresh('vistaPaciente');
             this.turnoService.refreshTurnos();
             
             console.log('Turno confirmado exitosamente');
+            this.notificationService.showSuccess('¡Turno confirmado exitosamente! El pago se procesó correctamente.');
+            
           } catch (error) {
             console.error('Error al restaurar información del turno:', error);
+            this.notificationService.showError('Error al restaurar la información del turno.');
           }
         }
         
-        // Agregar timeout para redirección automática tras 8 segundos
-        setTimeout(() => {
-          this.volverAlInicio();
-        }, 8000);
-        
-        // Iniciar contador regresivo
-        const countdown = setInterval(() => {
-          this.redirectCountdown--;
-          if (this.redirectCountdown <= 0) {
-            clearInterval(countdown);
-          }
-        }, 1000);
+        // NO redirigir automáticamente - dejar que el usuario decida cuándo salir
+        // Remover el timeout automático que enviaba al usuario al inicio
+        console.log('Pago exitoso - Usuario en paso 5, sin redirección automática');
       }
     });
   }
