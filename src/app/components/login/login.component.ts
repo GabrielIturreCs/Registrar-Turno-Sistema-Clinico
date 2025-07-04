@@ -117,9 +117,21 @@ export class LoginComponent implements OnInit {
         );
     }
 
-  // Método placeholder para el login con Google (solo vista)
+  // Método para login con Google
   loginWithGoogle() {
-    // Solo placeholder visual, la funcionalidad será implementada por el equipo de backend
+    console.log('🔍 Iniciando login con Google...');
+    
+    // Verificar si estamos en un navegador
+    if (typeof window !== 'undefined') {
+      // Obtener URL de autorización de Google del backend
+      const backendUrl = 'https://backend-develop-nu3j.onrender.com';
+      
+      // Redirigir directamente a Google OAuth
+      window.location.href = `${backendUrl}/api/google-auth/auth-url`;
+    } else {
+      console.error('Google Auth no disponible en este entorno');
+      this.notificationService.showError('Google Auth no disponible en este entorno');
+    }
   }
 
   navigateToRegister(): void {
