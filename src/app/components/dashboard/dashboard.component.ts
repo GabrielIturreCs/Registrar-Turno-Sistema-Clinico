@@ -816,7 +816,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.confirmTitle = title;
     this.confirmMessage = message;
     this.confirmCallback = callback;
-    const modal = new (window as any).bootstrap.Modal(document.getElementById('confirmModal'));
+    const modalEl = document.getElementById('confirmModal');
+    if (!modalEl) return;
+    // Cierra cualquier instancia previa
+    const existingModal = (window as any).bootstrap.Modal.getInstance(modalEl);
+    if (existingModal) {
+      existingModal.hide();
+    }
+    const modal = new (window as any).bootstrap.Modal(modalEl);
     modal.show();
   }
 
@@ -827,14 +834,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.confirmCallback = null;
     }
     // Cierra el modal
-    (window as any).bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+    const modalEl = document.getElementById('confirmModal');
+    if (modalEl) {
+      const modalInstance = (window as any).bootstrap.Modal.getInstance(modalEl);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
+    }
   }
 
   // Mostrar modal de alerta/mensaje
   showAlertModal(title: string, message: string) {
     this.alertTitle = title;
     this.alertMessage = message;
-    const modal = new (window as any).bootstrap.Modal(document.getElementById('alertModal'));
+    const modalEl = document.getElementById('alertModal');
+    if (!modalEl) return;
+    // Cierra cualquier instancia previa
+    const existingModal = (window as any).bootstrap.Modal.getInstance(modalEl);
+    if (existingModal) {
+      existingModal.hide();
+    }
+    const modal = new (window as any).bootstrap.Modal(modalEl);
     modal.show();
   }
 }
