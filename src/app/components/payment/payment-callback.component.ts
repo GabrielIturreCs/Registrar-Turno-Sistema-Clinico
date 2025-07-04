@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { CookiePaymentService } from '../../services/cookie-payment.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-payment-callback',
@@ -105,7 +107,8 @@ export class PaymentCallbackComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private paymentCookieService: PaymentCookieService
   ) {}
 
   ngOnInit(): void {
@@ -144,24 +147,24 @@ export class PaymentCallbackComponent implements OnInit {
       return;
     }
 
-    // Si el pago fue exitoso, redirigir al paso 5 del wizard de reserva
+    // Si el pago fue exitoso, manejar la redirección al step 5
     if (this.status === 'success') {
-      // Marcar que viene de pago exitoso y persistir en localStorage también
-      sessionStorage.setItem('payment_success', 'true');
-      localStorage.setItem('payment_success', 'true');
+      // Marcar el pago como exitoso en cookies seguras
+      this.route.queryParams.subscribe(params => {
+        const paymentId = params['collection_id'] || params['payment_id'] || 'unknown';
+        const reference = params['ref'] || params['external_reference'];
+        
+        this.paymentCookieService.markPaymentSuccess(paymentId, 'approved').subscribe({
+          next: () => {
+            console.log('✅ Pago marcado como exitoso en cookies');
+          },
+          error: (error) => {
+            console.error('❌ Error al marcar pago en cookies:', error);
+          }
+        });
+      });
       
-      // Recuperar información del turno guardada
-      const turnoInfoStr = sessionStorage.getItem('turno_pendiente');
-      if (turnoInfoStr) {
-        try {
-          const turnoInfo = JSON.parse(turnoInfoStr);
-          // Guardar en localStorage también para mayor persistencia
-          localStorage.setItem('turno_info_success', JSON.stringify(turnoInfo));
-        } catch (error) {
-          console.error('Error al procesar información del turno:', error);
-        }
-      }
-      
+      // Redirigir al wizard de reserva paso 5
       this.router.navigate(['/reservarTurno'], { 
         queryParams: { 
           step: '5',
@@ -169,7 +172,17 @@ export class PaymentCallbackComponent implements OnInit {
         }
       });
     } else {
-      // Para otros casos, redirigir según el parámetro return
+      // Para pagos fallidos o cancelados, limpiar cookies y redirigir al dashboard
+      this.paymentCookieService.clearPaymentData().subscribe({
+        next: () => {
+          console.log('✅ Cookies de pago limpiadas después de fallo/cancelación');
+        },
+        error: (error) => {
+          console.error('❌ Error al limpiar cookies:', error);
+        }
+      });
+      
+      // Redirigir según el tipo de usuario
       if (this.returnUrl === 'vistaPaciente') {
         this.router.navigate(['/vistaPaciente']);
       } else if (this.returnUrl === 'dashboard') {

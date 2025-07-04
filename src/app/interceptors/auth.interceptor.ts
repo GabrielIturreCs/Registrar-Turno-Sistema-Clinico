@@ -20,17 +20,22 @@ export class AuthInterceptor implements HttpInterceptor {
     // Obtener el token del localStorage
     const token = localStorage.getItem('token');
     
+    // Configurar headers y credentials
+    const headers: { [key: string]: string } = {};
+    
     // Si hay token, agregarlo al header Authorization
     if (token) {
-      request = request.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      headers['Authorization'] = `Bearer ${token}`;
     }
+    
+    // Clonar la request con headers y credentials
+    const authRequest = request.clone({
+      setHeaders: headers,
+      withCredentials: true // Siempre enviar cookies
+    });
 
     // Continuar con la petición
-    return next.handle(request).pipe(
+    return next.handle(authRequest).pipe(
       catchError((error: HttpErrorResponse) => {
         // Manejar errores de autenticación
         if (error.status === 401) {

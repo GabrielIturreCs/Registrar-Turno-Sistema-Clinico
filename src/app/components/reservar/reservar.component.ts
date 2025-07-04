@@ -8,6 +8,7 @@ import { TurnoService } from '../../services/turno.service';
 import { PacienteService } from '../../services/paciente.service';
 import { DataRefreshService } from '../../services/data-refresh.service';
 import { MercadoPagoService } from '../../services/mercadopago.service';
+import { PaymentCookieService } from '../../services/payment-cookie.service';
 import { Tratamiento } from '../../interfaces';
 import { NotificationService } from '../../services/notification.service';
 
@@ -95,6 +96,7 @@ export class ReservarComponent implements OnInit {
     private pacienteService: PacienteService,
     private dataRefreshService: DataRefreshService,
     private mercadoPagoService: MercadoPagoService,
+    private paymentCookieService: PaymentCookieService,
     private notificationService: NotificationService
   ) {
     this.chatForm = this.fb.group({
@@ -646,7 +648,7 @@ export class ReservarComponent implements OnInit {
           userType
         ).subscribe({
           next: (response: any) => {
-            // Guardar información del turno en sessionStorage y localStorage
+            // Guardar información del turno en cookies seguras del backend
             const turnoInfo = {
               pacienteId: pacienteId,
               fecha: this.selectedDate,
@@ -658,11 +660,22 @@ export class ReservarComponent implements OnInit {
               turnoId: turnoId,
               userType: userType
             };
-            sessionStorage.setItem('turno_pendiente', JSON.stringify(turnoInfo));
-            localStorage.setItem('turno_info_backup', JSON.stringify(turnoInfo));
             
-            // Redirigir a MercadoPago
-            this.mercadoPagoService.redirectToPayment(response.init_point);
+            // Guardar en cookies seguras del backend
+            this.paymentCookieService.setPaymentData(turnoInfo, userType, turnoId).subscribe({
+              next: (cookieResponse) => {
+                console.log('✅ Información guardada en cookies seguras:', cookieResponse);
+                // Redirigir a MercadoPago
+                this.mercadoPagoService.redirectToPayment(response.init_point);
+              },
+              error: (cookieError) => {
+                console.error('❌ Error al guardar en cookies:', cookieError);
+                // Como fallback, usar sessionStorage
+                sessionStorage.setItem('turno_pendiente', JSON.stringify(turnoInfo));
+                localStorage.setItem('turno_info_backup', JSON.stringify(turnoInfo));
+                this.mercadoPagoService.redirectToPayment(response.init_point);
+              }
+            });
           },
           error: (error: any) => {
             this.isLoading = false;
@@ -811,18 +824,34 @@ export class ReservarComponent implements OnInit {
 
   // Método para manejar el regreso desde el pago exitoso
   handlePaymentReturn(): void {
-    // Verificar si viene de pago exitoso
+    // Primero verificar cookies seguras del backend
+    this.paymentCookieService.getPaymentData().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          console.log('✅ Información recuperada desde cookies seguras:', response.data);
+          this.processPaymentReturn(response.data.turnoInfo, true);
+          // Limpiar cookies después de usar la información
+          this.paymentCookieService.clearPaymentData().subscribe();
+          return;
+        }
+        
+        // Fallback a verificación tradicional
+        this.checkTraditionalPaymentReturn();
+      },
+      error: (error) => {
+        console.log('ℹ️ No se encontraron cookies de pago, verificando método tradicional');
+        this.checkTraditionalPaymentReturn();
+      }
+    });
+  }
+
+  private checkTraditionalPaymentReturn(): void {
+    // Verificar si viene de pago exitoso (métodos tradicionales)
     const paymentSuccess = sessionStorage.getItem('payment_success') || localStorage.getItem('payment_success');
     
     // También verificar parámetros de query
     this.route.queryParams.subscribe(params => {
       if (params['paymentSuccess'] === 'true' || params['step'] === '5' || paymentSuccess === 'true') {
-        // Marcar como pago exitoso
-        this.paymentSuccess = true;
-        
-        // Ir al paso 5 (turno listo)
-        this.currentStep = this.shouldSelectPaciente ? 6 : 5;
-        
         // Recuperar información del turno desde sessionStorage o localStorage
         let turnoInfoStr = sessionStorage.getItem('turno_pendiente');
         if (!turnoInfoStr) {
@@ -832,37 +861,52 @@ export class ReservarComponent implements OnInit {
         if (turnoInfoStr) {
           try {
             const turnoInfo = JSON.parse(turnoInfoStr);
-            // Restaurar la información del turno
-            this.selectedDate = turnoInfo.fecha;
-            this.selectedTime = turnoInfo.hora;
-            this.selectedTreatment = turnoInfo.tratamiento;
-            if (turnoInfo.paciente) {
-              this.selectedPaciente = turnoInfo.paciente;
-            }
-            
-            // Limpiar storage
-            sessionStorage.removeItem('turno_pendiente');
-            sessionStorage.removeItem('payment_success');
-            localStorage.removeItem('payment_success');
-            localStorage.removeItem('turno_info_success');
-            
-            // Actualizar datos
-            this.dataRefreshService.triggerRefresh('vistaPaciente');
-            this.turnoService.refreshTurnos();
-            
-            console.log('Turno confirmado exitosamente');
-            this.notificationService.showSuccess('¡Turno confirmado exitosamente! El pago se procesó correctamente.');
-            
+            this.processPaymentReturn(turnoInfo, true);
           } catch (error) {
             console.error('Error al restaurar información del turno:', error);
             this.notificationService.showError('Error al restaurar la información del turno.');
           }
         }
-        
-        // NO redirigir automáticamente - dejar que el usuario decida cuándo salir
-        // Remover el timeout automático que enviaba al usuario al inicio
-        console.log('Pago exitoso - Usuario en paso 5, sin redirección automática');
       }
     });
+  }
+
+  private processPaymentReturn(turnoInfo: any, isSuccess: boolean): void {
+    if (isSuccess) {
+      // Marcar como pago exitoso
+      this.paymentSuccess = true;
+      
+      // Ir al paso 5 (turno listo)
+      this.currentStep = this.shouldSelectPaciente ? 6 : 5;
+      
+      // Restaurar la información del turno
+      this.selectedDate = turnoInfo.fecha;
+      this.selectedTime = turnoInfo.hora;
+      this.selectedTreatment = turnoInfo.tratamiento;
+      if (turnoInfo.paciente) {
+        this.selectedPaciente = turnoInfo.paciente;
+      }
+      
+      // Limpiar storage tradicional
+      sessionStorage.removeItem('turno_pendiente');
+      sessionStorage.removeItem('payment_success');
+      localStorage.removeItem('payment_success');
+      localStorage.removeItem('turno_info_success');
+      localStorage.removeItem('turno_info_backup');
+      
+      // Actualizar datos
+      this.dataRefreshService.triggerRefresh('vistaPaciente');
+      this.turnoService.refreshTurnos();
+      
+      console.log('✅ Turno confirmado exitosamente');
+      this.notificationService.showSuccess('¡Turno confirmado exitosamente! El pago se procesó correctamente.');
+      
+    } else {
+      // Manejo de pago fallido o cancelado
+      console.log('❌ Pago fallido o cancelado');
+      this.notificationService.showWarning('El pago no se completó. Puedes intentar nuevamente o contactar con soporte.');
+      // Volver al dashboard
+      this.volverAlInicio();
+    }
   }
 }

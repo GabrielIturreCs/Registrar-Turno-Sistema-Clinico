@@ -81,6 +81,13 @@ export class MercadoPagoService {
     });
   }
 
+  private getRequestOptions() {
+    return {
+      headers: this.getHeaders(),
+      withCredentials: true // Importante: enviar cookies
+    };
+  }
+
   /**
    * Crear un pago único en Mercado Pago
    * @param paymentData Datos del pago
@@ -90,7 +97,7 @@ export class MercadoPagoService {
     return this.http.post<MercadoPagoResponse>(
       `${this.apiUrl}/payment`, 
       paymentData, 
-      { headers: this.getHeaders() }
+      this.getRequestOptions()
     );
   }
 
@@ -103,7 +110,7 @@ export class MercadoPagoService {
     return this.http.post<SubscriptionResponse>(
       `${this.apiUrl}/subscription`, 
       subscriptionData, 
-      { headers: this.getHeaders() }
+      this.getRequestOptions()
     );
   }
 
