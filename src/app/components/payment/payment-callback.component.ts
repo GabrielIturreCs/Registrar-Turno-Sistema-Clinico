@@ -175,6 +175,7 @@ export class PaymentCallbackComponent implements OnInit {
   showPaymentNotification(): void {
     switch (this.status) {
       case 'success':
+        localStorage.setItem('pago_exitoso', 'true');
         this.notificationService.showSuccess(
           '¡Pago exitoso! Tu turno ha sido confirmado.'
         );
