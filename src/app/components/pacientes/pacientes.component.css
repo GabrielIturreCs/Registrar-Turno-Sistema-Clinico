@@ -96,12 +96,12 @@
 
 /* ========== HEADER ========== */
 .page-header {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e0f2fe 100%) !important;
-  border: 3px solid var(--primary-color) !important;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3) !important;
+  background: linear-gradient(135deg, var(--background-white) 0%, var(--primary-light) 50%, var(--cyan-light) 100%);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
   padding: 2.5rem;
   margin-bottom: 2rem;
-  border-radius: var(--border-radius);
+  border: 3px solid rgba(59, 130, 246, 0.2);
   position: relative;
   overflow: hidden;
 }
@@ -128,17 +128,31 @@
 }
 
 .page-title {
-  background: linear-gradient(135deg, #1e40af, #7c3aed, #db2777) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  font-weight: 900 !important;
-  text-shadow: none !important;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 900;
+  font-size: 2.5rem;
+  margin: 0;
+  text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  animation: titleGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+  0% { filter: brightness(1); }
+  100% { filter: brightness(1.2); }
 }
 
 .page-subtitle {
-  color: #0369a1 !important;
-  font-weight: 700 !important;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  background: linear-gradient(135deg, var(--info-color), var(--cyan-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* ========== BOTONES VIBRANTES ========== */
@@ -174,31 +188,32 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8, #1e40af) !important;
-  border: 2px solid #1e40af !important;
-  color: white !important;
-  font-weight: 700 !important;
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4) !important;
+  background: linear-gradient(135deg, var(--primary-color), var(--cyan-color), var(--secondary-color));
+  color: white;
+  box-shadow: var(--shadow-md);
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af, #1e3a8a) !important;
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.6) !important;
+  background: linear-gradient(135deg, var(--primary-hover), var(--cyan-hover), var(--secondary-hover));
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: var(--shadow-xl);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .btn-success {
-  background: linear-gradient(135deg, #22c55e, #16a34a, #15803d) !important;
-  border: 2px solid #15803d !important;
-  color: white !important;
-  font-weight: 700 !important;
-  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4) !important;
+  background: linear-gradient(135deg, var(--success-color), #34d399, var(--info-color));
+  color: white;
+  box-shadow: var(--shadow-md);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  font-weight: 700;
 }
 
 .btn-success:hover {
-  background: linear-gradient(135deg, #16a34a, #15803d, #166534) !important;
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.6) !important;
+  background: linear-gradient(135deg, var(--success-hover), #10b981, var(--info-hover));
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: var(--shadow-xl);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .btn-outline-primary {
@@ -233,29 +248,17 @@
 }
 
 .btn-outline-secondary {
-  background: linear-gradient(135deg, var(--secondary-light), var(--pink-light)) !important;
-  border: 3px solid var(--secondary-color) !important;
-  color: var(--secondary-color) !important;
-  font-weight: 700 !important;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+  background: linear-gradient(135deg, var(--secondary-light), var(--pink-light));
+  border: 3px solid var(--secondary-color);
+  color: var(--secondary-color);
 }
 
 .btn-outline-secondary:hover {
-  background: linear-gradient(135deg, var(--secondary-color), var(--pink-color)) !important;
-  border-color: var(--pink-color) !important;
-  color: white !important;
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5) !important;
-}
-
-.btn-outline-secondary i {
-  color: inherit !important;
-  transition: var(--transition) !important;
-}
-
-.btn-outline-secondary:hover i {
-  transform: scale(1.1) !important;
-  color: white !important;
+  background: linear-gradient(135deg, var(--secondary-color), var(--pink-color));
+  border-color: var(--pink-hover);
+  color: white;
+  transform: scale(1.1) rotate(-2deg);
+  box-shadow: var(--shadow-lg);
 }
 
 .btn-outline-danger {
@@ -428,9 +431,10 @@
 }
 
 .table tbody tr:hover {
-  background: linear-gradient(135deg, #dbeafe 0%, #c7d2fe 100%) !important;
-  transform: scale(1.02) !important;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3) !important;
+  background: linear-gradient(135deg, var(--warning-light) 0%, var(--accent-light) 100%);
+  transform: scale(1.03);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--border-radius-sm);
 }
 
 .table tbody td {
@@ -549,216 +553,440 @@
   box-shadow: var(--shadow-lg);
   border-radius: var(--border-radius-sm);
   overflow: hidden;
-  border: 3px solid var(--primary-color) !important;
+  border: 3px solid var(--info-color);
 }
 
 .input-group-text {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
-  border: none !important;
-  color: white !important;
-  font-weight: 800 !important;
-  font-size: 1.1rem !important;
+  background: linear-gradient(135deg, var(--info-color), var(--cyan-color), var(--primary-color));
+  border: none;
+  color: white;
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  position: relative;
+  overflow: hidden;
 }
 
-/* ========== MEJORAS ESPECÍFICAS PARA ELEMENTOS PROBLEMÁTICOS ========== */
-
-/* Header con mejor contraste */
-.page-header {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e0f2fe 100%) !important;
-  border: 3px solid var(--primary-color) !important;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3) !important;
+.input-group-text::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.8s;
 }
 
-/* Títulos más visibles */
-.page-title {
-  background: linear-gradient(135deg, #1e40af, #7c3aed, #db2777) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  font-weight: 900 !important;
-  text-shadow: none !important;
+.input-group:hover .input-group-text::before {
+  transform: translateX(100%);
 }
 
-.page-subtitle {
-  color: #0369a1 !important;
-  font-weight: 700 !important;
-}
-
-/* Campo de búsqueda más visible */
 .form-control {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%) !important;
-  border: 3px solid var(--primary-color) !important;
-  color: #1e293b !important;
-  font-weight: 600 !important;
-  font-size: 1rem !important;
-}
-
-.form-control::placeholder {
-  color: #64748b !important;
-  font-weight: 500 !important;
+  border: none;
+  padding: 1rem 1.5rem;
+  transition: var(--transition);
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--background-white) 0%, var(--cyan-light) 100%);
 }
 
 .form-control:focus {
-  background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%) !important;
-  border-color: var(--secondary-color) !important;
-  box-shadow: 0 0 0 0.4rem rgba(139, 92, 246, 0.3) !important;
-  color: #1e293b !important;
+  border: none;
+  box-shadow: 0 0 0 0.4rem var(--primary-glow);
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, var(--background-white) 0%, var(--primary-light) 100%);
 }
 
-/* Input group más visible */
-.input-group {
-  border: 3px solid var(--primary-color) !important;
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2) !important;
+/* ========== ESTADOS VACÍOS SUPER COLORIDOS ========== */
+.empty-state {
+  background: linear-gradient(135deg, var(--background-white) 0%, var(--pink-light) 50%, var(--accent-light) 100%);
+  border-radius: var(--border-radius);
+  padding: 5rem 3rem;
+  text-align: center;
+  border: 4px dashed var(--pink-color);
+  position: relative;
+  overflow: hidden;
 }
 
-.input-group-text {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
-  border: none !important;
-  color: white !important;
-  font-weight: 800 !important;
-  font-size: 1.1rem !important;
+.empty-state::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 30% 30%, var(--pink-glow) 0%, transparent 50%),
+    radial-gradient(circle at 70% 70%, var(--accent-glow) 0%, transparent 50%);
+  pointer-events: none;
+  animation: floatingOrbs 6s ease-in-out infinite alternate;
 }
 
-/* Badge con gradiente llamativo */
-.badge.bg-gradient-primary {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899) !important;
-  color: white !important;
-  border: 2px solid rgba(255, 255, 255, 0.5) !important;
-  font-weight: 800 !important;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+@keyframes floatingOrbs {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-10px) scale(1.1); }
 }
 
-/* Avatares con colores vibrantes */
-.avatar-sm.bg-gradient {
-  background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6) !important;
-  border: 4px solid white !important;
-  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4) !important;
+.empty-state i {
+  color: var(--pink-color);
+  opacity: 0.8;
+  animation: iconBounce 2s ease-in-out infinite;
 }
 
-/* Botones de acción mejorados */
-.btn-sm.btn-warning {
-  background: linear-gradient(135deg, #f59e0b, #fb923c) !important;
-  border: 2px solid #d97706 !important;
-  color: white !important;
-  font-weight: 700 !important;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
+@keyframes iconBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
 }
 
-.btn-sm.btn-warning:hover {
-  background: linear-gradient(135deg, #d97706, #ea580c) !important;
-  transform: scale(1.15) !important;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6) !important;
+/* ========== LOADING SUPER COLORIDO ========== */
+.loading-container {
+  background: linear-gradient(135deg, var(--background-white) 0%, var(--success-light) 50%, var(--cyan-light) 100%);
+  border-radius: var(--border-radius);
+  padding: 5rem 3rem;
+  text-align: center;
+  border: 4px solid var(--success-color);
+  position: relative;
+  overflow: hidden;
 }
 
-.btn-sm.btn-danger {
-  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-  border: 2px solid #b91c1c !important;
-  color: white !important;
-  font-weight: 700 !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+.loading-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 25% 25%, var(--success-glow) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, var(--cyan-glow) 0%, transparent 50%);
+  pointer-events: none;
+  animation: loadingOrbs 4s ease-in-out infinite alternate;
 }
 
-.btn-sm.btn-danger:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
-  transform: scale(1.15) !important;
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6) !important;
+@keyframes loadingOrbs {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(360deg) scale(1.2); }
 }
 
-/* Botones principales mejorados */
-.btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8, #1e40af) !important;
-  border: 2px solid #1e40af !important;
-  color: white !important;
-  font-weight: 700 !important;
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4) !important;
+.spinner-border {
+  color: var(--success-color);
+  border-width: 5px;
+  animation: spinnerRainbow 1s linear infinite;
 }
 
-.btn-primary:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af, #1e3a8a) !important;
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.6) !important;
+@keyframes spinnerRainbow {
+  0% { border-top-color: var(--success-color); }
+  25% { border-top-color: var(--primary-color); }
+  50% { border-top-color: var(--secondary-color); }
+  75% { border-top-color: var(--warning-color); }
+  100% { border-top-color: var(--success-color); }
 }
 
-.btn-success {
-  background: linear-gradient(135deg, #22c55e, #16a34a, #15803d) !important;
-  border: 2px solid #15803d !important;
-  color: white !important;
-  font-weight: 700 !important;
-  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4) !important;
+/* ========== MODALES COLORIDOS ========== */
+.modal {
+  backdrop-filter: blur(12px);
 }
 
-.btn-success:hover {
-  background: linear-gradient(135deg, #16a34a, #15803d, #166534) !important;
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.6) !important;
+.modal-backdrop {
+  background: rgba(102, 126, 234, 0.4);
+  backdrop-filter: blur(8px);
 }
 
-.btn-danger {
-  background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c) !important;
-  border: 2px solid #b91c1c !important;
-  color: white !important;
-  font-weight: 700 !important;
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
+.modal.show {
+  animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.btn-danger:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c, #991b1b) !important;
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.6) !important;
+.modal-content {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
 }
 
-/* Texto más visible */
-.text-info.fw-bold {
-  color: #0369a1 !important;
-  background: linear-gradient(135deg, #0369a1, #0284c7) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
+.modal-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border: none;
+  padding: 2.5rem;
+  position: relative;
 }
 
-/* Estados de carga más coloridos */
-.spinner-border.text-primary {
-  color: var(--primary-color) !important;
-  border-width: 4px !important;
-  width: 3.5rem !important;
-  height: 3.5rem !important;
+.modal-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-color), var(--info-color));
 }
 
-.loading-container h5,
-.loading-container p {
-  color: var(--primary-color) !important;
-  font-weight: 600 !important;
+.modal-header.bg-warning {
+  background: linear-gradient(135deg, var(--warning-color), #fb923c);
+  color: white;
 }
 
-/* Tabla con mejor contraste */
-.table tbody tr:nth-child(odd) {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+.modal-title {
+  font-weight: 800;
+  font-size: 1.6rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.table tbody tr:nth-child(even) {
-  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
+.modal-body {
+  padding: 2.5rem;
+  background: linear-gradient(135deg, var(--background-light) 0%, #f8fafc 100%);
 }
 
-.table tbody tr:hover {
-  background: linear-gradient(135deg, #dbeafe 0%, #c7d2fe 100%) !important;
-  transform: scale(1.02) !important;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3) !important;
+.modal-footer {
+  background: var(--background-white);
+  border-top: 3px solid var(--primary-color);
+  padding: 2rem 2.5rem;
+  gap: 1rem;
 }
 
-/* Texto de datos más visible */
-.fw-semibold.text-dark {
-  color: #1e293b !important;
-  font-weight: 700 !important;
+/* ========== FORMULARIOS EN MODALES COLORIDOS ========== */
+.modal .card {
+  background: var(--background-white);
+  border: 2px solid rgba(59, 130, 246, 0.1);
+  margin-bottom: 2rem;
+  border-radius: var(--border-radius-sm);
 }
 
+.modal .card-header {
+  background: linear-gradient(135deg, var(--info-light) 0%, var(--primary-light) 100%);
+  border-bottom: 2px solid var(--primary-color);
+  padding: 1.25rem 2rem;
+}
+
+.modal .card-body {
+  padding: 2rem;
+}
+
+.modal .form-label {
+  color: var(--text-dark);
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.modal .form-label i {
+  color: var(--primary-color);
+  margin-right: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.modal .form-control,
+.modal .form-select {
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 0.875rem 1.25rem;
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+.modal .form-control:focus,
+.modal .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.3rem rgba(59, 130, 246, 0.2);
+  transform: translateY(-1px);
+}
+
+/* ========== ALERTAS COLORIDAS ========== */
+.alert {
+  border: none;
+  border-radius: var(--border-radius-sm);
+  padding: 1.5rem 2rem;
+  border-left: 5px solid;
+  font-weight: 500;
+}
+
+.alert-info {
+  background: linear-gradient(135deg, var(--info-light) 0%, #e0f2fe 100%);
+  border-left-color: var(--info-color);
+  color: #0369a1;
+}
+
+.alert-warning {
+  background: linear-gradient(135deg, var(--warning-light) 0%, #fef3c7 100%);
+  border-left-color: var(--warning-color);
+  color: #92400e;
+  animation: slideInFromTop 0.4s ease-out;
+}
+
+/* ========== ANIMACIONES MEJORADAS ========== */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ========== RESPONSIVE COLORIDO ========== */
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 1rem 0.75rem;
+  }
+  
+  .page-header {
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+  }
+  
+  .btn-group {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .avatar-sm {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
+  
+  .table {
+    font-size: 0.875rem;
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-header,
+  .modal-footer {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .btn {
+    width: 100%;
+    margin-bottom: 0.75rem;
+  }
+  
+  .d-flex.gap-3 {
+    flex-direction: column;
+    gap: 1rem !important;
+  }
+  
+  .modal-dialog {
+    margin: 0.75rem;
+  }
+}
+
+/* ========== ESTILOS ESPECÍFICOS PARA OBRAS SOCIALES ========== */
+.obra-social-osde {
+  background: linear-gradient(135deg, var(--primary-color), var(--cyan-color)) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  font-weight: 800;
+}
+
+.obra-social-swiss {
+  background: linear-gradient(135deg, var(--success-color), #34d399) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  font-weight: 800;
+}
+
+.obra-social-galeno {
+  background: linear-gradient(135deg, var(--warning-color), var(--accent-color)) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  font-weight: 800;
+}
+
+.obra-social-medicus {
+  background: linear-gradient(135deg, var(--info-color), var(--cyan-color)) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  font-weight: 800;
+}
+
+.obra-social-pami {
+  background: linear-gradient(135deg, var(--secondary-color), var(--pink-color)) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  font-weight: 800;
+}
+
+.obra-social-ioma {
+  background: linear-gradient(135deg, var(--danger-color), #f87171) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  font-weight: 800;
+}
+
+.obra-social-particular {
+  background: linear-gradient(135deg, #374151, #6b7280) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  font-weight: 800;
+}
+
+.obra-social-default {
+  background: linear-gradient(135deg, #9ca3af, #d1d5db) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  color: #374151 !important;
+  font-weight: 800;
+}
+
+/* Efectos hover para badges de obra social */
+.badge[class*="obra-social"]:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-lg);
+  animation: badgeGlow 0.3s ease-in-out;
+}
+
+@keyframes badgeGlow {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+  100% { filter: brightness(1); }
+}
+
+/* ========== TEXTO Y ESTADOS MEJORADOS ========== */
 .text-muted {
-  color: #475569 !important;
-  font-weight: 500 !important;
+  color: var(--text-muted) !important;
+  font-weight: 600;
 }
 
-.text-success {
-  color: #059669 !important;
-  font-weight: 600 !important;
+.text-dark {
+  color: var(--text-dark) !important;
+  font-weight: 700;
+}
+
+.fw-semibold {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+.fw-bold {
+  color: var(--text-dark);
+  font-weight: 800;
 }
 
 /* Iconos coloridos */
@@ -859,675 +1087,4 @@
 .table tbody tr:hover .small {
   color: var(--primary-color);
   font-weight: 700;
-}
-
-/* ========== ESTADOS VACÍOS SUPER COLORIDOS ========== */
-.empty-state {
-  background: linear-gradient(135deg, var(--background-white) 0%, var(--pink-light) 50%, var(--accent-light) 100%);
-  border-radius: var(--border-radius);
-  padding: 5rem 3rem;
-  text-align: center;
-  border: 4px dashed var(--pink-color);
-  position: relative;
-  overflow: hidden;
-}
-
-/* ========== MEJORAS ESPECÍFICAS PARA VISIBILIDAD ========== */
-
-/* Header con mejor contraste */
-.page-header {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e0f2fe 100%) !important;
-  border: 3px solid var(--primary-color) !important;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3) !important;
-}
-
-/* Campo de búsqueda más visible */
-.form-control {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%) !important;
-  border: 3px solid var(--primary-color) !important;
-  color: #1e293b !important;
-  font-weight: 600 !important;
-  font-size: 1rem !important;
-}
-
-.form-control::placeholder {
-  color: #64748b !important;
-  font-weight: 500 !important;
-}
-
-.form-control:focus {
-  background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%) !important;
-  border-color: var(--secondary-color) !important;
-  box-shadow: 0 0 0 0.4rem rgba(139, 92, 246, 0.3) !important;
-  color: #1e293b !important;
-}
-
-/* Badge con gradiente llamativo */
-.badge.bg-gradient-primary {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899) !important;
-  color: white !important;
-  border: 2px solid rgba(255, 255, 255, 0.5) !important;
-  font-weight: 800 !important;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
-}
-
-/* Avatares con colores vibrantes */
-.avatar-sm.bg-gradient {
-  background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6) !important;
-  border: 4px solid white !important;
-  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4) !important;
-}
-
-/* Botones de acción mejorados */
-.btn-sm.btn-warning {
-  background: linear-gradient(135deg, #f59e0b, #fb923c) !important;
-  border: 2px solid #d97706 !important;
-  color: white !important;
-  font-weight: 700 !important;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
-}
-
-.btn-sm.btn-warning:hover {
-  background: linear-gradient(135deg, #d97706, #ea580c) !important;
-  transform: scale(1.15) !important;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6) !important;
-}
-
-.btn-sm.btn-danger {
-  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-  border: 2px solid #b91c1c !important;
-  color: white !important;
-  font-weight: 700 !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
-}
-
-.btn-sm.btn-danger:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
-  transform: scale(1.15) !important;
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6) !important;
-}
-
-/* Botones principales mejorados */
-.btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8, #1e40af) !important;
-  border: 2px solid #1e40af !important;
-  color: white !important;
-  font-weight: 700 !important;
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4) !important;
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af, #1e3a8a) !important;
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.6) !important;
-}
-
-.btn-success {
-  background: linear-gradient(135deg, #22c55e, #16a34a, #15803d) !important;
-  border: 2px solid #15803d !important;
-  color: white !important;
-  font-weight: 700 !important;
-  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4) !important;
-}
-
-.btn-success:hover {
-  background: linear-gradient(135deg, #16a34a, #15803d, #166534) !important;
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.6) !important;
-}
-
-.btn-danger {
-  background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c) !important;
-  border: 2px solid #b91c1c !important;
-  color: white !important;
-  font-weight: 700 !important;
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
-}
-
-.btn-danger:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c, #991b1b) !important;
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.6) !important;
-}
-
-/* Texto más visible */
-.text-info.fw-bold {
-  color: #0369a1 !important;
-  background: linear-gradient(135deg, #0369a1, #0284c7) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-}
-
-/* Estados de carga más coloridos */
-.spinner-border.text-primary {
-  color: var(--primary-color) !important;
-  border-width: 4px !important;
-  width: 3.5rem !important;
-  height: 3.5rem !important;
-}
-
-.loading-container h5,
-.loading-container p {
-  color: var(--primary-color) !important;
-  font-weight: 600 !important;
-}
-
-/* Tabla con mejor contraste */
-.table tbody tr:nth-child(odd) {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
-}
-
-.table tbody tr:nth-child(even) {
-  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
-}
-
-.table tbody tr:hover {
-  background: linear-gradient(135deg, #dbeafe 0%, #c7d2fe 100%) !important;
-  transform: scale(1.02) !important;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3) !important;
-}
-
-/* Texto de datos más visible */
-.fw-semibold.text-dark {
-  color: #1e293b !important;
-  font-weight: 700 !important;
-}
-
-.text-muted {
-  color: #475569 !important;
-  font-weight: 500 !important;
-}
-
-.text-success {
-  color: #059669 !important;
-  font-weight: 600 !important;
-}
-
-/* ========== FORMULARIOS EN MODALES - MEJORAR VISIBILIDAD ========== */
-
-/* Campos de entrada más visibles */
-.modal .form-control,
-.modal .form-select {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
-  border: 3px solid var(--primary-color) !important;
-  color: #1e293b !important;
-  font-weight: 600 !important;
-  font-size: 1rem !important;
-  padding: 0.875rem 1.25rem !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2) !important;
-  transition: all 0.3s ease !important;
-}
-
-.modal .form-control::placeholder {
-  color: #64748b !important;
-  font-weight: 500 !important;
-  opacity: 0.8 !important;
-}
-
-.modal .form-control:focus,
-.modal .form-select:focus {
-  background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%) !important;
-  border-color: var(--secondary-color) !important;
-  box-shadow: 0 0 0 0.4rem rgba(139, 92, 246, 0.3) !important;
-  color: #1e293b !important;
-  transform: translateY(-2px) !important;
-}
-
-/* Labels más visibles */
-.modal .form-label {
-  color: var(--primary-color) !important;
-  font-weight: 800 !important;
-  font-size: 1rem !important;
-  margin-bottom: 0.75rem !important;
-  text-shadow: none !important;
-  background: none !important;
-  -webkit-background-clip: unset !important;
-  -webkit-text-fill-color: unset !important;
-  background-clip: unset !important;
-}
-
-.modal .form-label i {
-  color: var(--secondary-color) !important;
-  font-size: 1.2rem !important;
-  margin-right: 0.75rem !important;
-  text-shadow: none !important;
-}
-
-/* Cards en modales más contrastantes */
-.modal .card {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%) !important;
-  border: 3px solid var(--primary-color) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15) !important;
-  margin-bottom: 2rem !important;
-}
-
-.modal .card-header {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
-  color: white !important;
-  border-bottom: none !important;
-  padding: 1.5rem 2rem !important;
-  border-radius: 13px 13px 0 0 !important;
-}
-
-.modal .card-header h6 {
-  color: white !important;
-  font-weight: 800 !important;
-  font-size: 1.1rem !important;
-  margin: 0 !important;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
-  background: none !important;
-  -webkit-background-clip: unset !important;
-  -webkit-text-fill-color: unset !important;
-  background-clip: unset !important;
-}
-
-.modal .card-header i {
-  color: white !important;
-  font-size: 1.3rem !important;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
-}
-
-.modal .card-body {
-  padding: 2.5rem !important;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
-}
-
-/* Form text más visible */
-.modal .form-text {
-  color: var(--info-color) !important;
-  font-weight: 600 !important;
-  font-size: 0.9rem !important;
-  margin-top: 0.5rem !important;
-}
-
-/* Alertas en modales más visibles */
-.modal .alert {
-  border: 3px solid !important;
-  border-radius: 12px !important;
-  padding: 1.5rem 2rem !important;
-  font-weight: 600 !important;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
-}
-
-.modal .alert-info {
-  background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%) !important;
-  border-color: var(--info-color) !important;
-  color: #0369a1 !important;
-}
-
-.modal .alert-warning {
-  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
-  border-color: var(--warning-color) !important;
-  color: #92400e !important;
-}
-
-.modal .alert h6 {
-  color: inherit !important;
-  font-weight: 800 !important;
-  background: none !important;
-  -webkit-background-clip: unset !important;
-  -webkit-text-fill-color: unset !important;
-  background-clip: unset !important;
-}
-
-/* Modal body con mejor contraste */
-.modal-body {
-  background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%) !important;
-  padding: 2.5rem !important;
-}
-
-/* Modal header más contrastante */
-.modal-header {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
-  border-bottom: 4px solid var(--accent-color) !important;
-  padding: 2rem 2.5rem !important;
-}
-
-.modal-header.bg-warning {
-  background: linear-gradient(135deg, var(--warning-color), var(--accent-color)) !important;
-  border-bottom: 4px solid var(--warning-hover) !important;
-}
-
-.modal-title {
-  color: white !important;
-  font-weight: 800 !important;
-  font-size: 1.4rem !important;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
-  background: none !important;
-  -webkit-background-clip: unset !important;
-  -webkit-text-fill-color: unset !important;
-  background-clip: unset !important;
-}
-
-.modal-title i {
-  color: white !important;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
-}
-
-/* Botones cerrar más visibles */
-.btn-close,
-.btn-close-white {
-  background-size: 1.5em !important;
-  opacity: 0.9 !important;
-  border-radius: 50% !important;
-  width: 2.5rem !important;
-  height: 2.5rem !important;
-  background-color: rgba(255,255,255,0.2) !important;
-}
-
-.btn-close:hover,
-.btn-close-white:hover {
-  opacity: 1 !important;
-  transform: scale(1.1) !important;
-  background-color: rgba(255,255,255,0.3) !important;
-}
-
-/* Select específico */
-.modal .form-select {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e") !important;
-  background-repeat: no-repeat !important;
-  background-position: right 1rem center !important;
-  background-size: 16px 12px !important;
-}
-
-/* Validación visual mejorada */
-.modal .form-control.ng-invalid.ng-touched {
-  border-color: var(--danger-color) !important;
-  box-shadow: 0 0 0 0.3rem rgba(239, 68, 68, 0.25) !important;
-}
-
-.modal .form-control.ng-valid.ng-touched {
-  border-color: var(--success-color) !important;
-  box-shadow: 0 0 0 0.3rem rgba(34, 197, 94, 0.25) !important;
-}
-
-/* ========== CLASES ADICIONALES PARA GRADIENTES ========== */
-
-.bg-gradient-accent {
-  background: linear-gradient(135deg, #f97316, #ea580c, #c2410c) !important;
-  color: white !important;
-  border: 2px solid #c2410c !important;
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4) !important;
-}
-
-.bg-gradient-secondary {
-  background: linear-gradient(135deg, #ec4899, #db2777, #be185d) !important;
-  color: white !important;
-  border: 2px solid #be185d !important;
-  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4) !important;
-}
-
-/* ========== MEJORAS ADICIONALES PARA ELEMENTOS ESPECÍFICOS ========== */
-
-/* Mejorar los spinners */
-.spinner-border-sm {
-  width: 1.2rem !important;
-  height: 1.2rem !important;
-  border-width: 2px !important;
-  color: inherit !important;
-}
-
-/* Mejorar los form-select en modales */
-.modal .form-select {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%) !important;
-  border: 3px solid var(--primary-color) !important;
-  color: #1e293b !important;
-  font-weight: 600 !important;
-}
-
-.modal .form-select:focus {
-  border-color: var(--secondary-color) !important;
-  box-shadow: 0 0 0 0.3rem rgba(139, 92, 246, 0.3) !important;
-}
-
-/* Mejorar el text en pequeño */
-.form-text {
-  color: var(--info-color) !important;
-  font-weight: 600 !important;
-  font-size: 0.85rem !important;
-}
-
-/* Mejorar los close buttons */
-.btn-close-white {
-  filter: brightness(0) invert(1) !important;
-  opacity: 0.8 !important;
-  background-size: 1.2em !important;
-}
-
-.btn-close-white:hover {
-  opacity: 1 !important;
-  transform: scale(1.1) !important;
-}
-
-/* Mejorar las alertas en modales */
-.modal .alert-info {
-  background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%) !important;
-  border-left: 5px solid var(--info-color) !important;
-  border-radius: 12px !important;
-  color: #0369a1 !important;
-}
-
-.modal .alert-warning {
-  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
-  border-left: 5px solid var(--warning-color) !important;
-  border-radius: 12px !important;
-  color: #92400e !important;
-}
-
-/* Mejorar los headers de cards en modales */
-.modal .card-header {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
-  border-bottom: 3px solid var(--primary-color) !important;
-  color: var(--primary-color) !important;
-  font-weight: 700 !important;
-}
-
-.modal .card-header h6 {
-  color: var(--primary-color) !important;
-  font-weight: 800 !important;
-}
-
-/* Mejorar los iconos en las labels */
-.modal .form-label i {
-  color: var(--secondary-color) !important;
-  font-size: 1.1rem !important;
-  margin-right: 0.5rem !important;
-}
-
-/* ========== ESTILOS ESPECÍFICOS PARA OBRAS SOCIALES ========== */
-
-.obra-social-osde {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
-  color: #000000 !important;
-  border: 2px solid #1e40af !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
-  font-weight: 800 !important;
-  text-shadow: none !important;
-}
-
-.obra-social-swiss {
-  background: linear-gradient(135deg, #22c55e, #16a34a) !important;
-  color: #000000 !important;
-  border: 2px solid #15803d !important;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4) !important;
-  font-weight: 800 !important;
-  text-shadow: none !important;
-}
-
-.obra-social-galeno {
-  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
-  color: #000000 !important;
-  border: 2px solid #b45309 !important;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
-  font-weight: 800 !important;
-  text-shadow: none !important;
-}
-
-.obra-social-medicus {
-  background: linear-gradient(135deg, #14b8a6, #0d9488) !important;
-  color: #000000 !important;
-  border: 2px solid #0f766e !important;
-  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4) !important;
-  font-weight: 800 !important;
-  text-shadow: none !important;
-}
-
-.obra-social-pami {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
-  color: #000000 !important;
-  border: 2px solid #6d28d9 !important;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
-  font-weight: 800 !important;
-  text-shadow: none !important;
-}
-
-.obra-social-ioma {
-  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-  color: #000000 !important;
-  border: 2px solid #b91c1c !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
-  font-weight: 800 !important;
-  text-shadow: none !important;
-}
-
-.obra-social-particular {
-  background: linear-gradient(135deg, #f97316, #ea580c) !important;
-  color: #000000 !important;
-  border: 2px solid #c2410c !important;
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4) !important;
-  font-weight: 800 !important;
-  text-shadow: none !important;
-}
-
-.obra-social-default {
-  background: linear-gradient(135deg, #ec4899, #db2777) !important;
-  color: #000000 !important;
-  border: 2px solid #be185d !important;
-  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4) !important;
-  font-weight: 800 !important;
-  text-shadow: none !important;
-}
-
-/* Efectos hover para badges de obras sociales */
-.obra-social-osde:hover,
-.obra-social-swiss:hover,
-.obra-social-galeno:hover,
-.obra-social-medicus:hover,
-.obra-social-pami:hover,
-.obra-social-ioma:hover,
-.obra-social-particular:hover,
-.obra-social-default:hover {
-  transform: scale(1.1) !important;
-  filter: brightness(1.1) !important;
-  color: #000000 !important;
-  text-shadow: none !important;
-}
-
-/* Regla general para asegurar texto negro en todos los badges de obras sociales */
-.badge[class*="obra-social"] {
-  color: #000000 !important;
-  font-weight: 800 !important;
-  text-shadow: none !important;
-  text-decoration: none !important;
-}
-
-.badge[class*="obra-social"]:hover {
-  color: #000000 !important;
-  text-shadow: none !important;
-}
-
-/* ========== CLASES ADICIONALES PARA GRADIENTES ========== */
-
-.bg-gradient-accent {
-  background: linear-gradient(135deg, #f97316, #ea580c, #c2410c) !important;
-  color: white !important;
-  border: 2px solid #c2410c !important;
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4) !important;
-}
-
-.bg-gradient-secondary {
-  background: linear-gradient(135deg, #ec4899, #db2777, #be185d) !important;
-  color: white !important;
-  border: 2px solid #be185d !important;
-  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4) !important;
-}
-
-/* ========== MEJORAS ADICIONALES PARA ELEMENTOS ESPECÍFICOS ========== */
-
-/* Mejorar los spinners */
-.spinner-border-sm {
-  width: 1.2rem !important;
-  height: 1.2rem !important;
-  border-width: 2px !important;
-  color: inherit !important;
-}
-
-/* Mejorar los form-select en modales */
-.modal .form-select {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%) !important;
-  border: 3px solid var(--primary-color) !important;
-  color: #1e293b !important;
-  font-weight: 600 !important;
-}
-
-.modal .form-select:focus {
-  border-color: var(--secondary-color) !important;
-  box-shadow: 0 0 0 0.3rem rgba(139, 92, 246, 0.3) !important;
-}
-
-/* Mejorar el text en pequeño */
-.form-text {
-  color: var(--info-color) !important;
-  font-weight: 600 !important;
-  font-size: 0.85rem !important;
-}
-
-/* Mejorar los close buttons */
-.btn-close-white {
-  filter: brightness(0) invert(1) !important;
-  opacity: 0.8 !important;
-  background-size: 1.2em !important;
-}
-
-.btn-close-white:hover {
-  opacity: 1 !important;
-  transform: scale(1.1) !important;
-}
-
-/* Mejorar las alertas en modales */
-.modal .alert-info {
-  background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%) !important;
-  border-left: 5px solid var(--info-color) !important;
-  border-radius: 12px !important;
-  color: #0369a1 !important;
-}
-
-.modal .alert-warning {
-  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
-  border-left: 5px solid var(--warning-color) !important;
-  border-radius: 12px !important;
-  color: #92400e !important;
-}
-
-/* Mejorar los headers de cards en modales */
-.modal .card-header {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
-  border-bottom: 3px solid var(--primary-color) !important;
-  color: var(--primary-color) !important;
-  font-weight: 700 !important;
-}
-
-.modal .card-header h6 {
-  color: var(--primary-color) !important;
-  font-weight: 800 !important;
-}
-
-/* Mejorar los iconos en las labels */
-.modal .form-label i {
-  color: var(--secondary-color) !important;
-  font-size: 1.1rem !important;
-  margin-right: 0.5rem !important;
 }

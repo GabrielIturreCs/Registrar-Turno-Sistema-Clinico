@@ -11,6 +11,7 @@ import { interval, Subscription } from 'rxjs';
 import { ActividadService } from '../../services/actividad.service';
 import { DentistaService } from '../../services/dentista.service';
 import { TratamientoService } from '../../services/tratamiento.service';
+import { ChatService } from '../../services/chat.service';
 // import { ReservarComponent } from '../reservar/reservar.component';
 
 interface AdminStats {
@@ -102,7 +103,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private pacienteService: PacienteService,
     private actividadService: ActividadService,
     private dentistaService: DentistaService,
-    private tratamientoService: TratamientoService
+    private tratamientoService: TratamientoService,
+    private chatService: ChatService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -234,8 +236,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Chatbot methods
   addWelcomeMessage(): void {
+    let welcomeText = '¡Hola! Soy tu asistente virtual del dashboard. ¿En qué puedo ayudarte?';
+    
+    // Personalizar mensaje según el tipo de usuario
+    if (this.user?.tipoUsuario === 'dentista') {
+      welcomeText = 'Hola Doctor/a. Soy DentalBot, tu asistente para la gestión de la clínica. Puedo ayudarte con:\n\n🔹 Gestión de citas y agenda\n🔹 Información de pacientes\n🔹 Seguimiento de tratamientos\n🔹 Reportes y estadísticas\n🔹 Control de inventario\n🔹 Configuración del sistema\n\n¿En qué puedo asistirte hoy?';
+    } else if (this.user?.tipoUsuario === 'paciente') {
+      welcomeText = '¡Hola! Soy DentalBot 🦷\n\nEstoy aquí para ayudarte con información sobre nuestros servicios dentales, horarios y responder tus consultas generales.\n\n¿En qué puedo ayudarte hoy?';
+    }
+    
     const welcomeMessage: ChatMessage = {
-      text: '¡Hola! Soy tu asistente virtual del dashboard. ¿En qué puedo ayudarte?',
+      text: welcomeText,
       isUser: false,
       timestamp: new Date()
     };
@@ -321,14 +332,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private getLocalResponse(message: string): string | null {
+    // Determinar el tipo de usuario para el chat
+    const userType = this.user?.tipoUsuario === 'dentista' ? 'dentist' : 'patient';
+    
+    // Usar el ChatService para generar una respuesta específica según el tipo de usuario
+    const chatResponse = this.chatService.generateResponse(message, userType);
+    
+    // Si hay una respuesta del ChatService, usarla
+    if (chatResponse) {
+      return chatResponse;
+    }
+
+    // Respuestas adicionales específicas del dashboard (como fallback)
     const msg = message.toLowerCase();
     
     const localResponses: { [key: string]: string } = {
-      'hola': '¡Hola! ¿En qué puedo ayudarte desde el dashboard?',
       'turnos': `Tienes ${this.totalTurnos} turnos en total, ${this.turnosHoy} turnos para hoy.`,
       'reservar': 'Para reservar un turno, puedes hacer clic en "Reservar Turno" o navegar a la sección correspondiente.',
       'cancelar': 'Para cancelar un turno, puedes hacerlo directamente desde las tarjetas de turnos usando el botón "Cancelar".',
-      'horarios': 'Nuestros horarios de atención son de lunes a viernes de 8:00 a 18:00 y sábados de 9:00 a 13:00.',
       'estadisticas': `Estadísticas actuales: ${this.totalTurnos} turnos totales, ${this.turnosHoy} turnos hoy, ${this.filteredTurnos.length} turnos activos.`,
       'proximo': this.proximoTurno ? `Tu próximo turno es el ${this.proximoTurno.fecha} a las ${this.proximoTurno.hora}.` : 'No tienes turnos próximos programados.',
       'tratamientos': 'Ofrecemos: Consulta General ($5000), Limpieza Dental ($8000), Empastes ($12000), Extracciones ($15000), y Ortodoncia.',

@@ -97,14 +97,14 @@ export class PacientesComponent implements OnInit {
 
   getObraSocialClass(obraSocial: string): string {
     switch (obraSocial.toLowerCase()) {
-      case 'osde': return 'badge bg-primary obra-social-osde fw-bold';
-      case 'swiss medical': return 'badge bg-success obra-social-swiss fw-bold';
-      case 'galeno': return 'badge bg-warning obra-social-galeno fw-bold';
-      case 'medicus': return 'badge bg-info obra-social-medicus fw-bold';
-      case 'pami': return 'badge bg-secondary obra-social-pami fw-bold';
-      case 'ioma': return 'badge bg-danger obra-social-ioma fw-bold';
-      case 'particular': return 'badge bg-gradient-accent obra-social-particular fw-bold';
-      default: return 'badge bg-gradient-secondary obra-social-default fw-bold';
+      case 'osde': return 'badge bg-primary obra-social-osde';
+      case 'swiss medical': return 'badge bg-success obra-social-swiss';
+      case 'galeno': return 'badge bg-warning obra-social-galeno';
+      case 'medicus': return 'badge bg-info obra-social-medicus';
+      case 'pami': return 'badge bg-secondary obra-social-pami';
+      case 'ioma': return 'badge bg-danger obra-social-ioma';
+      case 'particular': return 'badge bg-dark obra-social-particular';
+      default: return 'badge bg-secondary obra-social-default';
     }
   }
 
@@ -297,10 +297,5 @@ export class PacientesComponent implements OnInit {
 
   get canUpdatePaciente(): boolean {
     return this.isValidEditForm() && !this.isUpdating;
-  }
-
-  // Método para volver al dashboard
-  volverAlDashboard(): void {
-    this.router.navigate(['/dashboard']);
   }
 }

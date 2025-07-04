@@ -11,11 +11,7 @@
           <p class="page-subtitle">Administra la información de todos los pacientes de manera eficiente</p>
         </div>
         <div class="d-flex gap-3">
-          <button class="btn btn-outline-secondary" (click)="volverAlDashboard()" title="Volver al panel principal">
-            <i class="bi bi-house-door me-2"></i>
-            Volver al Panel
-          </button>
-          <button class="btn btn-primary" (click)="loadPacientes()" title="Actualizar lista">
+          <button class="btn btn-outline-info" (click)="loadPacientes()" title="Actualizar lista">
             <i class="bi bi-arrow-clockwise me-2"></i>
             Actualizar
           </button>
@@ -46,7 +42,7 @@
                   [(ngModel)]="searchTerm"
                   (input)="filterPacientes()"
                 >
-                <button class="btn btn-danger" type="button" (click)="searchTerm = ''; filterPacientes()" title="Limpiar búsqueda">
+                <button class="btn btn-outline-info" type="button" (click)="searchTerm = ''; filterPacientes()" title="Limpiar búsqueda">
                   <i class="bi bi-x-lg"></i>
                 </button>
               </div>
@@ -54,12 +50,12 @@
             <div class="col-lg-4 col-md-12 text-lg-end">
               <div class="d-flex align-items-center justify-content-lg-end justify-content-center">
                 <div class="me-3">
-                  <span class="badge bg-gradient-primary fs-6 px-3 py-2">
+                  <span class="badge bg-info fs-6 px-3 py-2">
                     <i class="bi bi-people me-2"></i>
                     {{ pacientesFiltrados.length }} de {{ pacientes.length }} pacientes
                   </span>
                 </div>
-                <div *ngIf="searchTerm" class="text-info fw-bold small">
+                <div *ngIf="searchTerm" class="text-muted small">
                   <i class="bi bi-funnel me-1"></i>
                   Filtrado
                 </div>
@@ -139,14 +135,14 @@
                 <td class="text-center">
                   <div class="btn-group" role="group">
                     <button 
-                      class="btn btn-sm btn-warning" 
+                      class="btn btn-sm btn-outline-warning" 
                       (click)="editarPaciente(paciente)"
                       title="Editar información del paciente"
                     >
                       <i class="bi bi-pencil-square"></i>
                     </button>
                     <button 
-                      class="btn btn-sm btn-danger" 
+                      class="btn btn-sm btn-outline-danger" 
                       (click)="eliminarPaciente(paciente)"
                       title="Eliminar paciente del sistema"
                     >
@@ -170,7 +166,7 @@
             <i class="bi bi-person-plus me-2"></i>
             Agregar Primer Paciente
           </button>
-          <button *ngIf="searchTerm" class="btn btn-primary" (click)="searchTerm = ''; filterPacientes()">
+          <button *ngIf="searchTerm" class="btn btn-outline-info" (click)="searchTerm = ''; filterPacientes()">
             <i class="bi bi-arrow-clockwise me-2"></i>
             Limpiar Filtros
           </button>
@@ -406,7 +402,7 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger" (click)="closeModal()" [disabled]="isCreating">
+          <button type="button" class="btn btn-outline-danger" (click)="closeModal()" [disabled]="isCreating">
             <i class="bi bi-x-circle me-2"></i>
             Cancelar
           </button>
@@ -554,7 +550,7 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger" (click)="closeEditModal()" [disabled]="isUpdating">
+          <button type="button" class="btn btn-outline-danger" (click)="closeEditModal()" [disabled]="isUpdating">
             <i class="bi bi-x-circle me-2"></i>
             Cancelar
           </button>
