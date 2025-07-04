@@ -31,4 +31,13 @@ export const routes: Routes = [
   { path: 'pacientes', component: PacientesComponent, canActivate: [authGuard(['dentista', 'administrador'])] },
   { path: 'dentista', component: DentistaComponent, canActivate: [authGuard('administrador')] },
   { path: 'tratamiento', component: TratamientoComponent, canActivate: [authGuard('administrador')] },
+  
+  // Rutas para callbacks de MercadoPago
+  { path: 'payment/success', component: VistaPacienteComponent, canActivate: [authGuard('paciente')] },
+  { path: 'payment/failure', component: VistaPacienteComponent, canActivate: [authGuard('paciente')] },
+  { path: 'payment/pending', component: VistaPacienteComponent, canActivate: [authGuard('paciente')] },
+  { path: 'payment/return', component: VistaPacienteComponent, canActivate: [authGuard('paciente')] },
+  
+  // Ruta wildcard para 404
+  { path: '**', redirectTo: '/' }
 ];

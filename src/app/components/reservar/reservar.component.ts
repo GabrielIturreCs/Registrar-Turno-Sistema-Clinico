@@ -118,16 +118,9 @@ export class ReservarComponent implements OnInit {
     setTimeout(() => {
       // Check if we're at the very beginning (step 1)
       if (this.currentStep === 1) {
-        console.log('At beginning of reservation wizard - checking if page needs refresh');
-        const hasRefreshed = sessionStorage.getItem('reservar-step1-refreshed');
-        if (!hasRefreshed) {
-          console.log('Refreshing page at step 1 for fresh data');
-          sessionStorage.setItem('reservar-step1-refreshed', 'true');
-          setTimeout(() => {
-            window.location.reload();
-          }, 100);
-          return;
-        }
+        console.log('At beginning of reservation wizard - data ready');
+        // Removed automatic page refresh as it interferes with navigation
+        sessionStorage.setItem('reservar-step1-loaded', 'true');
       }
     }, 500); // Give more time for user data to load
   }
@@ -678,24 +671,21 @@ export class ReservarComponent implements OnInit {
     // Trigger refresh for patient dashboard before navigation
     this.dataRefreshService.triggerRefresh('vistaPaciente');
     
-    // Add a small delay to ensure refresh is processed and navigation is reliable
+    // Add a small delay to ensure navigation is reliable
     setTimeout(() => {
       if (this.user?.tipoUsuario === 'paciente') {
-        console.log('Navigating to /vistaPaciente and forcing page reload');
+        console.log('Navigating to /vistaPaciente');
         this.router.navigate(['/vistaPaciente']).then(
           (success) => {
             if (success) {
-              // Force page reload to ensure data is completely fresh
-              console.log('Navigation successful, forcing page reload');
-              setTimeout(() => {
-                window.location.reload();
-              }, 500);
+              console.log('Navigation successful');
+              // Removed automatic page reload as it interferes with navigation
             }
           }
         ).catch((error: any) => {
           console.error('Navigation to /vistaPaciente failed:', error);
-          // Force hard navigation as fallback
-          window.location.href = '/vistaPaciente';
+          // Use router navigation instead of hard navigation
+          this.router.navigate(['/vistaPaciente']);
         });
       } else {
         // Para dentistas y administradores

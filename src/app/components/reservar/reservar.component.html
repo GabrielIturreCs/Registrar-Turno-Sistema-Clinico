@@ -90,7 +90,7 @@
             <div class="text-center py-4" *ngIf="pacientes.length === 0">
               <div class="spinner-border text-primary mb-3" role="status"></div>
               <p>Cargando pacientes disponibles...</p>
-              <button class="btn btn-outline-primary" (click)="loadPacientes()">
+              <button type="button" class="btn btn-outline-primary" (click)="loadPacientes()">
                 <i class="fas fa-refresh"></i> Reintentar
               </button>
             </div>
@@ -118,11 +118,11 @@
             <div class="calendar-container">
               <!-- Calendar Header -->
               <div class="calendar-header">
-                <button class="btn btn-outline-primary" (click)="prevMonth()">
+                <button type="button" class="btn btn-outline-primary" (click)="prevMonth()">
                   <i class="fas fa-chevron-left"></i>
                 </button>
                 <h4>{{ getMonthName() }} {{ getYear() }}</h4>
-                <button class="btn btn-outline-primary" (click)="nextMonth()">
+                <button type="button" class="btn btn-outline-primary" (click)="nextMonth()">
                   <i class="fas fa-chevron-right"></i>
                 </button>
               </div>
@@ -317,6 +317,7 @@
 
             <div class="confirmation-actions mt-4">
               <button 
+                type="button"
                 class="btn btn-success btn-lg me-3" 
                 (click)="confirmBooking()"
                 [disabled]="isLoading">
@@ -325,7 +326,7 @@
                 {{ isLoading ? 'Registrando...' : 'Confirmar Turno' }}
               </button>
               
-              <button class="btn btn-secondary" (click)="prevStep()" [disabled]="isLoading">
+              <button type="button" class="btn btn-secondary" (click)="prevStep()" [disabled]="isLoading">
                 <i class="fas fa-arrow-left"></i> Anterior
               </button>
             </div>
