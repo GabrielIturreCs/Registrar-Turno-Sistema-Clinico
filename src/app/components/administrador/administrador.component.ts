@@ -23,9 +23,9 @@ export class AdminComponent implements OnInit {
   ];
   usuarioAEliminar: any;
   showDeleteModal = false;
-  showAddUserModal = false;
+  showEditModal = false;
   toastMessage = '';
-  newUser = { nombre: '', apellido: '', tipoUsuario: 'paciente', nombreUsuario: '', dni: '', telefono: '' };
+  editingUser = { nombre: '', apellido: '', tipoUsuario: 'paciente', nombreUsuario: '', dni: '', telefono: '' };
 
   constructor(
     private router: Router,
@@ -40,6 +40,8 @@ export class AdminComponent implements OnInit {
 
   cargarUsuarios(): void {
     this.usuarios = [];
+    
+    // Cargar pacientes
     this.pacienteService.getPacientes().subscribe(pacientes => {
       const pacientesMapped = pacientes.map((p: any) => ({
         ...p,
@@ -49,6 +51,8 @@ export class AdminComponent implements OnInit {
       }));
       this.usuarios = [...this.usuarios, ...pacientesMapped];
     });
+    
+    // Cargar dentistas
     this.dentistaService.getDentistas().subscribe((dentistas: any[]) => {
       const dentistasMapped = dentistas.map((d: any) => ({
         ...d,
@@ -58,6 +62,8 @@ export class AdminComponent implements OnInit {
       }));
       this.usuarios = [...this.usuarios, ...dentistasMapped];
     });
+    
+    // Cargar administradores
     this.registerService.getUsuarios().subscribe((admins: any[]) => {
       const adminsMapped = admins.map((a: any) => ({
         ...a,
@@ -99,19 +105,23 @@ export class AdminComponent implements OnInit {
     this.cargarUsuarios();
   }
 
-  openAddUserModal() {
-    this.newUser = { nombre: '', apellido: '', tipoUsuario: 'paciente', nombreUsuario: '', dni: '', telefono: '' };
-    this.showAddUserModal = true;
+  openEditModal(usuario: any) {
+    this.editingUser = { ...usuario };
+    this.showEditModal = true;
   }
 
-  closeAddUserModal() {
-    this.showAddUserModal = false;
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editingUser = { nombre: '', apellido: '', tipoUsuario: 'paciente', nombreUsuario: '', dni: '', telefono: '' };
   }
 
-  addUser() {
-    this.usuarios.push({ ...this.newUser });
-    this.toastMessage = 'Usuario agregado con éxito';
-    this.closeAddUserModal();
+  updateUser() {
+    const index = this.usuarios.findIndex(u => u.nombreUsuario === this.editingUser.nombreUsuario);
+    if (index !== -1) {
+      this.usuarios[index] = { ...this.editingUser };
+    }
+    this.toastMessage = 'Usuario actualizado con éxito';
+    this.closeEditModal();
     setTimeout(() => this.toastMessage = '', 3000);
     this.cargarUsuarios();
   }
@@ -125,6 +135,6 @@ export class AdminComponent implements OnInit {
       (usuario.nombre.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
        usuario.apellido.toLowerCase().includes(this.searchTerm.toLowerCase())) &&
       (this.filterTipo === 'todos' || usuario.tipoUsuario === this.filterTipo)
-    ).filter(usuario => usuario.tipoUsuario === 'paciente' || usuario.tipoUsuario === 'dentista');
+    );
   }
 }

@@ -1,12 +1,15 @@
-import { Component, OnInit} from '@angular/core';
+import { Component, OnInit, OnDestroy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { User,Turno,Estadisticas } from '../../interfaces';
+import { User,Turno,Estadisticas, Paciente, Tratamiento } from '../../interfaces';
 import { TurnoService } from '../../services/turno.service';
+import { PacienteService } from '../../services/paciente.service';
+import { TratamientoService } from '../../services/tratamiento.service';
 import { NgChartsModule } from 'ng2-charts';
 import { PdfExportService } from '../../services/pdf-export.service';
+import { Subscription, interval } from 'rxjs';
 
 interface EstadisticaTratamiento {
   tratamiento: string;
@@ -20,9 +23,11 @@ interface EstadisticaTratamiento {
   templateUrl: './estadistica.component.html',
   styleUrl: './estadistica.component.css'
 })
-export class EstadisticaComponent implements OnInit {
+export class EstadisticaComponent implements OnInit, OnDestroy {
   user: User | null = null;
   turnos: Turno[] = [];
+  pacientes: Paciente[] = [];
+  tratamientos: Tratamiento[] = [];
 
   // Estructura para las estadísticas generales
   estadisticas: Estadisticas = {
@@ -58,46 +63,43 @@ export class EstadisticaComponent implements OnInit {
     ]
   };
 
+  // Suscripciones para manejo de memoria
+  private turnosSubscription?: Subscription;
+  private pacientesSubscription?: Subscription;
+  private tratamientosSubscription?: Subscription;
+  private refreshInterval?: Subscription;
+
+  // Estado de carga
+  isLoading = false;
+
   // Constructor para inyectar servicios
   constructor(
     private router: Router,
     private turnoService: TurnoService,
+    private pacienteService: PacienteService,
+    private tratamientoService: TratamientoService,
     private authService: AuthService,
     private pdfExportService: PdfExportService
   ) {}
+  
   ngOnInit(): void {
     this.loadUserData();
-    // Datos mock variados y recientes para mostrar estadísticas
-    this.turnos = [
-      // Pacientes
-      { id: 1, nroTurno: 'T-101', fecha: '2025-06-01', hora: '09:00', nombre: 'Juan', apellido: 'Pérez', tratamiento: 'Limpieza', estado: 'completado', precioFinal: 2000, tipoUsuario: 'paciente' },
-      { id: 2, nroTurno: 'T-102', fecha: '2025-06-02', hora: '10:00', nombre: 'Ana', apellido: 'García', tratamiento: 'Extracción', estado: 'reservado', precioFinal: 3500, tipoUsuario: 'paciente' },
-      { id: 3, nroTurno: 'T-103', fecha: '2025-06-03', hora: '11:00', nombre: 'Carlos', apellido: 'López', tratamiento: 'Ortodoncia', estado: 'cancelado', precioFinal: 0, tipoUsuario: 'paciente' },
-      { id: 4, nroTurno: 'T-104', fecha: '2025-06-04', hora: '12:00', nombre: 'Lucía', apellido: 'Martínez', tratamiento: 'Limpieza', estado: 'completado', precioFinal: 2000, tipoUsuario: 'paciente' },
-      { id: 5, nroTurno: 'T-105', fecha: '2025-06-05', hora: '13:00', nombre: 'Pedro', apellido: 'Sánchez', tratamiento: 'Extracción', estado: 'completado', precioFinal: 3500, tipoUsuario: 'paciente' },
-      // Dentistas
-      { id: 6, nroTurno: 'T-106', fecha: '2025-06-06', hora: '14:00', nombre: 'Dr. Mario', apellido: 'Fernández', tratamiento: 'Ortodoncia', estado: 'reservado', precioFinal: 5000, tipoUsuario: 'dentista' },
-      { id: 7, nroTurno: 'T-107', fecha: '2025-06-07', hora: '15:00', nombre: 'Dra. Sofía', apellido: 'Gómez', tratamiento: 'Limpieza', estado: 'reservado', precioFinal: 2000, tipoUsuario: 'dentista' },
-      { id: 8, nroTurno: 'T-108', fecha: '2025-06-08', hora: '16:00', nombre: 'Dr. Diego', apellido: 'Ruiz', tratamiento: 'Extracción', estado: 'cancelado', precioFinal: 0, tipoUsuario: 'dentista' },
-      { id: 9, nroTurno: 'T-109', fecha: '2025-06-09', hora: '17:00', nombre: 'Dra. Valentina', apellido: 'Torres', tratamiento: 'Ortodoncia', estado: 'completado', precioFinal: 5000, tipoUsuario: 'dentista' },
-      { id: 10, nroTurno: 'T-110', fecha: '2025-06-10', hora: '18:00', nombre: 'Dr. Martín', apellido: 'Castro', tratamiento: 'Limpieza', estado: 'completado', precioFinal: 2000, tipoUsuario: 'dentista' },
-      // Administradores (turnos de gestión, reuniones, etc.)
-      { id: 11, nroTurno: 'T-111', fecha: '2025-06-11', hora: '09:30', nombre: 'Admin Elena', apellido: 'Mendoza', tratamiento: 'Reunión de Gestión', estado: 'completado', precioFinal: 0, tipoUsuario: 'administrador' },
-      { id: 12, nroTurno: 'T-112', fecha: '2025-06-12', hora: '10:30', nombre: 'Admin Luis', apellido: 'Silva', tratamiento: 'Auditoría', estado: 'reservado', precioFinal: 0, tipoUsuario: 'administrador' },
-      // Más variedad
-      { id: 13, nroTurno: 'T-113', fecha: '2025-06-13', hora: '11:30', nombre: 'Paula', apellido: 'Ríos', tratamiento: 'Extracción', estado: 'completado', precioFinal: 3500, tipoUsuario: 'paciente' },
-      { id: 14, nroTurno: 'T-114', fecha: '2025-06-14', hora: '12:30', nombre: 'Jorge', apellido: 'Moreno', tratamiento: 'Ortodoncia', estado: 'cancelado', precioFinal: 0, tipoUsuario: 'dentista' },
-      { id: 15, nroTurno: 'T-115', fecha: '2025-06-15', hora: '13:30', nombre: 'Marta', apellido: 'Vega', tratamiento: 'Blanqueamiento', estado: 'completado', precioFinal: 4000, tipoUsuario: 'paciente' },
-      { id: 16, nroTurno: 'T-116', fecha: '2025-06-16', hora: '14:30', nombre: 'Raúl', apellido: 'Soto', tratamiento: 'Limpieza', estado: 'reservado', precioFinal: 2000, tipoUsuario: 'dentista' },
-      { id: 17, nroTurno: 'T-117', fecha: '2025-06-17', hora: '15:30', nombre: 'Cecilia', apellido: 'Aguilar', tratamiento: 'Extracción', estado: 'completado', precioFinal: 3500, tipoUsuario: 'paciente' },
-      { id: 18, nroTurno: 'T-118', fecha: '2025-06-18', hora: '16:30', nombre: 'Tomás', apellido: 'Paz', tratamiento: 'Ortodoncia', estado: 'reservado', precioFinal: 5000, tipoUsuario: 'dentista' },
-      { id: 19, nroTurno: 'T-119', fecha: '2025-06-19', hora: '17:30', nombre: 'Rosa', apellido: 'Campos', tratamiento: 'Blanqueamiento', estado: 'completado', precioFinal: 4000, tipoUsuario: 'paciente' },
-      { id: 20, nroTurno: 'T-120', fecha: '2025-06-20', hora: '18:30', nombre: 'Nicolás', apellido: 'Luna', tratamiento: 'Limpieza', estado: 'completado', precioFinal: 2000, tipoUsuario: 'paciente' }
-    ];
-    // Forzar fechas para que incluyan todos los datos mock
-    this.fechaDesde = '2025-06-01';
-    this.fechaHasta = '2025-06-30';
-    this.actualizarEstadisticas();
+    this.setDefaultDates();
+    this.loadData();
+    
+    // Configurar actualización automática cada 5 minutos
+    this.refreshInterval = interval(300000).subscribe(() => {
+      console.log('Estadísticas: Actualización automática iniciada');
+      this.loadData();
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Limpiar suscripciones para evitar memory leaks
+    this.turnosSubscription?.unsubscribe();
+    this.pacientesSubscription?.unsubscribe();
+    this.tratamientosSubscription?.unsubscribe();
+    this.refreshInterval?.unsubscribe();
   }
 
   //aca se carga el usuario actual
@@ -132,11 +134,56 @@ export class EstadisticaComponent implements OnInit {
     }
   }
 
-  //aca se cargan los turnos desde el servicio
+  //aca se cargan los datos desde los servicios
   loadData(): void {
-    this.turnoService.getTurnos().subscribe(turnos => {
-      this.turnos = turnos;
-      this.actualizarEstadisticas();
+    this.isLoading = true;
+    
+    // Limpiar suscripciones anteriores
+    this.turnosSubscription?.unsubscribe();
+    this.pacientesSubscription?.unsubscribe();
+    this.tratamientosSubscription?.unsubscribe();
+    
+    // Cargar turnos
+    this.turnosSubscription = this.turnoService.getTurnos().subscribe({
+      next: (turnos) => {
+        console.log('Estadísticas: Turnos cargados:', turnos.length);
+        this.turnos = turnos;
+        this.actualizarEstadisticas();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error cargando turnos:', error);
+        this.turnos = [];
+        this.actualizarEstadisticas();
+        this.isLoading = false;
+        this.mostrarNotificacion('Error al cargar turnos', 'error');
+      }
+    });
+
+    // Cargar pacientes
+    this.pacientesSubscription = this.pacienteService.getPacientes().subscribe({
+      next: (pacientes) => {
+        console.log('Estadísticas: Pacientes cargados:', pacientes.length);
+        this.pacientes = pacientes;
+      },
+      error: (error) => {
+        console.error('Error cargando pacientes:', error);
+        this.pacientes = [];
+        this.mostrarNotificacion('Error al cargar pacientes', 'error');
+      }
+    });
+
+    // Cargar tratamientos
+    this.tratamientosSubscription = this.tratamientoService.getTratamientos().subscribe({
+      next: (tratamientos) => {
+        console.log('Estadísticas: Tratamientos cargados:', tratamientos.length);
+        this.tratamientos = tratamientos;
+      },
+      error: (error) => {
+        console.error('Error cargando tratamientos:', error);
+        this.tratamientos = [];
+        this.mostrarNotificacion('Error al cargar tratamientos', 'error');
+      }
     });
   }
 
@@ -222,6 +269,34 @@ export class EstadisticaComponent implements OnInit {
       .sort((a, b) => b.cantidad - a.cantidad);
   }
 
+  // Método para refrescar datos manualmente
+  refreshEstadisticas(): void {
+    console.log('Estadísticas: Refrescando datos...');
+    this.loadData();
+    this.mostrarNotificacion('Datos actualizados correctamente', 'success');
+  }
+
+  // Método para mostrar notificaciones
+  private mostrarNotificacion(mensaje: string, tipo: 'success' | 'error' | 'info'): void {
+    // Crear una notificación simple
+    const notificacion = document.createElement('div');
+    notificacion.className = `alert alert-${tipo === 'success' ? 'success' : tipo === 'error' ? 'danger' : 'info'} alert-dismissible fade show position-fixed`;
+    notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notificacion.innerHTML = `
+      ${mensaje}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    // Remover la notificación después de 3 segundos
+    setTimeout(() => {
+      if (notificacion.parentNode) {
+        notificacion.parentNode.removeChild(notificacion);
+      }
+    }, 3000);
+  }
+
   navigateToDashboard(): void {
     this.router.navigate(['/dashboard']);
   }
@@ -245,5 +320,14 @@ export class EstadisticaComponent implements OnInit {
     }
   }
 
-
+  // Método para obtener estadísticas adicionales
+  getEstadisticasAdicionales(): any {
+    const completados = this.estadisticas.completados;
+    const ingresos = this.estadisticas.ingresos;
+    return {
+      totalPacientes: this.pacientes.length,
+      totalTratamientos: this.tratamientos.length,
+      promedioIngresosPorTurno: completados > 0 ? (ingresos / completados).toFixed(2) : '0',
+    };
+  }
 }

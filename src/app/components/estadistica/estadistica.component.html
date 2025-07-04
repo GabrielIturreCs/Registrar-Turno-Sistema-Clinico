@@ -26,12 +26,29 @@
 </div>
 
 <!-- Vista de Estadísticas -->
-<div class="container-fluid">
+<div class="container-fluid position-relative">
+  <!-- Overlay de carga -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2">Actualizando estadísticas...</p>
+  </div>
   <!-- Header -->
   <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h5><i class="fas fa-chart-bar"></i> Estadísticas del Sistema</h5>
       <div>
+        <h5><i class="fas fa-chart-bar"></i> Estadísticas del Sistema</h5>
+        <small class="text-muted">
+          <i class="fas fa-circle text-success"></i> Datos en tiempo real
+          <span class="ms-2">Última actualización: {{ fechaDesde }} - {{ fechaHasta }}</span>
+        </small>
+      </div>
+      <div>
+        <button class="btn btn-success btn-sm me-2" (click)="refreshEstadisticas()" [disabled]="isLoading">
+          <i class="fas" [class.fa-sync-alt]="!isLoading" [class.fa-spinner]="isLoading" [class.fa-spin]="isLoading"></i> 
+          {{ isLoading ? 'Cargando...' : 'Refrescar' }}
+        </button>
         <button class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#exportModal">
           <i class="fas fa-download"></i> Exportar
         </button>
@@ -69,17 +86,13 @@
         <option value="administrador">Administradores</option>
       </select>
     </div>
-    <div class="col-md-3 d-flex align-items-end">
-      <button class="btn btn-outline-primary w-100" (click)="actualizarEstadisticas()">
-        <i class="fas fa-sync-alt"></i> Actualizar
-      </button>
-    </div>
+    <!-- Botón de actualizar eliminado -->
   </div>
   <!-- Fin filtros -->
 
   <!-- Tarjetas de resumen -->
   <div class="row mb-4">
-    <div class="col-md-3">
+    <div class="col-md-2">
       <div class="card text-center bg-primary text-white">
         <div class="card-body">
           <h3 class="card-title">{{ estadisticas.total }}</h3>
@@ -87,7 +100,23 @@
         </div>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
+      <div class="card text-center bg-secondary text-white">
+        <div class="card-body">
+          <h3 class="card-title">{{ getEstadisticasAdicionales().totalPacientes }}</h3>
+          <p class="card-text">Total Pacientes</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card text-center bg-dark text-white">
+        <div class="card-body">
+          <h3 class="card-title">{{ getEstadisticasAdicionales().totalTratamientos }}</h3>
+          <p class="card-text">Total Tratamientos</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
       <div class="card text-center bg-success text-white">
         <div class="card-body">
           <h3 class="card-title">{{ estadisticas.completados }}</h3>
@@ -95,19 +124,19 @@
         </div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card text-center bg-warning text-white">
+    <div class="col-md-2">
+      <div class="card text-center bg-warning text-dark">
         <div class="card-body">
           <h3 class="card-title">{{ estadisticas.reservados }}</h3>
           <p class="card-text">Pendientes</p>
         </div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card text-center bg-info text-white">
+    <div class="col-md-2">
+      <div class="card text-center bg-danger text-white">
         <div class="card-body">
-          <h3 class="card-title">${{ estadisticas.ingresos }}</h3>
-          <p class="card-text">Ingresos Totales</p>
+          <h3 class="card-title">{{ estadisticas.cancelados }}</h3>
+          <p class="card-text">Cancelados</p>
         </div>
       </div>
     </div>

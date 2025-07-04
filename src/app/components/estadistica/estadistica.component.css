@@ -177,3 +177,86 @@ body {
 .btn-secondary:hover {
   background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%) !important;
 }
+
+/* Overlay de carga */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  border-radius: 18px;
+}
+
+.loading-overlay .spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.loading-overlay p {
+  color: #00bfff;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+/* Mejorar indicador de estado de conexión */
+.text-success {
+  color: #28a745 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+/* Animación para el botón de refrescar */
+.btn-success {
+  background: linear-gradient(90deg, #28a745 0%, #20c997 100%) !important;
+  color: #fff !important;
+  border: none;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-success:hover {
+  background: linear-gradient(90deg, #20c997 0%, #28a745 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(40, 167, 69, 0.4);
+}
+
+.btn-success:disabled {
+  background: #6c757d !important;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Estilos para notificaciones */
+.alert {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+}
+
+.alert-success {
+  background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+  color: white;
+}
+
+.alert-danger {
+  background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+  color: white;
+}
+
+.alert-info {
+  background: linear-gradient(90deg, #17a2b8 0%, #138496 100%);
+  color: white;
+}
+
+.alert .btn-close {
+  filter: invert(1);
+}
