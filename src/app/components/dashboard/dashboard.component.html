@@ -359,8 +359,8 @@
     </div>
   </div>
 
-  <!-- Chatbot Widget - Disponible en el dashboard -->
-  <div class="chatbot-widget">
+  <!-- Chatbot Widget - Solo para dentistas y pacientes -->
+  <div class="chatbot-widget" *ngIf="user?.tipoUsuario !== 'administrador'">
     <!-- Floating Button -->
     <div class="chat-toggle-btn" (click)="toggleChat()" [class.open]="chatOpen">
       <img src="/assets/images/logo.png" alt="Chat" class="chat-toggle-img" *ngIf="!chatOpen">
