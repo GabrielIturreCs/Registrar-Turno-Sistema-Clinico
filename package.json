@@ -1,0 +1,22 @@
+{
+  "name": "sistema-odontologico-monorepo",
+  "version": "1.0.0",
+  "description": "Sistema de gestión odontológica con frontend Angular y backend Node.js",
+  "scripts": {
+    "build": "npm run build:frontend",
+    "build:frontend": "cd Registrar-Turno-Sistema-Clinico && npm install && npm run build:render",
+    "build:render": "npm run build:frontend && cp -r Registrar-Turno-Sistema-Clinico/dist/odontologiafrontend/browser/* .",
+    "build:backend": "cd Backend-Develop && npm install",
+    "install": "npm run install:frontend",
+    "install:frontend": "cd Registrar-Turno-Sistema-Clinico && npm install",
+    "install:backend": "cd Backend-Develop && npm install",
+    "start:frontend": "cd Registrar-Turno-Sistema-Clinico && npm start",
+    "start:backend": "cd Backend-Develop && npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GabrielIturreCs/Registrar-Turno-Sistema-Clinico"
+  },
+  "author": "Gabriel Iturre",
+  "license": "MIT"
+}
