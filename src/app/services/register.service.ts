@@ -2,16 +2,16 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { RegisterForm } from '../interfaces';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RegisterService {
 
-
   hostBase: string;
   constructor(private _http: HttpClient) { 
-    this.hostBase = "http://localhost:3000/api/usuario/";
+    this.hostBase = `${environment.apiUrl}/usuario/`;
   }
 
   //crearUsuario

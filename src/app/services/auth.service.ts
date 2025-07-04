@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { LoginForm } from '../interfaces';
+import { environment } from '../environments/environment';
 import { User } from '../interfaces';
 
 /*export interface User {
@@ -35,7 +37,7 @@ export class AuthService {
   hostBase: string;
 
   constructor(private router: Router,private _http: HttpClient) {
-    this.hostBase = "http://localhost:3000/api/usuario/";
+    this.hostBase = `${environment.apiUrl}/usuario/`;
     this.loadUserFromStorage();
   }
 

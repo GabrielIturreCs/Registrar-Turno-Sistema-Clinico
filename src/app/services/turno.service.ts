@@ -3,12 +3,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Turno, Tratamiento, Paciente } from '../interfaces';
 import { tap } from 'rxjs/operators';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TurnoService {
-  private apiUrl = 'http://localhost:3000/api/turno';
+  private apiUrl = `${environment.apiUrl}/turno`;
   private turnosSubject = new BehaviorSubject<Turno[]>([]);
   public turnos$ = this.turnosSubject.asObservable();
 
@@ -127,12 +128,12 @@ export class TurnoService {
   // Obtener tratamientos disponibles
   getTratamientos(): Observable<Tratamiento[]> {
     // Sin headers de autenticación para simplificar
-    return this.http.get<Tratamiento[]>('http://localhost:3000/api/tratamiento');
+    return this.http.get<Tratamiento[]>(`${environment.apiUrl}/tratamiento`);
   }
 
   // Obtener pacientes
   getPacientes(): Observable<Paciente[]> {
-    return this.http.get<Paciente[]>('http://localhost:3000/api/pacientes', { 
+    return this.http.get<Paciente[]>(`${environment.apiUrl}/pacientes`, { 
       headers: this.getHeaders() 
     });
   }
