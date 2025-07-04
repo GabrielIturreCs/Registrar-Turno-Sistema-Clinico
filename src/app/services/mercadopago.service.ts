@@ -39,6 +39,7 @@ export interface PaymentRequest {
   external_reference?: string;
   notification_url?: string;
   statement_descriptor?: string;
+  user_type?: string; // Agregar tipo de usuario
 }
 
 export interface SubscriptionRequest {
@@ -112,17 +113,20 @@ export class MercadoPagoService {
    * @param pacienteEmail Email del paciente
    * @param monto Monto del pago
    * @param descripcion Descripción del tratamiento
+   * @param userType Tipo de usuario (opcional)
    * @returns Observable con la respuesta de Mercado Pago
    */
   createTurnoPayment(
     turnoId: string, 
     pacienteEmail: string, 
     monto: number, 
-    descripcion: string
+    descripcion: string,
+    userType?: string
   ): Observable<MercadoPagoResponse> {
     const paymentData: PaymentRequest = {
       payer_email: pacienteEmail,
       external_reference: turnoId,
+      user_type: userType || 'paciente', // Agregar tipo de usuario
       items: [
         {
           title: `Turno Médico - ${descripcion}`,

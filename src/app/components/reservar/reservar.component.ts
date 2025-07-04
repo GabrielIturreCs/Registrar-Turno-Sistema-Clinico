@@ -626,11 +626,13 @@ export class ReservarComponent implements OnInit {
         // 2. Guardar el turnoId para luego actualizarlo
         const turnoId = turnoCreado._id || turnoCreado.id;
         // 3. Crear el pago en Mercado Pago
+        const userType = this.user?.tipoUsuario || 'paciente';
         this.mercadoPagoService.createTurnoPayment(
           turnoId,
           `${paciente.nombre.toLowerCase()}.${paciente.apellido.toLowerCase()}@example.com`,
           monto,
-          descripcion
+          descripcion,
+          userType
         ).subscribe({
           next: (response: any) => {
             // Guardar información del turno en sessionStorage
