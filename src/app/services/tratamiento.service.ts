@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Tratamiento } from '../interfaces';
+import { environment } from '../environments/environment';
 
 // Interfaces para las respuestas del backend
 interface ApiResponse<T> {
@@ -14,7 +15,7 @@ interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class TratamientoService {
-  private apiUrl = 'http://localhost:3000/api/tratamiento';
+  private apiUrl = `${environment.apiUrl}/tratamiento`;
 
   constructor(private http: HttpClient) { }
 
