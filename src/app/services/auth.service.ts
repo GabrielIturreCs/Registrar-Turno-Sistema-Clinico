@@ -145,6 +145,10 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  setCurrentUser(user: User): void {
+    this.currentUserSubject.next(user);
+  }
+
   isAuthenticated(): boolean {
     return this.currentUserSubject.value !== null;
   }

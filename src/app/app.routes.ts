@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
+import { GoogleCallbackComponent } from './components/login/google-callback.component';
 import { ReservarComponent } from './components/reservar/reservar.component';
 import { TurnosComponent } from './components/turnos/turnos.component';
 import { RegistroComponent } from './components/registro/registro.component';
@@ -20,6 +21,7 @@ import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
+  { path: 'login/google-callback', component: GoogleCallbackComponent },
   { path: 'registro', component: RegistroComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard(['dentista', 'administrador'])] },
   { path: 'vistaPaciente', component: VistaPacienteComponent, canActivate: [authGuard('paciente')] },
