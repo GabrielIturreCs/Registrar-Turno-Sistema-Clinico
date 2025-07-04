@@ -14,6 +14,7 @@ import { DentistaComponent } from './components/dentista/dentista.component';
 import { TratamientoComponent } from './components/tratamiento/tratamiento.component';
 
 import { ReprogramarComponent } from './components/reprogramar/reprogramar.component';
+import { PaymentCallbackComponent } from './components/payment-callback/payment-callback.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -33,10 +34,10 @@ export const routes: Routes = [
   { path: 'tratamiento', component: TratamientoComponent, canActivate: [authGuard('administrador')] },
   
   // Rutas para callbacks de MercadoPago
-  { path: 'payment/success', component: VistaPacienteComponent, canActivate: [authGuard('paciente')] },
-  { path: 'payment/failure', component: VistaPacienteComponent, canActivate: [authGuard('paciente')] },
-  { path: 'payment/pending', component: VistaPacienteComponent, canActivate: [authGuard('paciente')] },
-  { path: 'payment/return', component: VistaPacienteComponent, canActivate: [authGuard('paciente')] },
+  { path: 'payment/success', component: PaymentCallbackComponent, canActivate: [authGuard('paciente')] },
+  { path: 'payment/failure', component: PaymentCallbackComponent, canActivate: [authGuard('paciente')] },
+  { path: 'payment/pending', component: PaymentCallbackComponent, canActivate: [authGuard('paciente')] },
+  { path: 'payment/return', component: PaymentCallbackComponent, canActivate: [authGuard('paciente')] },
   
   // Ruta wildcard para 404
   { path: '**', redirectTo: '/' }
