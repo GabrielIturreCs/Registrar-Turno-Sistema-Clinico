@@ -5,7 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "build:prod": "ng build --configuration production",
+    "build:prod": "ng build --configuration production --optimization=true --output-hashing=all --source-map=false --extract-licenses=true",
+    "build:render": "ng build --configuration production --optimization=true --output-hashing=all --source-map=false --extract-licenses=true --named-chunks=false --output-mode=static",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:odontologiafrontend": "node dist/odontologiafrontend/server/server.mjs"
