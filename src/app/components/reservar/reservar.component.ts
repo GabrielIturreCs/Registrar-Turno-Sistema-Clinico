@@ -7,6 +7,7 @@ import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
 import { TurnoService } from '../../services/turno.service';
 import { PacienteService } from '../../services/paciente.service';
 import { DataRefreshService } from '../../services/data-refresh.service';
+import { MercadoPagoService } from '../../services/mercadopago.service';
 import { Tratamiento } from '../../interfaces';
 
 interface User {
@@ -86,7 +87,8 @@ export class ReservarComponent implements OnInit {
     private chatbotService: ChatbotService,
     private turnoService: TurnoService,
     private pacienteService: PacienteService,
-    private dataRefreshService: DataRefreshService
+    private dataRefreshService: DataRefreshService,
+    private mercadoPagoService: MercadoPagoService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -100,6 +102,9 @@ export class ReservarComponent implements OnInit {
     this.addWelcomeMessage();
     this.generateCalendar();
     this.loadOccupiedSlots();
+    
+    // Verificar si hay parámetros de pago de Mercado Pago
+    this.procesarResultadoPago();
     
     // Ajustar total de pasos según el tipo de usuario
     if (this.user?.tipoUsuario === 'dentista' || this.user?.tipoUsuario === 'administrador') {
@@ -605,38 +610,62 @@ export class ReservarComponent implements OnInit {
       alert('Error: No se pudo obtener el ID del paciente');
       return;
     }
+
+    // Obtener el email del paciente
+    const paciente = this.pacientes.find(p => 
+      (p._id === pacienteId) || (p.id?.toString() === pacienteId)
+    );
     
-    const turnoData = {
-      pacienteId: pacienteId,
-      fecha: this.selectedDate,
-      hora: this.selectedTime,
-      tratamientoId: this.selectedTreatment._id || this.selectedTreatment.id // Usar _id del backend o id de fallback
-    };
+    if (!paciente) {
+      this.isLoading = false;
+      alert('Error: No se pudo obtener la información del paciente');
+      return;
+    }
 
-    console.log('Datos del turno a enviar:', turnoData);
-    console.log('User completo:', this.user);
-    console.log('Selected treatment completo:', this.selectedTreatment);
-    console.log('Tipo de pacienteId:', typeof turnoData.pacienteId);
-    console.log('Tipo de tratamientoId:', typeof turnoData.tratamientoId);
-    console.log('Paso actual antes de confirmar:', this.currentStep);
+    // Obtener el monto del tratamiento
+    const monto = this.selectedTreatment.precio || 5000; // Precio por defecto si no está definido
+    const descripcion = this.selectedTreatment.descripcion || 'Turno médico';
 
-    this.turnoService.createTurno(turnoData).subscribe({
-      next: (response) => {
-        console.log('Turno creado exitosamente:', response);
-        console.log('Cambiando al paso final (éxito)');
-        this.isLoading = false;
-        this.currentStep = this.shouldSelectPaciente ? 6 : 5; // Ir al paso correcto según el tipo de usuario
-        console.log('Paso actual después de éxito:', this.currentStep);
-        
-        // Trigger refresh for patient dashboard
-        this.dataRefreshService.triggerRefresh('vistaPaciente');
-      },
-      error: (error) => {
-        console.error('Error al registrar el turno:', error);
-        this.isLoading = false;
-        alert('Error al registrar el turno. Por favor, intenta nuevamente.');
-      }
-    });
+    // Crear un ID temporal para el turno
+    const turnoId = `turno_${Date.now()}`;
+
+    try {
+      // Crear el pago en Mercado Pago
+      this.mercadoPagoService.createTurnoPayment(
+        turnoId,
+        `${paciente.nombre.toLowerCase()}.${paciente.apellido.toLowerCase()}@example.com`, // Email por defecto
+        monto,
+        descripcion
+      ).subscribe({
+        next: (response) => {
+          console.log('Pago creado exitosamente:', response);
+          
+          // Guardar información del turno en sessionStorage para recuperarla después del pago
+          const turnoInfo = {
+            pacienteId: pacienteId,
+            fecha: this.selectedDate,
+            hora: this.selectedTime,
+            tratamientoId: this.selectedTreatment?._id || this.selectedTreatment?.id,
+            monto: monto,
+            descripcion: descripcion,
+            turnoId: turnoId
+          };
+          sessionStorage.setItem('turno_pendiente', JSON.stringify(turnoInfo));
+          
+          // Redirigir al usuario al link de pago
+          this.mercadoPagoService.redirectToPayment(response.init_point);
+        },
+        error: (error) => {
+          console.error('Error al crear el pago:', error);
+          this.isLoading = false;
+          alert('Error al procesar el pago. Por favor, intenta nuevamente.');
+        }
+      });
+    } catch (error) {
+      console.error('Error en el proceso de pago:', error);
+      this.isLoading = false;
+      alert('Error al procesar el pago. Por favor, intenta nuevamente.');
+    }
   }
 
   // Navigate back to dashboard/home
@@ -700,6 +729,72 @@ export class ReservarComponent implements OnInit {
     this.showCancelReservaModal = false;
     this.resetWizard();
     this.volverAlInicio();
+  }
+
+  // Método para procesar el resultado del pago de Mercado Pago
+  async procesarResultadoPago(): Promise<void> {
+    // Verificar si hay parámetros de pago en la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const collectionId = urlParams.get('collection_id');
+    const status = urlParams.get('collection_status');
+    const externalReference = urlParams.get('external_reference');
+
+    if (collectionId && status && externalReference) {
+      console.log('Procesando resultado de pago:', { collectionId, status, externalReference });
+
+      // Verificar si el pago fue exitoso
+      if (this.mercadoPagoService.isPaymentSuccessful(status)) {
+        // Recuperar información del turno guardada
+        const turnoInfoStr = sessionStorage.getItem('turno_pendiente');
+        if (turnoInfoStr) {
+          try {
+            const turnoInfo = JSON.parse(turnoInfoStr);
+            
+            // Crear el turno en el backend
+            const turnoData = {
+              pacienteId: turnoInfo.pacienteId,
+              fecha: turnoInfo.fecha,
+              hora: turnoInfo.hora,
+              tratamientoId: turnoInfo.tratamientoId
+            };
+
+            this.turnoService.createTurno(turnoData).subscribe({
+              next: (response) => {
+                console.log('Turno creado exitosamente después del pago:', response);
+                
+                // Limpiar información temporal
+                sessionStorage.removeItem('turno_pendiente');
+                
+                // Ir al paso de éxito
+                this.currentStep = this.shouldSelectPaciente ? 6 : 5;
+                
+                // Trigger refresh for patient dashboard
+                this.dataRefreshService.triggerRefresh('vistaPaciente');
+              },
+              error: (error) => {
+                console.error('Error al crear el turno después del pago:', error);
+                alert('El pago fue exitoso pero hubo un error al crear el turno. Por favor, contacta al administrador.');
+              }
+            });
+          } catch (error) {
+            console.error('Error al procesar información del turno:', error);
+            alert('Error al procesar la información del turno.');
+          }
+        } else {
+          console.error('No se encontró información del turno pendiente');
+          alert('No se encontró información del turno. Por favor, intenta nuevamente.');
+        }
+      } else if (this.mercadoPagoService.isPaymentFailed(status)) {
+        // Pago fallido
+        sessionStorage.removeItem('turno_pendiente');
+        alert('El pago no pudo ser procesado. Por favor, intenta nuevamente.');
+        this.resetWizard();
+      } else if (this.mercadoPagoService.isPaymentPending(status)) {
+        // Pago pendiente
+        alert('Tu pago está pendiente de confirmación. Te notificaremos cuando se complete.');
+        this.resetWizard();
+      }
+    }
   }
 
   // Método para obtener el pacienteId correcto
