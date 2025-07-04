@@ -19,6 +19,8 @@ export class AgendaComponent implements OnInit {
   selectedDate: string = '';
   searchTerm: string = '';
   filterEstado: string = 'todos';
+  modalTitle: string = '';
+  modalMessage: string = '';
 
   constructor(private router: Router, private turnoService: TurnoService, private pacienteService: PacienteService) {}
 
@@ -70,9 +72,9 @@ export class AgendaComponent implements OnInit {
         this.turnoService.cambiarEstadoTurno(turnoId, 'completado').subscribe({
           next: () => {
             this.loadTurnosData();
-            alert('✅ Turno marcado como completado exitosamente');
+            this.mostrarModal('Éxito', '✅ Turno marcado como completado exitosamente');
           },
-          error: () => alert('❌ Error al completar el turno')
+          error: () => this.mostrarModal('Error', '❌ Error al completar el turno')
         });
       }
     }
@@ -80,7 +82,7 @@ export class AgendaComponent implements OnInit {
 
   reprogramarTurno(turno: Turno): void {
     // Aquí podrías abrir un modal para reprogramar
-    alert('Función de reprogramación - En desarrollo');
+    this.mostrarModal('En desarrollo', 'Función de reprogramación - En desarrollo');
   }
 
   cancelarTurno(turno: Turno): void {
@@ -90,9 +92,9 @@ export class AgendaComponent implements OnInit {
         this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
           next: () => {
             this.loadTurnosData();
-            alert('✅ Turno cancelado exitosamente');
+            this.mostrarModal('Éxito', '✅ Turno cancelado exitosamente');
           },
-          error: () => alert('❌ Error al cancelar el turno')
+          error: () => this.mostrarModal('Error', '❌ Error al cancelar el turno')
         });
       }
     }
@@ -118,12 +120,17 @@ export class AgendaComponent implements OnInit {
 📋 ESTADO: ${turno.estado.toUpperCase()}
     `.trim();
     
-    alert(detalles);
+    this.mostrarModal('Detalles del turno', detalles);
   }
 
   exportarAgenda(): void {
-    // alert('Función de exportación - En desarrollo');
-    const modal = new (window as any).bootstrap.Modal(document.getElementById('exportModal'));
+    this.mostrarModal('Función de exportación', 'En desarrollo');
+  }
+
+  mostrarModal(titulo: string, mensaje: string) {
+    this.modalTitle = titulo;
+    this.modalMessage = mensaje;
+    const modal = new (window as any).bootstrap.Modal(document.getElementById('agendaAlertModal'));
     modal.show();
   }
 
@@ -134,9 +141,9 @@ export class AgendaComponent implements OnInit {
         this.turnoService.cambiarEstadoTurno(turnoId, 'reservado').subscribe({
           next: () => {
             this.loadTurnosData();
-            alert('Turno marcado como reservado');
+            this.mostrarModal('Éxito', 'Turno marcado como reservado');
           },
-          error: () => alert('Error al reservar el turno')
+          error: () => this.mostrarModal('Error', 'Error al reservar el turno')
         });
       }
     }
@@ -209,3 +216,4 @@ export class AgendaComponent implements OnInit {
     }
   }
 }
+
