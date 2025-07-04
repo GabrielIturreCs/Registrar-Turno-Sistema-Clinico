@@ -105,7 +105,11 @@ export class TurnoService {
       );
   }
 
-  // Cambiar estado del turno
+  /**
+   * Cambia el estado de un turno existente
+   * @param id ID del turno
+   * @param nuevoEstado Estado a establecer (ej: 'pendiente', 'reservado', 'cancelado')
+   */
   cambiarEstadoTurno(id: string, nuevoEstado: string): Observable<Turno> {
     return this.updateTurno(id, { estado: nuevoEstado });
   }

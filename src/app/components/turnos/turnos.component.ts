@@ -220,6 +220,7 @@ export class TurnosComponent implements OnInit {
 
   loadTurnosData(): void {
     this.isLoading = true;
+    // Forzar recarga desde backend para obtener el estado actualizado
     this.turnoService.getTurnosFromAPI().subscribe({
       next: (turnos) => {
         this.turnos = turnos;

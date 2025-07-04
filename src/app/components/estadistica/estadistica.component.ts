@@ -144,7 +144,7 @@ export class EstadisticaComponent implements OnInit, OnDestroy {
     this.tratamientosSubscription?.unsubscribe();
     
     // Cargar turnos
-    this.turnosSubscription = this.turnoService.getTurnos().subscribe({
+    this.turnosSubscription = this.turnoService.getTurnosFromAPI().subscribe({
       next: (turnos) => {
         console.log('Estadísticas: Turnos cargados:', turnos.length);
         this.turnos = turnos;

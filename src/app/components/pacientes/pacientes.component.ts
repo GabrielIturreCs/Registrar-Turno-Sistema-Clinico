@@ -298,4 +298,21 @@ export class PacientesComponent implements OnInit {
   get canUpdatePaciente(): boolean {
     return this.isValidEditForm() && !this.isUpdating;
   }
+
+  goToDashboard(): void {
+    const user = localStorage.getItem('user');
+    let tipoUsuario = '';
+    if (user) {
+      try {
+        tipoUsuario = JSON.parse(user).tipoUsuario;
+      } catch {}
+    }
+    if (tipoUsuario === 'administrador') {
+      this.router.navigate(['/dashboard']);
+    } else if (tipoUsuario === 'dentista') {
+      this.router.navigate(['/dashboard']);
+    } else {
+      this.router.navigate(['/dashboard']); // fallback
+    }
+  }
 }

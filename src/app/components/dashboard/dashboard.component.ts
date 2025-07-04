@@ -538,6 +538,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/pacientes']);
   }
 
+  goToPacientes(): void {
+    this.router.navigate(['/pacientes']);
+  }
+
   cancelarTurno(turno: Turno): void {
     if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
       const turnoId = turno._id || turno.id?.toString() || '';
@@ -601,6 +605,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
       case 'completado': return 'badge bg-success';
       case 'cancelado': return 'badge bg-danger';
       default: return 'badge bg-secondary';
+    }
+  }
+
+  getStatusText(estado: string): string {
+    switch (estado) {
+      case 'reservado': return 'Reservado';
+      case 'completado': return 'Completado';
+      case 'cancelado': return 'Cancelado';
+      case 'pendiente': return 'Pendiente';
+      case 'pendiente_pago': return 'Pendiente de Pago';
+      default: return 'Sin estado';
     }
   }
 

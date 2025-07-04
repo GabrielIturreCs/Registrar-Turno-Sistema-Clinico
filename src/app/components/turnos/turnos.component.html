@@ -211,15 +211,15 @@
                   </td>
                   <td class="text-success fw-bold">${{ turno.precioFinal }}</td>
                   <td class="text-center">
-                    <!-- Solo mostrar botón cancelar para pacientes y si está reservado -->
+                    <!-- Mostrar botón cancelar para pacientes si el turno está reservado, pendiente o pendiente_pago -->
                     <button 
-                      *ngIf="turno.estado === 'reservado'" 
+                      *ngIf="user?.tipoUsuario === 'paciente' && (turno.estado === 'reservado' || turno.estado === 'pendiente' || turno.estado === 'pendiente_pago')" 
                       class="btn btn-outline-danger btn-sm rounded-circle"
                       (click)="cancelarTurno(turno)"
                       title="Cancelar turno">
                       <i class="fas fa-times"></i>
                     </button>
-                    <!-- Ocultar botón completar para pacientes -->
+                    <!-- Mostrar botón completar solo para no pacientes -->
                     <button 
                       *ngIf="turno.estado === 'reservado' && user?.tipoUsuario !== 'paciente'" 
                       class="btn btn-outline-success btn-sm rounded-circle ms-2"

@@ -209,7 +209,8 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
     
     console.log('Cargando turnos para paciente:', this.paciente);
     
-    this.turnoService.getTurnos().subscribe({
+    // Forzar recarga desde backend para obtener el estado actualizado
+    this.turnoService.getTurnosFromAPI().subscribe({
       next: (turnos) => {
         console.log('Todos los turnos obtenidos:', turnos.length);
         console.log('Paciente actual ID:', this.paciente?.id || this.paciente?._id);
@@ -318,9 +319,11 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
 
   getStatusClass(estado: string): string {
     switch (estado) {
-      case 'reservado': return 'badge bg-warning text-dark';
+      case 'reservado': return 'badge bg-info text-white';
       case 'completado': return 'badge bg-success';
       case 'cancelado': return 'badge bg-danger';
+      case 'pendiente': return 'badge bg-secondary';
+      case 'pendiente_pago': return 'badge bg-secondary text-white';
       default: return 'badge bg-secondary';
     }
   }
@@ -330,6 +333,8 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
       case 'reservado': return 'Reservado';
       case 'completado': return 'Completado';
       case 'cancelado': return 'Cancelado';
+      case 'pendiente': return 'Pendiente';
+      case 'pendiente_pago': return 'Pendiente de Pago';
       default: return 'Sin estado';
     }
   }

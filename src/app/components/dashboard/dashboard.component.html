@@ -61,6 +61,12 @@
           </button>
           <button 
             type="button" 
+            class="btn nav-btn-pacientes py-3"
+            (click)="goToPacientes()">
+            <i class="bi bi-people"></i> Pacientes
+          </button>
+          <button 
+            type="button" 
             class="btn nav-btn-dentistas py-3"
             (click)="navigateToDentistas()">
             <i class="bi bi-person-badge-fill"></i> Dentistas
@@ -340,7 +346,7 @@
               <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <span class="fw-bold text-primary">Turno #{{ turno.nroTurno }}</span>
-                  <span [class]="getStatusClass(turno.estado)" style="font-size:0.95rem;">{{ turno.estado }}</span>
+                  <span [class]="getStatusClass(turno.estado)" style="font-size:0.95rem;">{{ getStatusText(turno.estado) }}</span>
                 </div>
                 <div class="mb-1"><i class="fas fa-calendar-alt text-info me-2"></i><strong>Fecha:</strong> {{ turno.fecha }}</div>
                 <div class="mb-1"><i class="fas fa-clock text-info me-2"></i><strong>Hora:</strong> {{ turno.hora }}</div>
