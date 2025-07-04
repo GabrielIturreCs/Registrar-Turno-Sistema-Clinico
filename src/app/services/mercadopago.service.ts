@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 // Interfaces para Mercado Pago
 export interface MercadoPagoItem {
@@ -69,7 +70,7 @@ export interface SubscriptionResponse {
   providedIn: 'root'
 })
 export class MercadoPagoService {
-  private apiUrl = 'http://localhost:3000/api/mp';
+  private apiUrl = `${environment.apiUrl}/mp`;
 
   constructor(private http: HttpClient) { }
 
