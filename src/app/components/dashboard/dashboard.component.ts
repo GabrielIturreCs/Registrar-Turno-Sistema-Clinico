@@ -94,6 +94,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private alertaInterval?: Subscription;
   cargandoAlertas = false;
 
+  // Variables para los modales
+  confirmTitle: string = '';
+  confirmMessage: string = '';
+  alertTitle: string = '';
+  alertMessage: string = '';
+  private confirmCallback: (() => void) | null = null;
+
   constructor(
     private router: Router, 
     private route: ActivatedRoute,
@@ -543,17 +550,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   cancelarTurno(turno: Turno): void {
-    if (confirm('¿Estás seguro de que quieres cancelar este turno?')) {
-      const turnoId = turno._id || turno.id?.toString() || '';
-      this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
-        next: () => {
-          this.loadTurnosData();
-          this.loadRealAdminStats(); // Recargar estadísticas después de cancelar
-          alert('Turno cancelado exitosamente');
-        },
-        error: () => alert('Error al cancelar el turno')
-      });
-    }
+    this.showConfirmModal(
+      'Confirmar cancelación',
+      '¿Estás seguro de que quieres cancelar este turno?',
+      () => {
+        const turnoId = turno._id || turno.id?.toString() || '';
+        this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
+          next: () => {
+            this.loadTurnosData();
+            this.loadRealAdminStats();
+            this.showAlertModal('Éxito', 'Turno cancelado exitosamente');
+          },
+          error: () => this.showAlertModal('Error', 'Error al cancelar el turno')
+        });
+      }
+    );
   }
 
   // Método público para recargar todas las estadísticas
@@ -798,5 +809,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
       default:
         return 'usuario';
     }
+  }
+
+  // Mostrar modal de confirmación
+  showConfirmModal(title: string, message: string, callback: () => void) {
+    this.confirmTitle = title;
+    this.confirmMessage = message;
+    this.confirmCallback = callback;
+    const modal = new (window as any).bootstrap.Modal(document.getElementById('confirmModal'));
+    modal.show();
+  }
+
+  // Acción cuando el usuario confirma
+  onConfirm() {
+    if (this.confirmCallback) {
+      this.confirmCallback();
+      this.confirmCallback = null;
+    }
+    // Cierra el modal
+    (window as any).bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+  }
+
+  // Mostrar modal de alerta/mensaje
+  showAlertModal(title: string, message: string) {
+    this.alertTitle = title;
+    this.alertMessage = message;
+    const modal = new (window as any).bootstrap.Modal(document.getElementById('alertModal'));
+    modal.show();
   }
 }
