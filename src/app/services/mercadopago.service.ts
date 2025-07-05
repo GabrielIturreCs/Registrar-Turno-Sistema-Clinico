@@ -45,6 +45,7 @@ export interface PaymentRequest {
     pending: string;
     success: string;
   };
+  auto_return?: 'approved' | 'all';
 }
 
 export interface SubscriptionRequest {
@@ -100,14 +101,15 @@ export class MercadoPagoService {
    * @returns Observable con la respuesta de Mercado Pago
    */
   createPayment(paymentData: PaymentRequest): Observable<MercadoPagoResponse> {
-    // Agregar back_urls si no están presentes
+    // Agregar back_urls y auto_return si no están presentes
     const paymentDataWithUrls = {
       ...paymentData,
-      back_urls: paymentData.back_urls || {
+      back_urls: {
         failure: "http://localhost:4200/reservar?payment=failure",
-        pending: "http://localhost:4200/reservar?payment=pending", 
+        pending: "http://localhost:4200/reservar?payment=pending",
         success: "http://localhost:4200/reservar?payment=success"
-      }
+      },
+      auto_return: 'approved'
     };
 
     return this.http.post<MercadoPagoResponse>(
@@ -149,7 +151,7 @@ export class MercadoPagoService {
     const paymentData: PaymentRequest = {
       payer_email: pacienteEmail,
       external_reference: turnoId,
-      user_type: userType || 'paciente', // Agregar tipo de usuario
+      user_type: userType || 'paciente',
       items: [
         {
           title: `Turno Médico - ${descripcion}`,
@@ -163,7 +165,8 @@ export class MercadoPagoService {
         failure: "http://localhost:4200/reservar?payment=failure",
         pending: "http://localhost:4200/reservar?payment=pending",
         success: "http://localhost:4200/reservar?payment=success"
-      }
+      },
+      auto_return: 'approved'
     };
 
     return this.createPayment(paymentData);
