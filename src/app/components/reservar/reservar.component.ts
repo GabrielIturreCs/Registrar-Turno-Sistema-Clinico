@@ -648,24 +648,7 @@ export class ReservarComponent implements OnInit {
           userType
         ).subscribe({
           next: (response: any) => {
-            // Guardar información del turno en cookies seguras del backend
-            const turnoInfo = {
-              pacienteId: pacienteId,
-              fecha: this.selectedDate,
-              hora: this.selectedTime,
-              tratamiento: this.selectedTreatment,
-              paciente: paciente,
-              monto: monto,
-              descripcion: descripcion,
-              turnoId: turnoId,
-              userType: userType
-            };
-            
-            // Guardar información de respaldo en caso de error
-            sessionStorage.setItem('turno_pendiente', JSON.stringify(turnoInfo));
-            localStorage.setItem('turno_info_backup', JSON.stringify(turnoInfo));
-            
-            // Redirigir a MercadoPago (las cookies se manejan en el backend)
+            console.log('Link de pago recibido:', response.init_point);
             this.mercadoPagoService.redirectToPayment(response.init_point);
           },
           error: (error: any) => {
