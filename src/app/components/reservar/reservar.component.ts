@@ -124,7 +124,24 @@ export class ReservarComponent implements OnInit {
     } else {
       this.totalSteps = 5;
     }
-    
+
+    // Detectar resultado de pago por query param
+    this.route.queryParams.subscribe(params => {
+      if (params['payment'] === 'success') {
+        this.registrarTurnoDespuesDePago();
+      }
+      if (params['payment'] === 'failure') {
+        this.currentStep = this.shouldSelectPaciente ? 6 : 5;
+        this.paymentSuccess = false;
+        this.notificationService.showWarning('El pago no se completó. Puedes intentar nuevamente o contactar con soporte.');
+      }
+      if (params['payment'] === 'pending') {
+        this.currentStep = this.shouldSelectPaciente ? 6 : 5;
+        this.paymentSuccess = false;
+        this.notificationService.showInfo('Tu pago está pendiente de confirmación. Te notificaremos cuando se complete.');
+      }
+    });
+
     // Force page refresh when at the beginning of the wizard
     // This ensures fresh data when starting the reservation process
     setTimeout(() => {
@@ -626,41 +643,22 @@ export class ReservarComponent implements OnInit {
     // Obtener el monto del tratamiento
     const monto = this.selectedTreatment.precio || 5000; // Precio por defecto si no está definido
     const descripcion = this.selectedTreatment.descripcion || 'Turno médico';
-    // 1. Crear el turno en el backend con estado "reservado" (no pendiente_pago)
-    const turnoData = {
-      pacienteId: pacienteId,
-      fecha: this.selectedDate,
-      hora: this.selectedTime,
-      tratamientoId: this.selectedTreatment?._id || this.selectedTreatment?.id,
-      estado: 'reservado'
-    };
-    this.turnoService.createTurno(turnoData).subscribe({
-      next: (turnoCreado: any) => {
-        // 2. Guardar el turnoId para luego actualizarlo
-        const turnoId = turnoCreado._id || turnoCreado.id;
-        // 3. Crear el pago en Mercado Pago
-        const userType = this.user?.tipoUsuario || 'paciente';
-        this.mercadoPagoService.createTurnoPayment(
-          turnoId,
-          `${paciente.nombre.toLowerCase()}.${paciente.apellido.toLowerCase()}@example.com`,
-          monto,
-          descripcion,
-          userType
-        ).subscribe({
-          next: (response: any) => {
-            console.log('Link de pago recibido:', response.init_point);
-            this.mercadoPagoService.redirectToPayment(response.init_point);
-          },
-          error: (error: any) => {
-            this.isLoading = false;
-            const errorMessage = error.error?.msg || 'Error al procesar el pago. Por favor, intenta nuevamente.';
-            this.notificationService.showError(errorMessage);
-          }
-        });
+    const userType = this.user?.tipoUsuario || 'paciente';
+    // SOLO crear preferencia de pago, NO registrar turno aún
+    this.mercadoPagoService.createTurnoPayment(
+      'temp', // id temporal, el backend no lo usará
+      `${paciente.nombre.toLowerCase()}.${paciente.apellido.toLowerCase()}@example.com`,
+      monto,
+      descripcion,
+      userType
+    ).subscribe({
+      next: (response: any) => {
+        this.isLoading = false;
+        this.mercadoPagoService.redirectToPayment(response.init_point);
       },
       error: (error: any) => {
         this.isLoading = false;
-        const errorMessage = error.error?.msg || 'Error al registrar el turno. Por favor, intenta nuevamente.';
+        const errorMessage = error.error?.msg || 'Error al procesar el pago. Por favor, intenta nuevamente.';
         this.notificationService.showError(errorMessage);
       }
     });
@@ -880,5 +878,36 @@ export class ReservarComponent implements OnInit {
       // Volver al dashboard
       this.volverAlInicio();
     }
+  }
+
+  registrarTurnoDespuesDePago(): void {
+    this.isLoading = true;
+    this.getPacienteId().then(pacienteId => {
+      if (!pacienteId) {
+        this.isLoading = false;
+        this.notificationService.showError('Error: No se pudo obtener el ID del paciente');
+        return;
+      }
+      const turnoData = {
+        pacienteId: pacienteId,
+        fecha: this.selectedDate,
+        hora: this.selectedTime,
+        tratamientoId: this.selectedTreatment?._id || this.selectedTreatment?.id,
+        estado: 'reservado'
+      };
+      this.turnoService.createTurno(turnoData).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.currentStep = this.shouldSelectPaciente ? 6 : 5;
+          this.paymentSuccess = true;
+          this.notificationService.showSuccess('¡Turno registrado exitosamente!');
+        },
+        error: (error) => {
+          this.isLoading = false;
+          const errorMessage = error.error?.msg || 'Error al registrar el turno después del pago';
+          this.notificationService.showError(errorMessage);
+        }
+      });
+    });
   }
 }
