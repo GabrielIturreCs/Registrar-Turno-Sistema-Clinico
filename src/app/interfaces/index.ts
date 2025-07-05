@@ -30,6 +30,8 @@ export interface Turno {
   pacienteId?: number | string;
   tratamientoId?: number | string;
   tipoUsuario?: string;
+  paymentStatus?: string; // Estado del pago
+  paymentId?: string; // ID de pago de MercadoPago
 }
 
 export interface Tratamiento {

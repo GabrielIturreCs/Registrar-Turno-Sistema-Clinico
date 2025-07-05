@@ -119,6 +119,13 @@ export class TurnoService {
     return this.updateTurno(id, { estado: nuevoEstado });
   }
 
+  /**
+   * Cancela un turno y gestiona el reembolso/cancelación del pago en MercadoPago
+   */
+  cancelarTurnoYReembolso(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}/cancelar`, { headers: this.getHeaders() });
+  }
+
   // Obtener estadísticas
   getEstadisticas(fechaDesde?: string, fechaHasta?: string): Observable<any> {
     let url = `${this.apiUrl}/estadisticas`;

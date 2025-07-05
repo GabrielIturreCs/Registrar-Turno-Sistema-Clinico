@@ -53,6 +53,7 @@ export class TurnosComponent implements OnInit {
   selectedTurnoParaCancelar: any = null;
   showCancelModal = false;
   showSuccessModal = false;
+  reembolsoStatus: string | null = null;
 
   constructor(
     private router: Router,
@@ -335,14 +336,36 @@ export class TurnosComponent implements OnInit {
     this.selectedTurnoParaCancelar = null;
   }
 
+  getPaymentStatusLabel(status: string): string {
+    switch (status) {
+      case 'approved': return 'Aprobado';
+      case 'refunded': return 'Reembolsado';
+      case 'cancelled': return 'Cancelado';
+      case 'pending': return 'Pendiente';
+      default: return status ? status : '—';
+    }
+  }
+
+  getPaymentStatusClass(status: string): string {
+    switch (status) {
+      case 'approved': return 'badge bg-success';
+      case 'refunded': return 'badge bg-info';
+      case 'cancelled': return 'badge bg-danger';
+      case 'pending': return 'badge bg-warning text-dark';
+      default: return 'badge bg-secondary';
+    }
+  }
+
   confirmCancelTurno() {
     if (this.selectedTurnoParaCancelar) {
       const turnoId = this.selectedTurnoParaCancelar._id || this.selectedTurnoParaCancelar.id?.toString() || '';
       if (turnoId) {
-        this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado').subscribe({
-          next: () => {
+        this.isLoading = true;
+        this.turnoService.cancelarTurnoYReembolso(turnoId).subscribe({
+          next: (res) => {
+            this.reembolsoStatus = res?.refundResult ? 'reembolsado' : 'cancelado';
             this.showSuccessModal = true;
-            // Force page reload to ensure fresh data
+            this.isLoading = false;
             setTimeout(() => {
               window.location.reload();
             }, 500);
@@ -350,7 +373,9 @@ export class TurnosComponent implements OnInit {
             this.selectedTurnoParaCancelar = null;
           },
           error: (error) => {
-            const errorMessage = error.error?.msg || 'Error al cancelar el turno';
+            this.isLoading = false;
+            this.reembolsoStatus = null;
+            const errorMessage = error.error?.msg || 'Error al cancelar el turno o el pago';
             this.notificationService.showError(errorMessage);
             this.showCancelModal = false;
             this.selectedTurnoParaCancelar = null;

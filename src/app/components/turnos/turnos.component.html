@@ -38,6 +38,7 @@
                   <th>Tratamiento</th>
                   <th>Estado</th>
                   <th>Precio</th>
+                  <th>Pago</th>
                   <th class="text-center">Acciones</th>
                 </tr>
               </thead>
@@ -54,6 +55,11 @@
                     </span>
                   </td>
                   <td class="text-success fw-bold">${{ turno.precioFinal }}</td>
+                  <td>
+                    <span [ngClass]="getPaymentStatusClass(turno.paymentStatus || '')">
+                      {{ getPaymentStatusLabel(turno.paymentStatus || '') }}
+                    </span>
+                  </td>
                   <td class="text-center">
                     <button *ngIf="turno.estado === 'reservado' && user?.tipoUsuario !== 'paciente'" class="btn btn-outline-success btn-sm rounded-circle me-1" (click)="completarTurno(turno)" title="Completar turno">
                       <i class="fas fa-check"></i>
@@ -193,6 +199,7 @@
                   <th>Tratamiento</th>
                   <th>Estado</th>
                   <th>Precio</th>
+                  <th>Pago</th>
                   <th class="text-center">Acciones</th>
                 </tr>
               </thead>
@@ -210,6 +217,11 @@
                     </span>
                   </td>
                   <td class="text-success fw-bold">${{ turno.precioFinal }}</td>
+                  <td>
+                    <span [ngClass]="getPaymentStatusClass(turno.paymentStatus || '')">
+                      {{ getPaymentStatusLabel(turno.paymentStatus || '') }}
+                    </span>
+                  </td>
                   <td class="text-center">
                     <!-- Mostrar botón cancelar para pacientes si el turno está reservado, pendiente o pendiente_pago -->
                     <button 
@@ -345,6 +357,12 @@
             <i class="fas fa-check-circle"></i>
           </div>
           <p>Turno cancelado exitosamente.</p>
+          <p *ngIf="reembolsoStatus === 'reembolsado'" class="text-info">
+            El pago fue <b>reembolsado</b> al paciente.
+          </p>
+          <p *ngIf="reembolsoStatus === 'cancelado'" class="text-warning">
+            El pago fue <b>cancelado</b> antes de acreditarse.
+          </p>
         </div>
         <div class="modal-footer">
           <button class="btn-modal btn-confirmar" (click)="closeSuccessModal()">Aceptar</button>
