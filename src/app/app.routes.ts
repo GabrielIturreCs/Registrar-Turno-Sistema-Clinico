@@ -15,7 +15,7 @@ import { DentistaComponent } from './components/dentista/dentista.component';
 import { TratamientoComponent } from './components/tratamiento/tratamiento.component';
 
 import { ReprogramarComponent } from './components/reprogramar/reprogramar.component';
-import { PaymentCallbackComponent } from './components/payment/payment-callback.component';
+import { PaymentCallbackComponent } from './components/payment-callback/payment-callback.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
