@@ -40,6 +40,11 @@ export interface PaymentRequest {
   notification_url?: string;
   statement_descriptor?: string;
   user_type?: string; // Agregar tipo de usuario
+  back_urls?: {
+    failure: string;
+    pending: string;
+    success: string;
+  };
 }
 
 export interface SubscriptionRequest {
@@ -72,6 +77,7 @@ export interface SubscriptionResponse {
 })
 export class MercadoPagoService {
   private apiUrl = `${environment.apiUrl}/mp`;
+  private frontendUrl = window.location.origin;
 
   constructor(private http: HttpClient) { }
 
@@ -94,9 +100,19 @@ export class MercadoPagoService {
    * @returns Observable con la respuesta de Mercado Pago
    */
   createPayment(paymentData: PaymentRequest): Observable<MercadoPagoResponse> {
+    // Agregar back_urls si no están presentes
+    const paymentDataWithUrls = {
+      ...paymentData,
+      back_urls: paymentData.back_urls || {
+        failure: `${this.frontendUrl}/payment/failure`,
+        pending: `${this.frontendUrl}/payment/pending`, 
+        success: `${this.frontendUrl}/payment/success`
+      }
+    };
+
     return this.http.post<MercadoPagoResponse>(
       `${this.apiUrl}/payment`, 
-      paymentData, 
+      paymentDataWithUrls, 
       this.getRequestOptions()
     );
   }
@@ -142,7 +158,12 @@ export class MercadoPagoService {
           unit_price: monto,
           category_id: 'health'
         }
-      ]
+      ],
+      back_urls: {
+        failure: `${this.frontendUrl}/payment/failure`,
+        pending: `${this.frontendUrl}/payment/pending`,
+        success: `${this.frontendUrl}/payment/success`
+      }
     };
 
     return this.createPayment(paymentData);
@@ -169,7 +190,7 @@ export class MercadoPagoService {
       frequency_type: 'months',
       transaction_amount: monto,
       currency_id: 'ARS',
-      back_url: 'http://localhost:4200/subscription-result'
+      back_url: `${this.frontendUrl}/subscription-result`
     };
 
     return this.createSubscription(subscriptionData);
