@@ -104,9 +104,9 @@ export class MercadoPagoService {
     const paymentDataWithUrls = {
       ...paymentData,
       back_urls: paymentData.back_urls || {
-        failure: `${this.frontendUrl}/payment/failure`,
-        pending: `${this.frontendUrl}/payment/pending`, 
-        success: `${this.frontendUrl}/payment/success`
+        failure: "http://localhost:4200/reservar?payment=failure",
+        pending: "http://localhost:4200/reservar?payment=pending", 
+        success: "http://localhost:4200/reservar?payment=success"
       }
     };
 
@@ -160,9 +160,9 @@ export class MercadoPagoService {
         }
       ],
       back_urls: {
-        failure: `${this.frontendUrl}/payment/failure`,
-        pending: `${this.frontendUrl}/payment/pending`,
-        success: `${this.frontendUrl}/payment/success`
+        failure: "http://localhost:4200/reservar?payment=failure",
+        pending: "http://localhost:4200/reservar?payment=pending",
+        success: "http://localhost:4200/reservar?payment=success"
       }
     };
 
@@ -190,7 +190,7 @@ export class MercadoPagoService {
       frequency_type: 'months',
       transaction_amount: monto,
       currency_id: 'ARS',
-      back_url: `${this.frontendUrl}/subscription-result`
+      back_url: 'http://localhost:4200/reservar?payment=success'
     };
 
     return this.createSubscription(subscriptionData);
