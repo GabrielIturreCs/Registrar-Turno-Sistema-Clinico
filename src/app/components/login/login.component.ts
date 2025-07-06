@@ -99,7 +99,8 @@ export class LoginComponent implements OnInit {
               localStorage.setItem('user', JSON.stringify(res));
               
               // Mostrar notificación de éxito
-              this.notificationService.showSuccess(`¡Bienvenido ${res.nombre}!`);
+              const nombreUsuario = res.nombre || res.nombreUsuario || 'Usuario';
+              this.notificationService.showSuccess(`¡Bienvenido ${nombreUsuario}!`);
               
               // Redirigir según el tipo de usuario
               this.redirectByUserType(res.tipoUsuario);

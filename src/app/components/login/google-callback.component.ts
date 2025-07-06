@@ -62,7 +62,8 @@ export class GoogleCallbackComponent implements OnInit {
           this.authService.setCurrentUser(user);
           
           // Mostrar notificación de éxito
-          this.notificationService.showSuccess(`¡Bienvenido ${user.nombre}!`);
+          const nombreUsuario = user.nombre || user.nombreUsuario || user.displayName || 'Usuario';
+          this.notificationService.showSuccess(`¡Bienvenido ${nombreUsuario}!`);
           
           // Redirigir según el tipo de usuario
           this.redirectByUserType(user.tipoUsuario);

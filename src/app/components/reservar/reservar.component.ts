@@ -665,10 +665,11 @@ export class ReservarComponent implements OnInit {
   }
 
   // Navigate back to dashboard/home
-  volverAlInicio(): void {
+  volverAlInicio(isCancellation: boolean = false): void {
     console.log('volverAlInicio called');
     console.log('User:', this.user);
     console.log('User tipo:', this.user?.tipoUsuario);
+    console.log('Is cancellation:', isCancellation);
     
     // Clear any refresh flags and backup data
     sessionStorage.removeItem('reservar-step1-refreshed');
@@ -684,7 +685,11 @@ export class ReservarComponent implements OnInit {
         (success) => {
           if (success) {
             console.log('Navigation successful');
-            this.notificationService.showSuccess('¡Bienvenido de vuelta! Tu turno ha sido confirmado.');
+            if (isCancellation) {
+              this.notificationService.showInfo('Reserva cancelada. Puedes hacer una nueva reserva cuando quieras.');
+            } else {
+              this.notificationService.showSuccess('¡Bienvenido de vuelta! Tu turno ha sido confirmado.');
+            }
           }
         }
       ).catch((error: any) => {
@@ -699,7 +704,11 @@ export class ReservarComponent implements OnInit {
         (success) => {
           if (success) {
             console.log('Navigation successful');
-            this.notificationService.showSuccess('Turno registrado exitosamente en el sistema.');
+            if (isCancellation) {
+              this.notificationService.showInfo('Reserva cancelada. Puedes hacer una nueva reserva cuando quieras.');
+            } else {
+              this.notificationService.showSuccess('Turno registrado exitosamente en el sistema.');
+            }
           }
         }
       ).catch((error: any) => {
@@ -728,7 +737,7 @@ export class ReservarComponent implements OnInit {
   confirmCancelReserva(): void {
     this.showCancelReservaModal = false;
     this.resetWizard();
-    this.volverAlInicio();
+    this.volverAlInicio(true); // true indica que es una cancelación
   }
 
   // Método para procesar el resultado del pago de Mercado Pago

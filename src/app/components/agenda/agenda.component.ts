@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { User, Turno } from '../../interfaces';
 import { TurnoService } from '../../services/turno.service';
 import { PacienteService } from '../../services/paciente.service';
+import { PdfExportService } from '../../services/pdf-export.service';
+import { NotificationService } from '../../services/notification.service';
 import { Tratamiento } from '../../interfaces';
 
 @Component({
@@ -23,7 +25,13 @@ export class AgendaComponent implements OnInit {
   modalMessage: string = '';
   isLoading: boolean = false;
 
-  constructor(private router: Router, private turnoService: TurnoService, private pacienteService: PacienteService) {}
+  constructor(
+    private router: Router, 
+    private turnoService: TurnoService, 
+    private pacienteService: PacienteService,
+    private pdfExportService: PdfExportService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.loadUserData();
@@ -125,7 +133,49 @@ export class AgendaComponent implements OnInit {
   }
 
   exportarAgenda(): void {
-    this.mostrarModal('Función de exportación', 'En desarrollo');
+    try {
+      // Obtener estadísticas del día
+      const estadisticas = {
+        total: this.turnosHoy,
+        completados: this.turnosCompletados,
+        pendientes: this.turnosPendientes,
+        cancelados: this.turnos.filter(t => t.fecha === this.selectedDate && t.estado === 'cancelado').length,
+        ingresos: this.ingresosHoy
+      };
+
+      // Determinar qué turnos exportar según el filtro actual
+      let turnosAExportar: Turno[];
+      
+      if (this.filterEstado === 'todos') {
+        // Exportar todos los turnos del día
+        turnosAExportar = this.turnos.filter(t => t.fecha === this.selectedDate);
+      } else {
+        // Exportar solo los turnos del estado seleccionado
+        turnosAExportar = this.turnos.filter(t => 
+          t.fecha === this.selectedDate && t.estado === this.filterEstado
+        );
+      }
+
+      // Ordenar por hora
+      turnosAExportar.sort((a, b) => a.hora.localeCompare(b.hora));
+      
+      // Verificar si hay turnos para exportar
+      if (turnosAExportar.length === 0) {
+        this.notificationService.showWarning('No hay turnos para exportar con los filtros seleccionados');
+        return;
+      }
+      
+      this.pdfExportService.exportarAgendaPDF(turnosAExportar, this.selectedDate, estadisticas, this.filterEstado);
+      
+      const mensaje = this.filterEstado === 'todos' 
+        ? `Agenda completa exportada exitosamente (${turnosAExportar.length} turnos)`
+        : `Agenda de turnos ${this.filterEstado} exportada exitosamente (${turnosAExportar.length} turnos)`;
+      
+      this.notificationService.showSuccess(mensaje);
+    } catch (error) {
+      console.error('Error al exportar agenda:', error);
+      this.notificationService.showError('Error al exportar la agenda');
+    }
   }
 
   mostrarModal(titulo: string, mensaje: string) {

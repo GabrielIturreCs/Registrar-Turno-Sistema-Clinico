@@ -391,13 +391,13 @@ export class TurnosComponent implements OnInit {
       if (turnoId) {
         this.turnoService.cambiarEstadoTurno(turnoId, 'completado').subscribe({
           next: () => {
-            alert('Turno marcado como completado');
+            this.notificationService.showSuccess('Turno marcado como completado');
             // Force page reload to ensure fresh data
             setTimeout(() => {
               window.location.reload();
             }, 500);
           },
-          error: () => alert('Error al completar el turno')
+          error: () => this.notificationService.showError('Error al completar el turno')
         });
       }
     }

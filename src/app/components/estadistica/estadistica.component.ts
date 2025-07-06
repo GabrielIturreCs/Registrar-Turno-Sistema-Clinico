@@ -9,6 +9,7 @@ import { PacienteService } from '../../services/paciente.service';
 import { TratamientoService } from '../../services/tratamiento.service';
 import { NgChartsModule } from 'ng2-charts';
 import { PdfExportService } from '../../services/pdf-export.service';
+import { NotificationService } from '../../services/notification.service';
 import { Subscription, interval } from 'rxjs';
 
 interface EstadisticaTratamiento {
@@ -79,7 +80,8 @@ export class EstadisticaComponent implements OnInit, OnDestroy {
     private pacienteService: PacienteService,
     private tratamientoService: TratamientoService,
     private authService: AuthService,
-    private pdfExportService: PdfExportService
+    private pdfExportService: PdfExportService,
+    private notificationService: NotificationService
   ) {}
   
   ngOnInit(): void {
@@ -127,7 +129,7 @@ export class EstadisticaComponent implements OnInit, OnDestroy {
     // Solo permitir acceso a administrador
     if (!this.user || this.user.tipoUsuario !== 'administrador') {
       console.log('Estadísticas: Acceso denegado. Usuario:', this.user);
-      alert('Acceso denegado. Solo los administradores pueden ver las estadísticas.');
+      this.notificationService.showError('Acceso denegado. Solo los administradores pueden ver las estadísticas.');
       this.router.navigate(['/login']);
     } else {
       console.log('Estadísticas: Acceso permitido para administrador:', this.user.nombre);
@@ -156,7 +158,7 @@ export class EstadisticaComponent implements OnInit, OnDestroy {
         this.turnos = [];
         this.actualizarEstadisticas();
         this.isLoading = false;
-        this.mostrarNotificacion('Error al cargar turnos', 'error');
+        this.notificationService.showError('Error al cargar turnos');
       }
     });
 
@@ -169,7 +171,7 @@ export class EstadisticaComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Error cargando pacientes:', error);
         this.pacientes = [];
-        this.mostrarNotificacion('Error al cargar pacientes', 'error');
+        this.notificationService.showError('Error al cargar pacientes');
       }
     });
 
@@ -182,7 +184,7 @@ export class EstadisticaComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Error cargando tratamientos:', error);
         this.tratamientos = [];
-        this.mostrarNotificacion('Error al cargar tratamientos', 'error');
+        this.notificationService.showError('Error al cargar tratamientos');
       }
     });
   }
@@ -293,28 +295,23 @@ this.pieChartData = {
   refreshEstadisticas(): void {
     console.log('Estadísticas: Refrescando datos...');
     this.loadData();
-    this.mostrarNotificacion('Datos actualizados correctamente', 'success');
+    this.notificationService.showSuccess('Datos actualizados correctamente');
   }
 
-  // Método para mostrar notificaciones
+  // Método para mostrar notificaciones (deprecated - usar NotificationService)
   private mostrarNotificacion(mensaje: string, tipo: 'success' | 'error' | 'info'): void {
-    // Crear una notificación simple
-    const notificacion = document.createElement('div');
-    notificacion.className = `alert alert-${tipo === 'success' ? 'success' : tipo === 'error' ? 'danger' : 'info'} alert-dismissible fade show position-fixed`;
-    notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    notificacion.innerHTML = `
-      ${mensaje}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(notificacion);
-    
-    // Remover la notificación después de 3 segundos
-    setTimeout(() => {
-      if (notificacion.parentNode) {
-        notificacion.parentNode.removeChild(notificacion);
-      }
-    }, 3000);
+    // Este método se mantiene por compatibilidad pero se recomienda usar NotificationService
+    switch (tipo) {
+      case 'success':
+        this.notificationService.showSuccess(mensaje);
+        break;
+      case 'error':
+        this.notificationService.showError(mensaje);
+        break;
+      case 'info':
+        this.notificationService.showInfo(mensaje);
+        break;
+    }
   }
 
   navigateToDashboard(): void {

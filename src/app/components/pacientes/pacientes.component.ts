@@ -254,12 +254,12 @@ export class PacientesComponent implements OnInit {
 
   updatePaciente(): void {
     if (!this.isValidEditForm()) {
-      alert('Por favor, completa todos los campos obligatorios');
+      this.notificationService.showWarning('Por favor, completa todos los campos obligatorios');
       return;
     }
 
     if (!this.currentEditingPaciente) {
-      alert('Error: No hay paciente seleccionado para editar');
+      this.notificationService.showError('Error: No hay paciente seleccionado para editar');
       return;
     }
 
@@ -279,13 +279,13 @@ export class PacientesComponent implements OnInit {
         console.log('Paciente actualizado exitosamente:', response);
         this.isUpdating = false;
         this.closeEditModal();
-        alert('Paciente actualizado exitosamente');
+        this.notificationService.showSuccess('Paciente actualizado exitosamente');
         this.loadPacientes(); // Recargar la lista
       },
       error: (error) => {
         console.error('Error al actualizar paciente:', error);
         this.isUpdating = false;
-        alert('Error al actualizar el paciente. Por favor, intenta nuevamente.');
+        this.notificationService.showError('Error al actualizar el paciente. Por favor, intenta nuevamente.');
       }
     });
   }

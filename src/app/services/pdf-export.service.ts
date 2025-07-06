@@ -65,6 +65,64 @@ export class PdfExportService {
     pdf.save(nombreArchivo);
   }
 
+  async exportarAgendaPDF(
+    turnos: Turno[],
+    fecha: string,
+    estadisticas: {
+      total: number;
+      completados: number;
+      pendientes: number;
+      cancelados: number;
+      ingresos: number;
+    },
+    filtroEstado?: string
+  ): Promise<void> {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    let yPosition = margin;
+
+    // Título
+    pdf.setFontSize(24);
+    pdf.setTextColor(0, 191, 255);
+    pdf.text('Agenda del Dentista', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 15;
+
+    // Fecha del reporte
+    pdf.setFontSize(12);
+    pdf.setTextColor(100, 100, 100);
+    const fechaReporte = new Date().toLocaleDateString('es-ES');
+    pdf.text(`Generado el: ${fechaReporte}`, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 10;
+
+    // Fecha de la agenda
+    pdf.text(`Agenda del: ${new Date(fecha).toLocaleDateString('es-ES')}`, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 10;
+
+    // Información del filtro si aplica
+    if (filtroEstado && filtroEstado !== 'todos') {
+      pdf.text(`Filtro: Turnos ${filtroEstado}`, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 10;
+    }
+
+    yPosition += 5;
+
+    // Resumen del día
+    yPosition = this.saltoSiNecesario(pdf, yPosition, 50, pageHeight, margin);
+    yPosition = this.agregarResumenAgenda(pdf, estadisticas, yPosition, pageWidth, margin);
+
+    // Lista de turnos
+    yPosition = this.saltoSiNecesario(pdf, yPosition, (turnos.length + 2) * 8 + 20, pageHeight, margin);
+    this.agregarTurnosAgenda(pdf, turnos, yPosition, pageWidth, margin);
+
+    // Guardar
+    const nombreArchivo = filtroEstado && filtroEstado !== 'todos' 
+      ? `agenda_${fecha.replace(/-/g, '')}_${filtroEstado}.pdf`
+      : `agenda_${fecha.replace(/-/g, '')}.pdf`;
+    pdf.save(nombreArchivo);
+  }
+
   private saltoSiNecesario(pdf: jsPDF, y: number, espacioNecesario: number, pageHeight: number, margin: number): number {
     if (y + espacioNecesario > pageHeight - margin) {
       pdf.addPage();
@@ -150,6 +208,73 @@ export class PdfExportService {
 
     const tablaCompleta = [
       ['Fecha', 'Paciente', 'Tratamiento', 'Estado', 'Precio'],
+      ...datosTurnos
+    ];
+
+    this.crearTabla(pdf, tablaCompleta, margin, yPosition, pageWidth - 2 * margin);
+  }
+
+  private agregarResumenAgenda(
+    pdf: jsPDF, 
+    estadisticas: {
+      total: number;
+      completados: number;
+      pendientes: number;
+      cancelados: number;
+      ingresos: number;
+    }, 
+    yPosition: number, 
+    pageWidth: number, 
+    margin: number
+  ): number {
+    pdf.setFontSize(16);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Resumen del Día', margin, yPosition);
+    yPosition += 10;
+
+    const datosResumen = [
+      ['Total Turnos', estadisticas.total.toString()],
+      ['Completados', estadisticas.completados.toString()],
+      ['Pendientes', estadisticas.pendientes.toString()],
+      ['Cancelados', estadisticas.cancelados.toString()],
+      ['Ingresos del Día', `$${estadisticas.ingresos.toLocaleString()}`]
+    ];
+
+    this.crearTabla(pdf, datosResumen, margin, yPosition, pageWidth - 2 * margin);
+    yPosition += datosResumen.length * 8 + 10;
+
+    return yPosition;
+  }
+
+  private agregarTurnosAgenda(
+    pdf: jsPDF, 
+    turnos: Turno[], 
+    yPosition: number, 
+    pageWidth: number, 
+    margin: number
+  ): void {
+    pdf.setFontSize(16);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Lista de Turnos', margin, yPosition);
+    yPosition += 10;
+
+    if (turnos.length === 0) {
+      pdf.setFontSize(12);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text('No hay turnos programados para esta fecha', margin, yPosition);
+      return;
+    }
+
+    const datosTurnos = turnos.map(turno => [
+      turno.hora,
+      `${turno.nombre} ${turno.apellido}`,
+      turno.tratamiento,
+      turno.estado,
+      `$${turno.precioFinal.toLocaleString()}`
+    ]);
+
+    const tablaCompleta = [
+      ['Hora', 'Paciente', 'Tratamiento', 'Estado', 'Precio'],
       ...datosTurnos
     ];
 
