@@ -1204,8 +1204,8 @@
 /* Welcome Bubble - Burbuja de bienvenida que sale del ícono */
 .welcome-bubble {
   position: absolute;
-  bottom: 70px; /* Aparece arriba del botón */
-  right: -130px; /* Centrada respecto al botón */
+  bottom: 80px; /* Aparece arriba del botón */
+  right: -150px; /* Ajustado para mejor posición */
   width: 320px;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 20px;
