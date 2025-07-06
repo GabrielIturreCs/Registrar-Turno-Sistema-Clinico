@@ -574,4 +574,24 @@ export class DentistaComponent implements OnInit, OnDestroy {
     const tratamiento = this.tratamientos.find(t => t.id === tratamientoId);
     return tratamiento ? tratamiento.descripcion : 'N/A';
   }
+
+  getUserGreeting(): string {
+    if (!this.user) return 'Usuario';
+    let nombre = '';
+    if (this.user.nombre && this.user.apellido) {
+      nombre = `${this.user.nombre} ${this.user.apellido}`;
+    } else if (this.user.nombre) {
+      nombre = this.user.nombre;
+    } else {
+      // Si no hay nombre, mostrar solo el tipo de usuario capitalizado
+      nombre = this.capitalizeFirstLetter(this.user.tipoUsuario || 'Usuario');
+    }
+    // Mostrar el rol entre paréntesis
+    return `${nombre} (${this.user.tipoUsuario})`;
+  }
+
+  capitalizeFirstLetter(str: string): string {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
 } 
