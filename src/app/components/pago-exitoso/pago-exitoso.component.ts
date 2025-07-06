@@ -31,28 +31,51 @@ export class PagoExitosoComponent implements OnInit {
       this.externalReference = params['external_reference'];
 
       if (this.paymentId && this.paymentStatus === 'approved') {
-        // Llama a tu backend para validar el pago (opcional, recomendado)
-        this.http.post('/api/validar-pago', {
+        // Guardar información del pago exitoso en sessionStorage
+        const paymentInfo = {
           paymentId: this.paymentId,
-          externalReference: this.externalReference
-        }).subscribe({
-          next: (res: any) => {
-            this.message = '¡Tu pago ha sido aprobado! Redirigiendo...';
-            setTimeout(() => {
-              this.router.navigate(['/reservar'], { queryParams: { payment: 'success' } });
-            }, 2000);
-          },
-          error: (err) => {
-            this.error = 'No se pudo validar el pago en el servidor.';
-            this.loading = false;
-          }
-        });
+          paymentStatus: this.paymentStatus,
+          externalReference: this.externalReference,
+          timestamp: new Date().toISOString()
+        };
+        sessionStorage.setItem('payment_success_info', JSON.stringify(paymentInfo));
+        
+        // Marcar el pago como exitoso
+        sessionStorage.setItem('payment_success', 'true');
+        
+        this.message = '¡Tu pago ha sido aprobado! Redirigiendo...';
+        setTimeout(() => {
+          // Redirigir a reservar con parámetros específicos para el paso 5
+          this.router.navigate(['/reservarTurno'], { 
+            queryParams: { 
+              payment: 'success',
+              step: '5',
+              returnFromPayment: 'true'
+            } 
+          });
+        }, 2000);
       } else if (this.paymentStatus === 'pending') {
         this.message = 'Tu pago está pendiente. Te notificaremos cuando se complete.';
-        this.loading = false;
+        sessionStorage.setItem('payment_pending', 'true');
+        setTimeout(() => {
+          this.router.navigate(['/reservarTurno'], { 
+            queryParams: { 
+              payment: 'pending',
+              step: '5'
+            } 
+          });
+        }, 2000);
       } else if (this.paymentStatus === 'rejected' || this.paymentStatus === 'failure') {
         this.message = 'Tu pago ha sido rechazado. Por favor, intenta de nuevo.';
-        this.loading = false;
+        sessionStorage.setItem('payment_failed', 'true');
+        setTimeout(() => {
+          this.router.navigate(['/reservarTurno'], { 
+            queryParams: { 
+              payment: 'failure',
+              step: '5'
+            } 
+          });
+        }, 2000);
       } else {
         this.message = 'No se pudo determinar el estado del pago.';
         this.loading = false;
@@ -61,6 +84,13 @@ export class PagoExitosoComponent implements OnInit {
   }
 
   volverAReservar() {
-    this.router.navigate(['/reservar']);
+    // Redirigir a reservar con parámetros específicos
+    this.router.navigate(['/reservarTurno'], { 
+      queryParams: { 
+        payment: 'success',
+        step: '5',
+        returnFromPayment: 'true'
+      } 
+    });
   }
 } 
