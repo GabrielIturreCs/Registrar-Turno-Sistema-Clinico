@@ -105,9 +105,9 @@ export class MercadoPagoService {
     const paymentDataWithUrls = {
       ...paymentData,
       back_urls: {
-        failure: "http://localhost:4200/reservar?payment=failure",
-        pending: "http://localhost:4200/reservar?payment=pending",
-        success: "http://localhost:4200/reservar?payment=success"
+        failure: "http://localhost:4200/pago/fallido",
+        pending: "http://localhost:4200/pago/pendiente",
+        success: "http://localhost:4200/pago/exitoso"
       },
       auto_return: 'approved'
     };
@@ -162,9 +162,9 @@ export class MercadoPagoService {
         }
       ],
       back_urls: {
-        failure: "http://localhost:4200/reservar?payment=failure",
-        pending: "http://localhost:4200/reservar?payment=pending",
-        success: "http://localhost:4200/reservar?payment=success"
+        failure: "http://localhost:4200/pago/fallido",
+        pending: "http://localhost:4200/pago/pendiente",
+        success: "http://localhost:4200/pago/exitoso"
       },
       auto_return: 'approved'
     };

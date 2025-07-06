@@ -17,6 +17,9 @@ import { TratamientoComponent } from './components/tratamiento/tratamiento.compo
 import { ReprogramarComponent } from './components/reprogramar/reprogramar.component';
 import { PaymentCallbackComponent } from './components/payment-callback/payment-callback.component';
 import { authGuard } from './guards/auth.guard';
+import { PagoExitosoComponent } from './components/pago-exitoso/pago-exitoso.component';
+import { PagoPendienteComponent } from './components/pago-pendiente/pago-pendiente.component';
+import { PagoFallidoComponent } from './components/pago-fallido/pago-fallido.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -40,6 +43,9 @@ export const routes: Routes = [
   { path: 'payment/failure', component: PaymentCallbackComponent },
   { path: 'payment/pending', component: PaymentCallbackComponent },
   { path: 'payment/return', component: PaymentCallbackComponent },
+  { path: 'pago/exitoso', component: PagoExitosoComponent },
+  { path: 'pago/pendiente', component: PagoPendienteComponent },
+  { path: 'pago/fallido', component: PagoFallidoComponent },
   
   // Ruta wildcard para 404
   { path: '**', redirectTo: '/' }
