@@ -32,6 +32,8 @@ export class TurnosComponent implements OnInit {
   messages: ChatMessage[] = [];
   chatForm: FormGroup;
   isTyping = false;
+  showWelcomeBubble = false;
+  
   quickQuestions: QuickQuestion[] = [
     { text: '¿Cuáles son los horarios?', action: 'horarios' },
     { text: '¿Qué tratamientos ofrecen?', action: 'tratamientos' },
@@ -82,6 +84,8 @@ export class TurnosComponent implements OnInit {
       this.loadChatHistory();
       this.addWelcomeMessage();
     }
+    // Mostrar burbuja de bienvenida después de un retraso
+    this.showWelcomeBubbleAfterDelay();
   }
 
   // Cargar historial del chat desde ChatService con localStorage
@@ -107,19 +111,73 @@ export class TurnosComponent implements OnInit {
   // Chatbot methods
   addWelcomeMessage(): void {
     const welcomeMessage: ChatMessage = {
-      text: '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte con tus turnos?',
+      text: '👋 ¡Hola! Soy tu **asistente virtual inteligente**.\n\n🤖 Estoy aquí para ayudarte con todo lo que necesites:\n\n• 📅 Reservar y gestionar tus turnos\n• 💳 Consultas sobre pagos\n• 📞 Información de contacto\n• 🏥 Servicios y tratamientos\n• ❓ Responder todas tus dudas\n\n¿En qué puedo ayudarte hoy?',
       isUser: false,
       timestamp: new Date(),
-      actions: []
+      actions: [
+        {
+          text: 'Reservar Turno',
+          action: 'navigate:/reservarTurno',
+          icon: 'calendar-plus',
+          variant: 'success'
+        },
+        {
+          text: 'Mis Turnos',
+          action: 'navigate:/misTurnos',
+          icon: 'calendar',
+          variant: 'primary'
+        },
+        {
+          text: 'Contactar Clínica',
+          action: 'call:(011) 4567-8901',
+          icon: 'phone',
+          variant: 'info'
+        }
+      ]
     };
     this.messages.push(welcomeMessage);
   }
 
-  toggleChat(): void {
-    this.chatOpen = !this.chatOpen;
-    if (this.chatOpen && this.messages.length === 0) {
+  // Métodos para la burbuja de bienvenida
+  openChatFromBubble(): void {
+    this.showWelcomeBubble = false;
+    this.chatOpen = true;
+    if (this.messages.length === 0) {
       this.addWelcomeMessage();
     }
+    this.scrollToBottom();
+  }
+
+  closeWelcomeBubble(event: Event): void {
+    event.stopPropagation();
+    this.showWelcomeBubble = false;
+    // Guardar preferencia para no mostrar la burbuja nuevamente
+    localStorage.setItem('welcomeBubbleShown', 'true');
+  }
+
+  private showWelcomeBubbleAfterDelay(): void {
+    // Verificar si ya se mostró la burbuja anteriormente
+    const bubbleShown = localStorage.getItem('welcomeBubbleShown');
+    if (!bubbleShown) {
+      setTimeout(() => {
+        this.showWelcomeBubble = true;
+        // Auto-ocultar después de 10 segundos
+        setTimeout(() => {
+          this.showWelcomeBubble = false;
+        }, 10000);
+      }, 2000); // Mostrar después de 2 segundos
+    }
+  }
+
+  toggleChat(): void {
+    this.chatOpen = !this.chatOpen;
+    if (this.chatOpen) {
+      this.showWelcomeBubble = false; // Ocultar burbuja si se abre el chat
+      if (this.messages.length === 0) {
+        this.addWelcomeMessage();
+      }
+    }
+    this.scrollToBottom();
   }
 
   onSubmit(): void {

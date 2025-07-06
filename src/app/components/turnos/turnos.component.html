@@ -250,6 +250,27 @@
 
     <!-- Chatbot Widget - Disponible en todas las vistas -->
     <div class="chatbot-widget">
+      <!-- Burbuja de presentación amigable -->
+      <div class="welcome-bubble" [class.show]="showWelcomeBubble && !chatOpen" (click)="openChatFromBubble()">
+        <div class="bubble-content">
+          <div class="bubble-avatar">
+            <img src="/assets/images/logo.png" alt="Asistente" class="bubble-avatar-img">
+          </div>
+          <div class="bubble-text">
+            <div class="bubble-message">
+              👋 ¡Hola! Soy tu <strong>asistente virtual inteligente</strong>
+            </div>
+            <div class="bubble-submessage">
+              Estoy aquí para ayudarte con tus turnos y consultas 😊
+            </div>
+          </div>
+          <button class="bubble-close" (click)="closeWelcomeBubble($event)">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="bubble-pointer"></div>
+      </div>
+
       <!-- Floating Button -->
       <div class="chat-toggle-btn" (click)="toggleChat()" [class.open]="chatOpen">
         <img src="/assets/images/logo.png" alt="Chat" class="chat-toggle-img" *ngIf="!chatOpen">
