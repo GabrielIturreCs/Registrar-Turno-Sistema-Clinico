@@ -80,9 +80,9 @@ export class CompleteProfileComponent implements OnInit {
       try {
         // Crear el perfil de paciente
         const patientData = {
-          nombre: this.currentUser.nombre,
-          apellido: this.currentUser.apellido,
-          email: this.currentUser.email,
+          nombre: this.currentUser.nombre || 'Usuario',
+          apellido: this.currentUser.apellido || 'Google', 
+          email: this.currentUser.email || '',
           telefono: this.profileForm.value.telefono,
           dni: this.profileForm.value.dni,
           direccion: this.profileForm.value.direccion,
@@ -92,6 +92,19 @@ export class CompleteProfileComponent implements OnInit {
 
         console.log('Datos del paciente a enviar:', patientData);
         console.log('Usuario actual:', this.currentUser);
+        console.log('Formulario válido:', this.profileForm.valid);
+        console.log('Valores del formulario:', this.profileForm.value);
+        
+        // Validar que todos los campos requeridos estén presentes
+        const requiredFields: (keyof typeof patientData)[] = ['nombre', 'apellido', 'email', 'telefono', 'dni', 'direccion', 'obraSocial', 'userId'];
+        for (const field of requiredFields) {
+          if (!patientData[field] || patientData[field].toString().trim() === '') {
+            console.error(`❌ Campo faltante o vacío: ${field}`, patientData[field]);
+            this.notificationService.showError(`El campo ${field} es requerido y no puede estar vacío`);
+            this.loading = false;
+            return;
+          }
+        }
 
         this.authService.createPatientProfile(patientData).subscribe(
           (response: any) => {
