@@ -21,6 +21,7 @@ export class AgendaComponent implements OnInit {
   filterEstado: string = 'todos';
   modalTitle: string = '';
   modalMessage: string = '';
+  isLoading: boolean = false;
 
   constructor(private router: Router, private turnoService: TurnoService, private pacienteService: PacienteService) {}
 

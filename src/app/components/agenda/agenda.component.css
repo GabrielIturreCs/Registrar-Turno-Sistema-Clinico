@@ -111,15 +111,18 @@
 }
 
 .calendar-day.selected, .calendar-day:hover {
+  border: 2px solid #0099cc;
   background: linear-gradient(135deg, #00bfff 0%, #87ceeb 100%);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(0,191,255,0.15);
+  box-shadow: 0 4px 16px rgba(0,191,255,0.18);
 }
 
 .calendar-day.today {
   border: 2px solid #00bfff;
   background: #e3f0ff;
   color: #00bfff;
+  font-weight: 800;
+  box-shadow: 0 0 0 2px #00bfff33;
 }
 
 /* Eventos */
@@ -226,4 +229,42 @@
     min-width: 50px;
     padding: 0.3rem 0.7rem;
   }
+  .btn-agenda, .calendar-btn, .event-action-btn {
+    font-size: 1.1rem;
+    padding: 0.9rem 1.5rem;
+  }
+}
+
+.agenda-card, .event-item {
+  transition: box-shadow 0.3s, transform 0.3s, opacity 0.3s;
+  opacity: 1;
+}
+.agenda-card.ng-enter, .event-item.ng-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.agenda-card.ng-enter-active, .event-item.ng-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.agenda-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+}
+
+.agenda-card:active, .event-item:active {
+  box-shadow: 0 2px 8px rgba(0,191,255,0.10);
+  transform: scale(0.98);
+}
+
+.agenda-title, .event-title {
+  color: #0077b6;
+  text-shadow: 0 2px 8px rgba(0,119,182,0.08);
+}
+.btn-agenda, .calendar-btn, .event-action-btn {
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
 }
