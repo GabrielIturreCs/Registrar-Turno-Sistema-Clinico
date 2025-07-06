@@ -237,6 +237,12 @@ export class ChatService {
     return response;
   }
 
+  // --- DENTISTAS ---
+  private generateDentistResponse(message: string): string {
+    // Respuesta básica para dentistas (se puede expandir en el futuro)
+    return `👨‍⚕️ **Asistente para Dentistas**\n\nEsta función está en desarrollo. Por ahora, puedes usar el chat como paciente para todas las consultas sobre el sistema.\n\n**Funciones disponibles:**\n- Gestión de agenda\n- Revisión de turnos\n- Información de pacientes\n- Herramientas administrativas\n\n¿Necesitas ayuda con alguna función específica del sistema?`;
+  }
+
   // --- PACIENTES ---
   private generatePatientResponse(message: string): string {
     // Detectar tema de conversación
@@ -583,13 +589,375 @@ export class ChatService {
       }
     }
     
+    // NAVEGACIÓN Y ACCIONES DEL SISTEMA - Nuevo tema
+    if (message.includes('cancelar turno') || message.includes('cancelar mi turno') || message.includes('cancelar cita') ||
+        message.includes('anular turno') || message.includes('eliminar turno') || message.includes('no puedo ir') ||
+        message.includes('no podré asistir') || message.includes('tengo que cancelar')) {
+      currentTopic = 'cancelar_turno';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `❌ **Cancelar turno**\n\n**Pasos para cancelar tu turno:**\n1. Ve a 'Mis Turnos' desde tu panel\n2. Busca el turno que deseas cancelar\n3. Haz clic en el botón rojo con ❌\n4. Confirma la cancelación\n\n**Enlace directo:** 👉 **[Ir a Mis Turnos](/misTurnos)**\n\n**Política de cancelación:**\n- Cancela hasta 24 horas antes\n- Reembolso automático si pagaste\n- Sin penalización por cancelación\n\n¿Necesitas ayuda para encontrar tu turno?`;
+      } else if (step === 2) {
+        return `Para cancelar tu turno específico:\n\n**Si ya encontraste tu turno:**\n- Haz clic en el botón rojo ❌\n- Confirma la cancelación\n- Recibirás confirmación por email\n\n**Si no puedes encontrarlo:**\n- Verifica la fecha del turno\n- Actualiza la página\n- Contacta al ${this.clinicContext.phone}\n\n**Después de cancelar:**\n- Reembolso procesado en 24-48 horas\n- Turno disponible para otros pacientes\n- Puedes reservar uno nuevo cuando quieras\n\n¿Necesitas ayuda con algo más?`;
+      }
+    }
+
+    // REPROGRAMAR TURNO
+    if (message.includes('reprogramar') || message.includes('cambiar turno') || message.includes('cambiar fecha') ||
+        message.includes('cambiar hora') || message.includes('mover turno') || message.includes('reagendar') ||
+        message.includes('cambiar cita') || message.includes('nueva fecha') || message.includes('otro día')) {
+      currentTopic = 'reprogramar_turno';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `🔄 **Reprogramar turno**\n\n**Cómo reprogramar tu turno:**\n1. Ve a 'Mis Turnos' 👉 **[Ir a Mis Turnos](/misTurnos)**\n2. Encuentra tu turno actual\n3. Haz clic en "Reprogramar" (icono de calendario)\n4. Selecciona nueva fecha y hora\n5. Confirma el cambio\n\n**Importante:**\n- Reprograma hasta 24 horas antes\n- Sujeto a disponibilidad\n- Sin costo adicional\n- Mantiene el mismo tratamiento\n\n¿Qué fecha te gustaría cambiar?`;
+      } else if (step === 2) {
+        return `Para reprogramar exitosamente:\n\n**Pasos detallados:**\n1. **Accede a tus turnos:** [Mis Turnos](/misTurnos)\n2. **Busca tu turno:** por fecha o tratamiento\n3. **Haz clic en reprogramar:** icono 🔄\n4. **Selecciona nueva fecha:** calendario disponible\n5. **Confirma:** nueva fecha y hora\n\n**Alternativa rápida:**\n- Cancela el turno actual\n- Reserva uno nuevo inmediatamente\n- Mantén el mismo tratamiento\n\n¿Prefieres que te ayude a reservar uno nuevo?`;
+      }
+    }
+
+    // PAGOS Y ESTADO DEL PAGO
+    if (message.includes('pagar') || message.includes('pago') || message.includes('cuánto cuesta') ||
+        message.includes('precio') || message.includes('cobro') || message.includes('factura') ||
+        message.includes('mercadopago') || message.includes('tarjeta') || message.includes('efectivo') ||
+        message.includes('estado del pago') || message.includes('pagué') || message.includes('cobrar')) {
+      currentTopic = 'pagos_sistema';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `💳 **Pagos y facturación**\n\n**Métodos de pago disponibles:**\n- MercadoPago (tarjetas, efectivo)\n- Pago en clínica (efectivo, tarjeta)\n- Transferencia bancaria\n- Obras sociales\n\n**Para ver tus pagos:**\n👉 **[Ir a Mis Turnos](/misTurnos)** - verás el estado de cada pago\n\n**Estados de pago:**\n- ✅ Pagado\n- ⏳ Pendiente\n- ❌ Fallido\n- 💰 Reembolsado\n\n¿Necesitas ayuda con algún pago específico?`;
+      } else if (step === 2) {
+        return `Para gestionar tus pagos:\n\n**Ver estado de pagos:**\n- Ve a [Mis Turnos](/misTurnos)\n- Cada turno muestra su estado de pago\n- Haz clic en "Ver detalles" para más info\n\n**Problemas con pagos:**\n- Pago fallido: intenta nuevamente\n- Pago pendiente: espera 24-48 horas\n- Doble cobro: contacta al ${this.clinicContext.phone}\n\n**Reembolsos:**\n- Procesados automáticamente al cancelar\n- Tiempo: 3-5 días hábiles\n- Mismo método de pago original\n\n¿Tienes algún problema específico con un pago?`;
+      }
+    }
+
+    // HISTORIAL DE TURNOS
+    if (message.includes('historial') || message.includes('mis turnos') || message.includes('turnos anteriores') ||
+        message.includes('citas pasadas') || message.includes('consultas anteriores') || message.includes('ver turnos') ||
+        message.includes('lista de turnos') || message.includes('turnos realizados') || message.includes('historial médico')) {
+      currentTopic = 'historial_turnos';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `📋 **Historial de turnos**\n\n**Accede a tu historial completo:**\n👉 **[Ver Mis Turnos](/misTurnos)**\n\n**En tu historial puedes ver:**\n- Turnos realizados\n- Turnos pendientes\n- Turnos cancelados\n- Tratamientos recibidos\n- Pagos realizados\n- Fechas y horarios\n- Dentista que te atendió\n\n**Filtros disponibles:**\n- Por fecha\n- Por tratamiento\n- Por estado\n\n¿Buscas algo específico en tu historial?`;
+      } else if (step === 2) {
+        return `Para navegar tu historial:\n\n**Funciones disponibles:**\n- **Ver detalles:** información completa del turno\n- **Descargar comprobante:** para reembolsos\n- **Solicitar certificado:** de atención médica\n- **Revisar tratamientos:** historial clínico\n\n**Accesos rápidos:**\n- [Mis Turnos](/misTurnos) - historial completo\n- [Vista Paciente](/vistaPaciente) - resumen\n- [Reservar Turno](/reservarTurno) - nuevo turno\n\n**Dudas frecuentes:**\n- Certificados médicos disponibles\n- Historial completo desde el primer turno\n- Exportar datos bajo solicitud\n\n¿Necesitas un certificado o comprobante específico?`;
+      }
+    }
+
+    // CONTACTO CON LA CLÍNICA
+    if (message.includes('contactar') || message.includes('llamar') || message.includes('teléfono') ||
+        message.includes('whatsapp') || message.includes('email') || message.includes('contacto') ||
+        message.includes('hablar') || message.includes('comunicar') || message.includes('consultar') ||
+        message.includes('dirección') || message.includes('ubicación') || message.includes('dónde están')) {
+      currentTopic = 'contacto_clinica';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `📞 **Contacto con la clínica**\n\n**Medios de contacto:**\n📞 **Teléfono:** ${this.clinicContext.phone}\n📱 **WhatsApp:** ${this.clinicContext.whatsapp}\n📧 **Email:** ${this.clinicContext.email}\n🌐 **Web:** ${this.clinicContext.website}\n\n**Dirección:**\n📍 ${this.clinicContext.address}\n\n**Horarios de atención:**\n- Lunes a Viernes: 8:00 - 20:00\n- Sábados: 8:00 - 14:00\n- Emergencias: 24/7\n\n¿Qué medio prefieres para contactarte?`;
+      } else if (step === 2) {
+        return `Para contactarte efectivamente:\n\n**Por teléfono:**\n- Llama al ${this.clinicContext.phone}\n- Mejor horario: 9:00 - 11:00 y 14:00 - 17:00\n- Ten a mano tu número de turno\n\n**Por WhatsApp:**\n- Envía mensaje a ${this.clinicContext.whatsapp}\n- Respuesta en máximo 2 horas\n- Adjunta fotos si es necesario\n\n**Por email:**\n- Escribe a ${this.clinicContext.email}\n- Respuesta en 24 horas\n- Ideal para consultas no urgentes\n\n**Visita presencial:**\n- ${this.clinicContext.address}\n- Estacionamiento gratuito\n- Acceso para personas con movilidad reducida\n\n¿Necesitas indicaciones para llegar?`;
+      }
+    }
+
+    // DATOS PERSONALES Y PERFIL
+    if (message.includes('datos personales') || message.includes('perfil') || message.includes('información personal') ||
+        message.includes('cambiar datos') || message.includes('actualizar') || message.includes('editar perfil') ||
+        message.includes('obra social') || message.includes('teléfono') || message.includes('dirección') ||
+        message.includes('email') || message.includes('nombre') || message.includes('modificar datos')) {
+      currentTopic = 'datos_personales';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `👤 **Datos personales y perfil**\n\n**Para ver/editar tu perfil:**\n👉 **[Ir a Vista Paciente](/vistaPaciente)**\n\n**Datos que puedes actualizar:**\n- Nombre y apellido\n- Teléfono de contacto\n- Email\n- Dirección\n- Obra social\n- Fecha de nacimiento\n- Información médica relevante\n\n**Importante:**\n- Mantén tus datos actualizados\n- Verifica tu email para notificaciones\n- Obra social actualizada para coberturas\n\n¿Qué datos necesitas cambiar?`;
+      } else if (step === 2) {
+        return `Para actualizar tus datos:\n\n**Pasos para editar:**\n1. Ve a [Vista Paciente](/vistaPaciente)\n2. Busca la sección "Mi Perfil"\n3. Haz clic en "Editar datos"\n4. Actualiza la información\n5. Guarda los cambios\n\n**Datos críticos:**\n- **Teléfono:** para confirmaciones\n- **Email:** para notificaciones\n- **Obra social:** para coberturas\n- **Alergias:** información médica\n\n**Seguridad:**\n- Tus datos están protegidos\n- Solo tú puedes editarlos\n- Cambios registrados para auditoría\n\n¿Necesitas ayuda con algún dato específico?`;
+      }
+    }
+
+    // PROBLEMAS CON PAGOS
+    if (message.includes('problema pago') || message.includes('error pago') || message.includes('no puedo pagar') ||
+        message.includes('pago fallido') || message.includes('rechazado') || message.includes('cobro duplicado') ||
+        message.includes('reembolso') || message.includes('devolver dinero') || message.includes('doble cobro') ||
+        message.includes('tarjeta rechazada') || message.includes('fallo en el pago')) {
+      currentTopic = 'problemas_pago';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `💳 **Problemas con pagos**\n\n**Problemas comunes:**\n- Pago rechazado por tarjeta\n- Pago duplicado\n- Pago pendiente mucho tiempo\n- Reembolso no procesado\n\n**Soluciones inmediatas:**\n1. Verifica el estado en [Mis Turnos](/misTurnos)\n2. Intenta con otra tarjeta\n3. Contacta a tu banco\n4. Llama al ${this.clinicContext.phone}\n\n**Estados de pago:**\n- ❌ Fallido: intenta nuevamente\n- ⏳ Pendiente: espera 24-48 horas\n- ✅ Aprobado: confirmación por email\n\n¿Qué problema específico tienes?`;
+      } else if (step === 2) {
+        return `Para resolver tu problema de pago:\n\n**Pago rechazado:**\n- Verifica datos de tarjeta\n- Confirma límites disponibles\n- Intenta con otro método\n- Contacta a tu banco\n\n**Doble cobro:**\n- Ve a [Mis Turnos](/misTurnos)\n- Toma captura de ambos cobros\n- Llama al ${this.clinicContext.phone}\n- Reembolso en 3-5 días\n\n**Reembolso tardío:**\n- Espera 3-5 días hábiles\n- Verifica con tu banco\n- Contacta si pasa del plazo\n\n**Emergencia:**\n- Llama al ${this.clinicContext.phone}\n- Pago en clínica disponible\n- Transferencia bancaria\n\n¿Necesitas ayuda urgente?`;
+      }
+    }
+
+    // NOTIFICACIONES Y RECORDATORIOS
+    if (message.includes('notificaciones') || message.includes('recordatorios') || message.includes('avisos') ||
+        message.includes('alertas') || message.includes('email') || message.includes('sms') ||
+        message.includes('mensaje') || message.includes('confirmación') || message.includes('aviso turno') ||
+        message.includes('recordar turno') || message.includes('no recibo') || message.includes('confirmar')) {
+      currentTopic = 'notificaciones';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `🔔 **Notificaciones y recordatorios**\n\n**Tipos de notificaciones:**\n- Confirmación de turno\n- Recordatorio 24 horas antes\n- Confirmación de pago\n- Cambios en el turno\n- Resultados de estudios\n\n**Cómo recibirlas:**\n- Email (principal)\n- SMS (opcional)\n- Notificaciones push (app)\n- WhatsApp (emergencias)\n\n**Configuración:**\n- Ve a [Vista Paciente](/vistaPaciente)\n- Verifica tu email y teléfono\n- Activa las notificaciones\n\n¿No estás recibiendo notificaciones?`;
+      } else if (step === 2) {
+        return `Para recibir notificaciones correctamente:\n\n**Verifica tu configuración:**\n1. Ve a [Vista Paciente](/vistaPaciente)\n2. Confirma tu email actual\n3. Verifica tu número de teléfono\n4. Activa notificaciones\n\n**Si no recibes emails:**\n- Revisa spam/correo no deseado\n- Agrega ${this.clinicContext.email} a contactos\n- Verifica filtros de email\n\n**Problemas con SMS:**\n- Confirma número con código de país\n- Verifica operadora\n- Contacta soporte técnico\n\n**Recordatorios manuales:**\n- Anota fechas importantes\n- Configura alarmas personales\n- Llama para confirmar\n\n¿Necesitas que verifiquemos tu configuración?`;
+      }
+    }
+
+    // NO PUEDO ASISTIR
+    if (message.includes('no puedo ir') || message.includes('no podré asistir') || message.includes('impedimento') ||
+        message.includes('surgió algo') || message.includes('emergencia') || message.includes('problema') ||
+        message.includes('no voy a poder') || message.includes('tengo que faltar') || message.includes('ausente') ||
+        message.includes('falta') || message.includes('inasistencia') || message.includes('no asistiré')) {
+      currentTopic = 'no_puedo_asistir';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `⚠️ **No puedes asistir a tu turno**\n\n**Opciones disponibles:**\n1. **Reprogramar:** nueva fecha y hora\n2. **Cancelar:** reembolso completo\n3. **Transferir:** a familiar (si es posible)\n\n**Acciones rápidas:**\n- 🔄 [Reprogramar turno](/misTurnos)\n- ❌ [Cancelar turno](/misTurnos)\n- 📞 Llamar al ${this.clinicContext.phone}\n\n**Tiempo límite:**\n- Hasta 24 horas antes: sin penalización\n- Menos de 24 horas: posible carga\n- Emergencias: siempre justificadas\n\n¿Qué prefieres hacer con tu turno?`;
+      } else if (step === 2) {
+        return `Para resolver tu situación:\n\n**Si es una emergencia:**\n- Llama inmediatamente al ${this.clinicContext.phone}\n- Explica la situación\n- Sin penalización por emergencia\n- Reprogramación prioritaria\n\n**Si puedes planificar:**\n- Ve a [Mis Turnos](/misTurnos)\n- Selecciona reprogramar o cancelar\n- Elige nueva fecha si reprogramas\n- Confirma la acción\n\n**Política de cancelación:**\n- +24 horas: reembolso completo\n- -24 horas: posible cargo del 50%\n- Emergencias médicas: siempre justificadas\n\n**Alternativas:**\n- Telemedicina (consultas simples)\n- Reprogramación urgente\n- Transferencia a familiar\n\n¿Es una emergencia o puedes reprogramar?`;
+      }
+    }
+
+    // RESERVAR TURNO PASO A PASO
+    if (message.includes('reservar turno') || message.includes('agendar') || message.includes('nuevo turno') ||
+        message.includes('sacar turno') || message.includes('cita') || message.includes('como reservar') ||
+        message.includes('hacer reserva') || message.includes('solicitar turno') || message.includes('pedir turno') ||
+        message.includes('turno nuevo') || message.includes('agenda') || message.includes('programar')) {
+      currentTopic = 'reservar_turno';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `📅 **Reservar nuevo turno**\n\n**Paso a paso:**\n1. **Ve a reservar:** 👉 **[Reservar Turno](/reservarTurno)**\n2. **Selecciona fecha:** calendario disponible\n3. **Elige horario:** turnos libres\n4. **Confirma tratamiento:** tipo de consulta\n5. **Realiza el pago:** MercadoPago o en clínica\n\n**Información necesaria:**\n- Fecha deseada\n- Horario preferido\n- Tipo de tratamiento\n- Datos actualizados\n\n**Disponibilidad:**\n- Lunes a Viernes: 8:00 - 20:00\n- Sábados: 8:00 - 14:00\n- Turnos cada 30 minutos\n\n¿Qué tratamiento necesitas?`;
+      } else if (step === 2) {
+        return `Para completar tu reserva:\n\n**Pasos detallados:**\n1. **Accede:** [Reservar Turno](/reservarTurno)\n2. **Calendario:** haz clic en día disponible\n3. **Horarios:** selecciona hora libre\n4. **Tratamiento:** elige de la lista\n5. **Confirma:** revisa datos\n6. **Pago:** MercadoPago o presencial\n\n**Tratamientos disponibles:**\n- Consulta general\n- Limpieza dental\n- Empastes\n- Endodoncia\n- Ortodoncia\n- Implantes\n- Emergencias\n\n**Después de reservar:**\n- Confirmación por email\n- Recordatorio 24 horas antes\n- Comprobante de pago\n\n¿Necesitas ayuda con algún paso específico?`;
+      }
+    }
+
+    // TRATAMIENTOS Y PRECIOS
+    if (message.includes('tratamientos') || message.includes('qué ofrecen') || message.includes('servicios') ||
+        message.includes('precios') || message.includes('costos') || message.includes('cuánto cuesta') ||
+        message.includes('especialidades') || message.includes('procedimientos') || message.includes('que hacen') ||
+        message.includes('lista') || message.includes('opciones') || message.includes('tipos')) {
+      currentTopic = 'tratamientos_precios';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `🦷 **Tratamientos y precios**\n\n**Especialidades disponibles:**\n${this.clinicContext.specialties.map(spec => `- ${spec}`).join('\n')}\n\n**Tratamientos comunes:**\n- Consulta general: $3,000\n- Limpieza dental: $4,500\n- Empaste: $5,000-$8,000\n- Endodoncia: $15,000-$25,000\n- Ortodoncia: $80,000-$150,000\n- Implantes: $45,000-$80,000\n\n**Métodos de pago:**\n- Efectivo (10% descuento)\n- Tarjetas de crédito\n- Cuotas sin interés\n- Obra social\n\n**Para cotizar:** 👉 **[Reservar Consulta](/reservarTurno)**\n\n¿Qué tratamiento específico te interesa?`;
+      } else if (step === 2) {
+        return `Para tu tratamiento específico:\n\n**Evaluación personalizada:**\n- Reserva una consulta\n- Diagnóstico completo\n- Presupuesto detallado\n- Plan de tratamiento\n\n**Profesionales disponibles:**\n${this.clinicContext.doctors.map(doc => `- ${doc}`).join('\n')}\n\n**Tecnología avanzada:**\n${this.clinicContext.equipment.map(eq => `- ${eq}`).join('\n')}\n\n**Financiamiento:**\n- Hasta 12 cuotas sin interés\n- Descuento por pago contado\n- Convenios con obras sociales\n- Planes de tratamiento\n\n**Reserva tu consulta:** [Reservar Turno](/reservarTurno)\n\n¿Quieres un presupuesto personalizado?`;
+      }
+    }
+
+    // ESTADO DE TURNOS
+    if (message.includes('estado turno') || message.includes('mi turno') || message.includes('consultar turno') ||
+        message.includes('información turno') || message.includes('detalles turno') || message.includes('cuando es') ||
+        message.includes('que dia') || message.includes('que hora') || message.includes('proximo turno') ||
+        message.includes('ver turno') || message.includes('turno actual') || message.includes('confirmado')) {
+      currentTopic = 'estado_turnos';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `📋 **Estado de tus turnos**\n\n**Ver tus turnos:**\n👉 **[Mis Turnos](/misTurnos)** - información completa\n👉 **[Vista Paciente](/vistaPaciente)** - resumen\n\n**Estados posibles:**\n- ✅ **Confirmado:** turno asegurado\n- ⏳ **Pendiente:** esperando confirmación\n- 💳 **Pendiente pago:** falta pagar\n- ❌ **Cancelado:** turno cancelado\n- ✅ **Completado:** turno realizado\n\n**Información disponible:**\n- Fecha y hora exacta\n- Tratamiento programado\n- Dentista asignado\n- Estado del pago\n- Ubicación del consultorio\n\n¿Buscas información de algún turno específico?`;
+      } else if (step === 2) {
+        return `Para consultar tu turno específico:\n\n**Información detallada:**\n- **Fecha y hora:** exacta del turno\n- **Tratamiento:** tipo de consulta\n- **Profesional:** dentista asignado\n- **Consultorio:** ubicación específica\n- **Preparación:** instrucciones especiales\n\n**Acciones disponibles:**\n- 📱 Confirmar asistencia\n- 🔄 Reprogramar si es necesario\n- ❌ Cancelar con reembolso\n- 📞 Contactar al profesional\n\n**Recordatorios:**\n- Llega 10 minutos antes\n- Trae DNI y obra social\n- Confirma 24 horas antes\n- Sigue instrucciones previas\n\n¿Necesitas confirmar tu próximo turno?`;
+      }
+    }
+
+    // NO VEO MIS TURNOS
+    if (message.includes('no veo turnos') || message.includes('no aparecen') || message.includes('no encuentro') ||
+        message.includes('perdí turno') || message.includes('donde están') || message.includes('no aparece') ||
+        message.includes('no sale') || message.includes('vacío') || message.includes('problema ver') ||
+        message.includes('no muestra') || message.includes('error turnos') || message.includes('no cargan')) {
+      currentTopic = 'no_veo_turnos';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `🔍 **No ves tus turnos**\n\n**Soluciones rápidas:**\n1. **Actualiza la página:** F5 o Ctrl+R\n2. **Verifica tu sesión:** inicia sesión nuevamente\n3. **Prueba otro navegador:** Chrome, Firefox, Safari\n4. **Limpia caché:** navegador\n\n**Accesos alternativos:**\n- 👉 [Mis Turnos](/misTurnos)\n- 👉 [Vista Paciente](/vistaPaciente)\n- 📱 Versión móvil\n\n**Posibles causas:**\n- Problemas de conexión\n- Sesión expirada\n- Caché del navegador\n- Datos desactualizados\n\n¿Qué navegador estás usando?`;
+      } else if (step === 2) {
+        return `Para resolver el problema:\n\n**Pasos detallados:**\n1. **Cierra sesión:** botón salir\n2. **Inicia sesión nuevamente:** usuario y contraseña\n3. **Ve a:** [Mis Turnos](/misTurnos)\n4. **Espera:** carga completa de la página\n\n**Si persiste el problema:**\n- Borra caché del navegador\n- Intenta en modo incógnito\n- Usa otro dispositivo\n- Contacta soporte\n\n**Contacto urgente:**\n- Llama al ${this.clinicContext.phone}\n- WhatsApp: ${this.clinicContext.whatsapp}\n- Email: ${this.clinicContext.email}\n\n**Información necesaria:**\n- Número de turno\n- Fecha aproximada\n- Tratamiento reservado\n\n¿Necesitas ayuda técnica inmediata?`;
+      }
+    }
+
+    // ACCESO MÓVIL
+    if (message.includes('celular') || message.includes('móvil') || message.includes('teléfono') ||
+        message.includes('smartphone') || message.includes('tablet') || message.includes('app') ||
+        message.includes('aplicación') || message.includes('desde el celular') || message.includes('versión móvil') ||
+        message.includes('android') || message.includes('iphone') || message.includes('responsive')) {
+      currentTopic = 'acceso_movil';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `📱 **Acceso móvil**\n\n**Cómo usar desde tu celular:**\n- Abre el navegador (Chrome, Safari, Firefox)\n- Ingresa a la web: ${this.clinicContext.website}\n- Inicia sesión normalmente\n- Navega con diseño adaptado\n\n**Funciones disponibles:**\n- Reservar turnos\n- Ver mis turnos\n- Cancelar/reprogramar\n- Realizar pagos\n- Contactar clínica\n- Chat de ayuda\n\n**Ventajas móviles:**\n- Notificaciones push\n- Cámara para documentos\n- Ubicación GPS\n- Llamadas directas\n\n¿Tienes problemas para acceder desde tu celular?`;
+      } else if (step === 2) {
+        return `Para optimizar tu experiencia móvil:\n\n**Configuración recomendada:**\n- Agrega a pantalla principal\n- Activa notificaciones\n- Permite ubicación\n- Guarda contraseña\n\n**Navegadores compatibles:**\n- Chrome (recomendado)\n- Safari (iOS)\n- Firefox\n- Edge\n\n**Funciones móviles:**\n- **Llamada directa:** toca ${this.clinicContext.phone}\n- **WhatsApp:** toca ${this.clinicContext.whatsapp}\n- **Ubicación:** GPS a la clínica\n- **Fotos:** adjuntar documentos\n\n**Problemas comunes:**\n- Pantalla pequeña: usa zoom\n- Carga lenta: verifica conexión\n- Formularios: gira horizontal\n\n¿Necesitas ayuda con alguna función específica?`;
+      }
+    }
+
+    // CERRAR SESIÓN
+    if (message.includes('cerrar sesión') || message.includes('salir') || message.includes('logout') ||
+        message.includes('desconectar') || message.includes('terminar sesión') || message.includes('log out') ||
+        message.includes('desloguear') || message.includes('finalizar') || message.includes('acabar sesión') ||
+        message.includes('sign out') || message.includes('como salir') || message.includes('desactivar')) {
+      currentTopic = 'cerrar_sesion';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `🚪 **Cerrar sesión**\n\n**Cómo cerrar sesión:**\n1. Busca tu nombre en la parte superior\n2. Haz clic en el menú desplegable\n3. Selecciona "Cerrar sesión" o "Salir"\n4. Confirma la acción\n\n**Ubicación del botón:**\n- Esquina superior derecha\n- Menú principal\n- Icono de usuario\n- Panel de navegación\n\n**Importante:**\n- Guarda cambios antes de salir\n- Confirma turnos pendientes\n- Anota información importante\n\n¿No encuentras el botón para salir?`;
+      } else if (step === 2) {
+        return `Para cerrar sesión correctamente:\n\n**Pasos detallados:**\n1. **Busca:** tu nombre o icono de usuario\n2. **Haz clic:** en el menú desplegable\n3. **Selecciona:** "Cerrar sesión"\n4. **Confirma:** si se solicita\n\n**Alternativas:**\n- Cierra la pestaña del navegador\n- Cierra todo el navegador\n- Reinicia el dispositivo\n\n**Recomendaciones:**\n- Siempre cierra sesión en equipos públicos\n- Guarda información importante\n- Anota números de turno\n- Confirma acciones pendientes\n\n**Próximo acceso:**\n- Usa las mismas credenciales\n- Recupera contraseña si es necesario\n- Contacta soporte si hay problemas\n\n¿Necesitas ayuda con algo más antes de salir?`;
+      }
+    }
+
+    // SEGURIDAD Y PRIVACIDAD
+    if (message.includes('seguridad') || message.includes('privacidad') || message.includes('datos seguros') ||
+        message.includes('protección') || message.includes('confidencial') || message.includes('hackear') ||
+        message.includes('robar datos') || message.includes('información personal') || message.includes('contraseña') ||
+        message.includes('cuenta segura') || message.includes('virus') || message.includes('malware')) {
+      currentTopic = 'seguridad_privacidad';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `🔒 **Seguridad y privacidad**\n\n**Tus datos están protegidos:**\n- Conexión SSL encriptada\n- Servidor seguro\n- Cumplimiento GDPR\n- Auditorías regulares\n\n**Medidas de seguridad:**\n- Contraseñas encriptadas\n- Sesiones temporales\n- Acceso limitado\n- Backup automático\n\n**Tu información médica:**\n- Confidencialidad absoluta\n- Acceso solo autorizado\n- Historial protegido\n- Ley de secreto profesional\n\n**Recomendaciones:**\n- Usa contraseñas seguras\n- Cierra sesión en equipos públicos\n- No compartas credenciales\n- Reporta actividad sospechosa\n\n¿Tienes alguna preocupación específica?`;
+      } else if (step === 2) {
+        return `Para mantener tu cuenta segura:\n\n**Contraseña segura:**\n- Mínimo 8 caracteres\n- Incluye números y símbolos\n- Evita datos personales\n- Cambia regularmente\n\n**Buenas prácticas:**\n- No guardes contraseñas en navegadores públicos\n- Verifica la URL antes de ingresar datos\n- Usa conexiones seguras (WiFi confiable)\n- Mantén actualizado tu navegador\n\n**En caso de problemas:**\n- Cambia contraseña inmediatamente\n- Contacta al ${this.clinicContext.phone}\n- Reporta actividad sospechosa\n- Verifica tu historial de accesos\n\n**Protección de datos:**\n- Tus datos no se comparten\n- Uso exclusivo para atención médica\n- Eliminación segura cuando solicites\n- Derechos de acceso y rectificación\n\n¿Necesitas cambiar tu contraseña?`;
+      }
+    }
+
+    // NAVEGACIÓN Y ACCIONES DEL SISTEMA
+    if (message.includes('cancelar turno') || message.includes('cancelar mi turno') || message.includes('cancelar cita') ||
+        message.includes('anular turno') || message.includes('eliminar turno') || message.includes('no puedo ir') ||
+        message.includes('no podré asistir') || message.includes('tengo que cancelar')) {
+      currentTopic = 'cancelar_turno';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `❌ **Cancelar turno**\n\n**Pasos para cancelar tu turno:**\n1. Ve a 'Mis Turnos' desde tu panel\n2. Busca el turno que deseas cancelar\n3. Haz clic en el botón rojo con ❌\n4. Confirma la cancelación\n\n**Enlace directo:** 👉 **[Ir a Mis Turnos](/misTurnos)**\n\n**Política de cancelación:**\n- Cancela hasta 24 horas antes\n- Reembolso automático si pagaste\n- Sin penalización por cancelación\n\n¿Necesitas ayuda para encontrar tu turno?`;
+      } else if (step === 2) {
+        return `Para cancelar tu turno específico:\n\n**Si ya encontraste tu turno:**\n- Haz clic en el botón rojo ❌\n- Confirma la cancelación\n- Recibirás confirmación por email\n\n**Si no puedes encontrarlo:**\n- Verifica la fecha del turno\n- Actualiza la página\n- Contacta al ${this.clinicContext.phone}\n\n**Después de cancelar:**\n- Reembolso procesado en 24-48 horas\n- Turno disponible para otros pacientes\n- Puedes reservar uno nuevo cuando quieras\n\n¿Necesitas ayuda con algo más?`;
+      }
+    }
+
+    // REPROGRAMAR TURNO
+    if (message.includes('reprogramar') || message.includes('cambiar turno') || message.includes('cambiar fecha') ||
+        message.includes('cambiar hora') || message.includes('mover turno') || message.includes('reagendar') ||
+        message.includes('cambiar cita') || message.includes('nueva fecha') || message.includes('otro día')) {
+      currentTopic = 'reprogramar_turno';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `🔄 **Reprogramar turno**\n\n**Cómo reprogramar tu turno:**\n1. Ve a 'Mis Turnos' 👉 **[Ir a Mis Turnos](/misTurnos)**\n2. Encuentra tu turno actual\n3. Haz clic en "Reprogramar" (icono de calendario)\n4. Selecciona nueva fecha y hora\n5. Confirma el cambio\n\n**Importante:**\n- Reprograma hasta 24 horas antes\n- Sujeto a disponibilidad\n- Sin costo adicional\n- Mantiene el mismo tratamiento\n\n¿Qué fecha te gustaría cambiar?`;
+      } else if (step === 2) {
+        return `Para reprogramar exitosamente:\n\n**Pasos detallados:**\n1. **Accede a tus turnos:** [Mis Turnos](/misTurnos)\n2. **Busca tu turno:** por fecha o tratamiento\n3. **Haz clic en reprogramar:** icono 🔄\n4. **Selecciona nueva fecha:** calendario disponible\n5. **Confirma:** nueva fecha y hora\n\n**Alternativa rápida:**\n- Cancela el turno actual\n- Reserva uno nuevo inmediatamente\n- Mantén el mismo tratamiento\n\n¿Prefieres que te ayude a reservar uno nuevo?`;
+      }
+    }
+
+    // RESERVAR TURNO PASO A PASO
+    if (message.includes('reservar turno') || message.includes('agendar') || message.includes('nuevo turno') ||
+        message.includes('sacar turno') || message.includes('cita') || message.includes('como reservar') ||
+        message.includes('hacer reserva') || message.includes('solicitar turno') || message.includes('pedir turno') ||
+        message.includes('turno nuevo') || message.includes('agenda') || message.includes('programar')) {
+      currentTopic = 'reservar_turno';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `📅 **Reservar nuevo turno**\n\n**Paso a paso:**\n1. **Ve a reservar:** 👉 **[Reservar Turno](/reservarTurno)**\n2. **Selecciona fecha:** calendario disponible\n3. **Elige horario:** turnos libres\n4. **Confirma tratamiento:** tipo de consulta\n5. **Realiza el pago:** MercadoPago o en clínica\n\n**Información necesaria:**\n- Fecha deseada\n- Horario preferido\n- Tipo de tratamiento\n- Datos actualizados\n\n**Disponibilidad:**\n- Lunes a Viernes: 8:00 - 20:00\n- Sábados: 8:00 - 14:00\n- Turnos cada 30 minutos\n\n¿Qué tratamiento necesitas?`;
+      } else if (step === 2) {
+        return `Para completar tu reserva:\n\n**Pasos detallados:**\n1. **Accede:** [Reservar Turno](/reservarTurno)\n2. **Calendario:** haz clic en día disponible\n3. **Horarios:** selecciona hora libre\n4. **Tratamiento:** elige de la lista\n5. **Confirma:** revisa datos\n6. **Pago:** MercadoPago o presencial\n\n**Tratamientos disponibles:**\n- Consulta general\n- Limpieza dental\n- Empastes\n- Endodoncia\n- Ortodoncia\n- Implantes\n- Emergencias\n\n**Después de reservar:**\n- Confirmación por email\n- Recordatorio 24 horas antes\n- Comprobante de pago\n\n¿Necesitas ayuda con algún paso específico?`;
+      }
+    }
+
+    // HISTORIAL DE TURNOS
+    if (message.includes('historial') || message.includes('mis turnos') || message.includes('turnos anteriores') ||
+        message.includes('citas pasadas') || message.includes('consultas anteriores') || message.includes('ver turnos') ||
+        message.includes('lista de turnos') || message.includes('turnos realizados') || message.includes('historial médico')) {
+      currentTopic = 'historial_turnos';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `📋 **Historial de turnos**\n\n**Accede a tu historial completo:**\n👉 **[Ver Mis Turnos](/misTurnos)**\n\n**En tu historial puedes ver:**\n- Turnos realizados\n- Turnos pendientes\n- Turnos cancelados\n- Tratamientos recibidos\n- Pagos realizados\n- Fechas y horarios\n- Dentista que te atendió\n\n**Filtros disponibles:**\n- Por fecha\n- Por tratamiento\n- Por estado\n\n¿Buscas algo específico en tu historial?`;
+      } else if (step === 2) {
+        return `Para navegar tu historial:\n\n**Funciones disponibles:**\n- **Ver detalles:** información completa del turno\n- **Descargar comprobante:** para reembolsos\n- **Solicitar certificado:** de atención médica\n- **Revisar tratamientos:** historial clínico\n\n**Accesos rápidos:**\n- [Mis Turnos](/misTurnos) - historial completo\n- [Vista Paciente](/vistaPaciente) - resumen\n- [Reservar Turno](/reservarTurno) - nuevo turno\n\n**Dudas frecuentes:**\n- Certificados médicos disponibles\n- Historial completo desde el primer turno\n- Exportar datos bajo solicitud\n\n¿Necesitas un certificado o comprobante específico?`;
+      }
+    }
+
+    // PAGOS Y ESTADO DEL PAGO
+    if (message.includes('pagar') || message.includes('pago') || message.includes('cuánto cuesta') ||
+        message.includes('precio') || message.includes('cobro') || message.includes('factura') ||
+        message.includes('mercadopago') || message.includes('tarjeta') || message.includes('efectivo') ||
+        message.includes('estado del pago') || message.includes('pagué') || message.includes('cobrar')) {
+      currentTopic = 'pagos_sistema';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `💳 **Pagos y facturación**\n\n**Métodos de pago disponibles:**\n- MercadoPago (tarjetas, efectivo)\n- Pago en clínica (efectivo, tarjeta)\n- Transferencia bancaria\n- Obras sociales\n\n**Para ver tus pagos:**\n👉 **[Ir a Mis Turnos](/misTurnos)** - verás el estado de cada pago\n\n**Estados de pago:**\n- ✅ Pagado\n- ⏳ Pendiente\n- ❌ Fallido\n- 💰 Reembolsado\n\n¿Necesitas ayuda con algún pago específico?`;
+      } else if (step === 2) {
+        return `Para gestionar tus pagos:\n\n**Ver estado de pagos:**\n- Ve a [Mis Turnos](/misTurnos)\n- Cada turno muestra su estado de pago\n- Haz clic en "Ver detalles" para más info\n\n**Problemas con pagos:**\n- Pago fallido: intenta nuevamente\n- Pago pendiente: espera 24-48 horas\n- Doble cobro: contacta al ${this.clinicContext.phone}\n\n**Reembolsos:**\n- Procesados automáticamente al cancelar\n- Tiempo: 3-5 días hábiles\n- Mismo método de pago original\n\n¿Tienes algún problema específico con un pago?`;
+      }
+    }
+
+    // CONTACTO CON LA CLÍNICA
+    if (message.includes('contactar') || message.includes('llamar') || message.includes('teléfono') ||
+        message.includes('whatsapp') || message.includes('email') || message.includes('contacto') ||
+        message.includes('hablar') || message.includes('comunicar') || message.includes('consultar') ||
+        message.includes('dirección') || message.includes('ubicación') || message.includes('dónde están')) {
+      currentTopic = 'contacto_clinica';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `📞 **Contacto con la clínica**\n\n**Medios de contacto:**\n📞 **Teléfono:** ${this.clinicContext.phone}\n📱 **WhatsApp:** ${this.clinicContext.whatsapp}\n📧 **Email:** ${this.clinicContext.email}\n🌐 **Web:** ${this.clinicContext.website}\n\n**Dirección:**\n📍 ${this.clinicContext.address}\n\n**Horarios de atención:**\n- Lunes a Viernes: 8:00 - 20:00\n- Sábados: 8:00 - 14:00\n- Emergencias: 24/7\n\n¿Qué medio prefieres para contactarte?`;
+      } else if (step === 2) {
+        return `Para contactarte efectivamente:\n\n**Por teléfono:**\n- Llama al ${this.clinicContext.phone}\n- Mejor horario: 9:00 - 11:00 y 14:00 - 17:00\n- Ten a mano tu número de turno\n\n**Por WhatsApp:**\n- Envía mensaje a ${this.clinicContext.whatsapp}\n- Respuesta en máximo 2 horas\n- Adjunta fotos si es necesario\n\n**Por email:**\n- Escribe a ${this.clinicContext.email}\n- Respuesta en 24 horas\n- Ideal para consultas no urgentes\n\n**Visita presencial:**\n- ${this.clinicContext.address}\n- Estacionamiento gratuito\n- Acceso para personas con movilidad reducida\n\n¿Necesitas indicaciones para llegar?`;
+      }
+    }
+
+    // DATOS PERSONALES Y PERFIL
+    if (message.includes('datos personales') || message.includes('perfil') || message.includes('información personal') ||
+        message.includes('cambiar datos') || message.includes('actualizar') || message.includes('editar perfil') ||
+        message.includes('obra social') || message.includes('teléfono') || message.includes('dirección') ||
+        message.includes('email') || message.includes('nombre') || message.includes('modificar datos')) {
+      currentTopic = 'datos_personales';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        return `👤 **Datos personales y perfil**\n\n**Para ver/editar tu perfil:**\n👉 **[Ir a Vista Paciente](/vistaPaciente)**\n\n**Datos que puedes actualizar:**\n- Nombre y apellido\n- Teléfono de contacto\n- Email\n- Dirección\n- Obra social\n- Fecha de nacimiento\n- Información médica relevante\n\n**Importante:**\n- Mantén tus datos actualizados\n- Verifica tu email para notificaciones\n- Obra social actualizada para coberturas\n\n¿Qué datos necesitas cambiar?`;
+      } else if (step === 2) {
+        return `Para actualizar tus datos:\n\n**Pasos para editar:**\n1. Ve a [Vista Paciente](/vistaPaciente)\n2. Busca la sección "Mi Perfil"\n3. Haz clic en "Editar datos"\n4. Actualiza la información\n5. Guarda los cambios\n\n**Datos críticos:**\n- **Teléfono:** para confirmaciones\n- **Email:** para notificaciones\n- **Obra social:** para coberturas\n- **Alergias:** información médica\n\n**Seguridad:**\n- Tus datos están protegidos\n- Solo tú puedes editarlos\n- Cambios registrados para auditoría\n\n¿Necesitas ayuda con algún dato específico?`;
+      }
+    }
+
     // Respuesta por defecto con contexto
     const lastTopic = this.getLastTopic();
     if (lastTopic && this.getConversationStep() > 2) {
       return `Entiendo que sigues preguntando sobre ${this.getTopicName(lastTopic)}. ¿Te gustaría que te ayude a agendar una consulta para resolver todas tus dudas con un especialista?`;
     }
     
-    return `🤔 **Entiendo tu consulta sobre "${message}"**\n\nPuedo ayudarte con:\n- Dolor dental\n- Sensibilidad\n- Encías y sangrado\n- Mal aliento\n- Cuidado infantil\n- Embarazo\n- Bruxismo\n- Manchas y blanqueamiento\n- Caries y empastes\n- Endodoncia\n- Periodoncia\n- Ortodoncia\n- Implantes\n- Higiene bucal\n- Emergencias\n- Diabetes\n- Ansiedad dental\n- Costos y financiamiento\n- Horarios y ubicación\n- Nutrición dental\n- Medicamentos\n- Cuidado post-tratamiento\n- Prevención y mantenimiento\n\n¿Podrías ser más específico?`;
+    return `🤔 **Entiendo tu consulta sobre "${message}"**\n\nPuedo ayudarte con:\n\n**💊 Temas médicos:**\n- Dolor dental, sensibilidad, encías\n- Caries, empastes, endodoncia\n- Ortodoncia, implantes\n- Emergencias dentales\n\n**🏥 Navegación del sistema:**\n- Cancelar turno\n- Reprogramar turno\n- Reservar nuevo turno\n- Ver historial de turnos\n- Gestionar pagos\n- Contactar la clínica\n\n**ℹ️ Información:**\n- Tratamientos y precios\n- Horarios y ubicación\n- Datos personales\n- Acceso móvil\n\n¿Podrías ser más específico sobre lo que necesitas?`;
   }
 
   private getTopicName(topic: string): string {
@@ -598,253 +966,35 @@ export class ChatService {
       'sensibilidad': 'sensibilidad dental',
       'sangrado_encias': 'sangrado de encías',
       'mal_aliento': 'mal aliento',
-      'cuidado_infantil': 'cuidado dental infantil',
-      'embarazo': 'salud dental en el embarazo',
+      'cuidado_infantil': 'cuidado infantil',
+      'embarazo': 'embarazo',
       'bruxismo': 'bruxismo',
-      'manchas': 'manchas en los dientes',
+      'manchas': 'manchas en dientes',
       'endodoncia': 'endodoncia',
-      'periodoncia': 'enfermedad periodontal',
+      'periodoncia': 'periodoncia',
       'ortodoncia': 'ortodoncia',
-      'implantes': 'implantes dentales',
+      'implantes': 'implantes',
       'higiene_bucal': 'higiene bucal',
-      'caries': 'caries dental',
-      'blanqueamiento': 'blanqueamiento dental',
-      'emergencias': 'emergencias dentales',
-      'diabetes': 'diabetes y salud dental',
+      'caries': 'caries',
+      'blanqueamiento': 'blanqueamiento',
+      'emergencias': 'emergencias',
+      'diabetes': 'diabetes',
       'ansiedad_dental': 'ansiedad dental',
-      'costos': 'costos y financiamiento',
+      'costos': 'costos',
       'horarios_ubicacion': 'horarios y ubicación',
-      'nutricion_dental': 'nutrición y salud dental',
-      'medicamentos_dental': 'medicamentos y salud dental',
+      'nutricion_dental': 'nutrición dental',
+      'medicamentos_dental': 'medicamentos',
       'cuidado_post_tratamiento': 'cuidado post-tratamiento',
-      'prevencion_mantenimiento': 'prevención y mantenimiento'
+      'prevencion_mantenimiento': 'prevención y mantenimiento',
+      'cancelar_turno': 'cancelar turno',
+      'reprogramar_turno': 'reprogramar turno',
+      'reservar_turno': 'reservar turno',
+      'historial_turnos': 'historial de turnos',
+      'pagos_sistema': 'pagos y facturación',
+      'contacto_clinica': 'contacto con la clínica',
+      'datos_personales': 'datos personales'
     };
     return topicNames[topic] || topic;
-  }
-
-  // --- DENTISTAS ---
-  private generateDentistResponse(message: string): string {
-    // Detectar tema de conversación
-    let currentTopic = '';
-    
-    // Pacientes difíciles
-    if (message.includes('paciente difícil') || message.includes('paciente ansioso') || message.includes('manejo')) {
-      currentTopic = 'pacientes_dificiles';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `👨‍⚕️ **Manejo de pacientes difíciles**\n\n- Escucha activa\n- Valida preocupaciones\n- Lenguaje no técnico\n- Técnicas de relajación\n- Explica cada paso\n- Sedación si es necesario\n- Notas clínicas detalladas\n\n¿Necesitas ayuda con un caso específico?`;
-      } else if (step === 2) {
-        return `Para pacientes ansiosos específicamente:\n\n**Técnicas efectivas:**\n- Técnica "Tell-Show-Do"\n- Distracción con música\n- Respiración guiada\n- Sedación consciente\n- Ambiente relajante\n\n**Comunicación:**\n- Explica antes de hacer\n- Usa analogías simples\n- Valida sus miedos\n- Ofrece control\n\n¿Quieres que profundicemos en alguna técnica?`;
-      }
-    }
-    
-    // Emergencias
-    if (message.includes('emergencia') || message.includes('urgencia')) {
-      currentTopic = 'emergencias';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `🚨 **Protocolo de emergencias dentales**\n\n- Dolor severo: evaluación inmediata\n- Fractura: preservar fragmento\n- Luxación: reposición rápida\n- Hemorragia: control inmediato\n- Infección: antibióticos y drenaje\n\n¿Tienes una emergencia que atender?`;
-      } else if (step === 2) {
-        return `Para emergencias específicas:\n\n**Dolor severo:**\n- Evaluar causa (caries, fractura, infección)\n- Analgésicos apropiados\n- Antibióticos si hay infección\n- Derivación si es necesario\n\n**Fractura dental:**\n- Preservar fragmento en leche\n- Evaluar extensión\n- Restauración inmediata o temporal\n- Seguimiento\n\n¿Qué tipo de emergencia estás atendiendo?`;
-      }
-    }
-    
-    // Instrumentos rotos
-    if (message.includes('instrumento roto') || message.includes('fresa rota') || message.includes('se rompió')) {
-      currentTopic = 'instrumentos_rotos';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `🛠️ **Instrumento roto**\n\n- Mantén la calma\n- Detén el procedimiento\n- Localiza el fragmento\n- Informa al paciente\n- Documenta en la historia clínica\n- Seguimiento y prevención futura\n\n¿Qué instrumento se rompió?`;
-      } else if (step === 2) {
-        return `Protocolo específico para instrumentos rotos:\n\n**Acción inmediata:**\n- Detener procedimiento\n- Localizar fragmento con radiografía\n- Informar al paciente\n- Documentar en historia clínica\n\n**Prevención:**\n- Revisar instrumental antes de usar\n- No forzar instrumentos\n- Mantenimiento regular\n- Reemplazo preventivo\n\n¿Pudiste localizar el fragmento?`;
-      }
-    }
-    
-    // Anestesia
-    if (message.includes('anestesia') || message.includes('anestésico')) {
-      currentTopic = 'anestesia';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `💉 **Guía de anestesia dental**\n\n- Tópica, local, troncular, sedación\n- Técnica de la mariposa\n- Aplicación lenta\n- Temperatura adecuada\n- Distracción\n- Precaución en embarazadas, niños, ancianos\n\n¿Qué tipo de anestesia necesitas aplicar?`;
-      } else if (step === 2) {
-        return `Técnicas específicas de anestesia:\n\n**Anestesia local:**\n- Técnica de la mariposa\n- Aplicación lenta y suave\n- Distracción del paciente\n- Temperatura corporal\n\n**Consideraciones especiales:**\n- Embarazadas: evitar primer trimestre\n- Niños: dosis ajustada\n- Ancianos: precaución cardiovascular\n- Ansiosos: sedación previa\n\n¿Necesitas ayuda con alguna técnica específica?`;
-      }
-    }
-    
-    // Comunicación
-    if (message.includes('comunicación') || message.includes('explicar')) {
-      currentTopic = 'comunicacion';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `🗣️ **Comunicación con pacientes**\n\n- Explica con claridad\n- Usa ejemplos visuales\n- Sé empático\n- Informa sobre costos y alternativas\n- Refuerza la confianza\n\n¿Tienes dificultades con algún tipo de paciente?`;
-      } else if (step === 2) {
-        return `Estrategias de comunicación efectiva:\n\n**Explicación de tratamientos:**\n- Usa analogías simples\n- Muestra modelos o imágenes\n- Explica beneficios y riesgos\n- Ofrece alternativas\n\n**Manejo de costos:**\n- Transparencia total\n- Planes de pago\n- Priorizar tratamientos\n- Documentar todo\n\n¿Quieres que profundicemos en algún aspecto?`;
-      }
-    }
-    
-    // Control de infecciones
-    if (message.includes('infección') || message.includes('esterilización')) {
-      currentTopic = 'control_infecciones';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `🦠 **Control de infecciones**\n\n- Esteriliza instrumental\n- Usa barreras de protección\n- Desinfecta superficies\n- Lavado de manos frecuente\n- Control de residuos\n\n¿Tienes dudas sobre algún protocolo?`;
-      } else if (step === 2) {
-        return `Protocolos específicos de control de infecciones:\n\n**Esterilización:**\n- Autoclave a 121°C por 20 min\n- Indicadores químicos y biológicos\n- Almacenamiento estéril\n- Rotación de instrumental\n\n**Protección personal:**\n- Guantes, mascarilla, gafas\n- Cambio entre pacientes\n- Lavado de manos\n- Desinfección de superficies\n\n¿Necesitas actualizar algún protocolo?`;
-      }
-    }
-    
-    // Actualización profesional
-    if (message.includes('curso') || message.includes('actualización')) {
-      currentTopic = 'actualizacion_profesional';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `📚 **Actualización profesional**\n\n- Cursos online: Círculo Odontológico, AOA, FOUBA\n- Congresos: CICAO, FDI\n- Revistas: Journal of Dental Research, Acta Odontológica\n\n¿Qué área te interesa actualizar?`;
-      } else if (step === 2) {
-        return `Opciones específicas de actualización:\n\n**Cursos online:**\n- Círculo Odontológico Argentino\n- Asociación Odontológica Argentina\n- FOUBA (Federación Odontológica)\n- Plataformas internacionales\n\n**Congresos 2024:**\n- CICAO (Buenos Aires)\n- FDI World Dental Congress\n- Jornadas regionales\n\n¿Te interesa algún área específica?`;
-      }
-    }
-    
-    // GESTIÓN DE AGENDA - Expandido
-    if (message.includes('agenda') || message.includes('ausentismo') || message.includes('turnos') ||
-        message.includes('confirmación') || message.includes('recordatorio') || message.includes('lista de espera') ||
-        message.includes('cancelación') || message.includes('reprogramación')) {
-      currentTopic = 'gestion_agenda';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `📅 **Gestión de agenda**\n\n- Confirmar turnos por WhatsApp\n- Recordatorios automáticos\n- Lista de espera\n- Flexibilidad horaria\n- Seguimiento de ausentistas\n- Política de cancelaciones\n\n¿Tienes problemas con ausentismo?`;
-      } else if (step === 2) {
-        return `Estrategias para reducir ausentismo:\n\n**Confirmación de turnos:**\n- WhatsApp 24h antes\n- Llamada telefónica\n- Email de recordatorio\n- SMS automático\n\n**Manejo de ausentistas:**\n- Lista de espera\n- Cargo por cancelación tardía\n- Política clara de reprogramación\n- Seguimiento personalizado\n\n¿Quieres implementar alguna estrategia?`;
-      }
-    }
-
-    // DIAGNÓSTICO DIFERENCIAL - Nuevo tema
-    if (message.includes('diagnóstico') || message.includes('diferencial') || message.includes('síntomas') ||
-        message.includes('evaluación') || message.includes('examen') || message.includes('pruebas') ||
-        message.includes('radiografía') || message.includes('tomografía') || message.includes('biopsia')) {
-      currentTopic = 'diagnostico_diferencial';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `🔍 **Diagnóstico diferencial dental**\n\n**Herramientas diagnósticas:**\n- Examen clínico completo\n- Radiografías periapicales\n- Panorámica\n- Tomografía computada\n- Pruebas de vitalidad\n- Biopsia si es necesario\n\n¿Qué tipo de caso estás evaluando?`;
-      } else if (step === 2) {
-        return `Para casos complejos:\n\n**Protocolo de diagnóstico:**\n- Historia clínica detallada\n- Examen extraoral e intraoral\n- Radiografías específicas\n- Pruebas complementarias\n- Consulta interdisciplinaria\n\n**Diagnósticos diferenciales comunes:**\n- Dolor: caries, pulpitis, periodontitis, sinusitis\n- Lesiones: caries, fracturas, desgaste, hipoplasia\n- Inflamación: gingivitis, periodontitis, absceso\n\n¿Necesitas ayuda con algún diagnóstico específico?`;
-      }
-    }
-
-    // TRATAMIENTOS ESPECIALIZADOS - Nuevo tema
-    if (message.includes('tratamiento') || message.includes('especializado') || message.includes('técnica') ||
-        message.includes('procedimiento') || message.includes('cirugía') || message.includes('microscopio') ||
-        message.includes('láser') || message.includes('implante') || message.includes('ortodoncia')) {
-      currentTopic = 'tratamientos_especializados';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `🦷 **Tratamientos especializados**\n\n**Técnicas avanzadas:**\n- Microendodoncia con microscopio\n- Cirugía guiada por computadora\n- Láser dental\n- Implantes inmediatos\n- Ortodoncia invisible\n- Cirugía periodontal\n\n¿Qué tratamiento te interesa?`;
-      } else if (step === 2) {
-        return `Para tratamientos específicos:\n\n**Microendodoncia:**\n- Microscopio operatorio\n- Instrumentación ultrasónica\n- Obturación termoplástica\n- Seguimiento radiográfico\n\n**Cirugía guiada:**\n- Planificación digital\n- Guías quirúrgicas\n- Implantes precisos\n- Menor traumatismo\n\n¿Quieres información sobre algún tratamiento específico?`;
-      }
-    }
-
-    // GESTIÓN DE RIESGOS - Nuevo tema
-    if (message.includes('riesgo') || message.includes('malpractice') || message.includes('seguro') ||
-        message.includes('responsabilidad') || message.includes('consentimiento') || message.includes('documentación') ||
-        message.includes('historia clínica') || message.includes('legal') || message.includes('protección')) {
-      currentTopic = 'gestion_riesgos';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `⚖️ **Gestión de riesgos odontológicos**\n\n**Protección legal:**\n- Consentimiento informado\n- Historia clínica completa\n- Documentación fotográfica\n- Seguro de responsabilidad civil\n- Protocolos estandarizados\n\n¿Tienes dudas sobre protección legal?`;
-      } else if (step === 2) {
-        return `Para minimizar riesgos:\n\n**Documentación esencial:**\n- Consentimiento informado detallado\n- Historia clínica completa\n- Fotografías antes/durante/después\n- Radiografías de control\n- Notas de progreso\n\n**Seguros recomendados:**\n- Responsabilidad civil profesional\n- Cobertura por mala praxis\n- Protección patrimonial\n- Seguro de consultorio\n\n¿Necesitas ayuda con documentación específica?`;
-      }
-    }
-
-    // MARKETING DENTAL - Nuevo tema
-    if (message.includes('marketing') || message.includes('pacientes') || message.includes('publicidad') ||
-        message.includes('redes sociales') || message.includes('web') || message.includes('promoción') ||
-        message.includes('fidelización') || message.includes('referidos') || message.includes('crecimiento')) {
-      currentTopic = 'marketing_dental';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `📈 **Marketing dental**\n\n**Estrategias efectivas:**\n- Redes sociales (Instagram, Facebook)\n- Página web profesional\n- Marketing de contenidos\n- Programa de referidos\n- Fidelización de pacientes\n- Google My Business\n\n¿Quieres mejorar tu presencia digital?`;
-      } else if (step === 2) {
-        return `Para el marketing dental:\n\n**Redes sociales:**\n- Contenido educativo\n- Antes y después\n- Tips de salud bucal\n- Historias de pacientes\n- Lives informativos\n\n**Fidelización:**\n- Programa de puntos\n- Descuentos por referidos\n- Recordatorios personalizados\n- Seguimiento post-tratamiento\n- Encuestas de satisfacción\n\n¿Te interesa alguna estrategia específica?`;
-      }
-    }
-
-    // GESTIÓN FINANCIERA - Nuevo tema
-    if (message.includes('financiero') || message.includes('costo') || message.includes('precio') ||
-        message.includes('presupuesto') || message.includes('facturación') || message.includes('cobro') ||
-        message.includes('cuotas') || message.includes('financiamiento') || message.includes('rentabilidad')) {
-      currentTopic = 'gestion_financiera';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `💰 **Gestión financiera dental**\n\n**Aspectos clave:**\n- Estructura de costos\n- Fijación de precios\n- Control de gastos\n- Facturación eficiente\n- Cobro de honorarios\n- Financiamiento a pacientes\n\n¿Tienes dudas sobre gestión financiera?`;
-      } else if (step === 2) {
-        return `Para optimizar las finanzas:\n\n**Estructura de precios:**\n- Análisis de costos por tratamiento\n- Precios competitivos del mercado\n- Diferentes opciones de pago\n- Descuentos por volumen\n\n**Control financiero:**\n- Software de facturación\n- Seguimiento de cobros\n- Control de inventario\n- Análisis de rentabilidad\n\n¿Quieres optimizar algún aspecto financiero?`;
-      }
-    }
-
-    // TECNOLOGÍA DENTAL - Nuevo tema
-    if (message.includes('tecnología') || message.includes('digital') || message.includes('software') ||
-        message.includes('CAD/CAM') || message.includes('escáner') || message.includes('impresora 3D') ||
-        message.includes('intraoral') || message.includes('planificación') || message.includes('innovación')) {
-      currentTopic = 'tecnologia_dental';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `🖥️ **Tecnología dental**\n\n**Tecnologías disponibles:**\n- Escáner intraoral\n- CAD/CAM para coronas\n- Impresión 3D\n- Planificación digital\n- Software de gestión\n- Radiografía digital\n\n¿Qué tecnología te interesa implementar?`;
-      } else if (step === 2) {
-        return `Para implementar tecnología:\n\n**Escáner intraoral:**\n- Mejor experiencia del paciente\n- Precisión en restauraciones\n- Menos tiempo de tratamiento\n- Archivos digitales\n\n**CAD/CAM:**\n- Coronas en una sola visita\n- Materiales de alta calidad\n- Personalización completa\n- Menor costo operativo\n\n¿Quieres información sobre alguna tecnología específica?`;
-      }
-    }
-
-    // SALUD LABORAL - Nuevo tema
-    if (message.includes('ergonomía') || message.includes('postura') || message.includes('dolor') ||
-        message.includes('espalda') || message.includes('cuello') || message.includes('muñeca') ||
-        message.includes('fatiga') || message.includes('prevención') || message.includes('bienestar')) {
-      currentTopic = 'salud_laboral';
-      this.setLastTopic(currentTopic);
-      
-      const step = this.getConversationStep();
-      if (step === 1) {
-        return `💪 **Salud laboral del odontólogo**\n\n**Riesgos comunes:**\n- Dolor de espalda y cuello\n- Síndrome del túnel carpiano\n- Fatiga visual\n- Estrés laboral\n- Posturas forzadas\n\n¿Tienes problemas de salud laboral?`;
-      } else if (step === 2) {
-        return `Para prevenir problemas laborales:\n\n**Ergonomía:**\n- Silla ergonómica\n- Posición correcta del paciente\n- Instrumentos ergonómicos\n- Pausas regulares\n- Ejercicios de estiramiento\n\n**Prevención:**\n- Evaluación ergonómica\n- Ejercicios específicos\n- Control oftalmológico\n- Manejo del estrés\n- Descanso adecuado\n\n¿Quieres una evaluación ergonómica?`;
-      }
-    }
-    
-    // Respuesta por defecto con contexto
-    const lastTopic = this.getLastTopic();
-    if (lastTopic && this.getConversationStep() > 2) {
-      return `Veo que sigues consultando sobre ${this.getDentistTopicName(lastTopic)}. ¿Te gustaría que profundicemos en algún aspecto específico o necesitas ayuda práctica con algún caso?`;
-    }
-    
-    return `👨‍⚕️ **Asistente DentalBot**\n\nPuedo ayudarte con:\n- Manejo de pacientes difíciles\n- Emergencias y protocolos\n- Instrumentos rotos\n- Técnicas de anestesia\n- Comunicación efectiva\n- Control de infecciones\n- Actualización profesional\n- Gestión de agenda\n- Diagnóstico diferencial\n- Tratamientos especializados\n- Gestión de riesgos\n- Marketing dental\n- Gestión financiera\n- Tecnología dental\n- Salud laboral\n\n¿Podrías ser más específico?`;
   }
 
   private getDentistTopicName(topic: string): string {
