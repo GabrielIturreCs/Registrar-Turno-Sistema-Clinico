@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { Router, NavigationEnd } from '@angular/router';
 import { User, Turno, Tratamiento, Paciente } from '../../interfaces';
 import { ChatbotService } from '../../services/ChatBot.service';
+import { ChatService } from '../../services/chat.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
 import { TurnoService } from '../../services/turno.service';
 import { TratamientoService } from '../../services/tratamiento.service';
@@ -64,6 +65,7 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
     private router: Router,
     private fb: FormBuilder,
     private chatbotService: ChatbotService,
+    private chatService: ChatService,
     private turnoService: TurnoService,
     private tratamientoService: TratamientoService,
     private pacienteService: PacienteService,
@@ -174,6 +176,7 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
           // Una vez que tenemos el paciente, cargar sus turnos y tratamientos
           this.loadMisTurnos();
           this.loadTratamientos();
+          this.loadChatHistory();
           this.addWelcomeMessage(); // Agregar mensaje después de cargar datos
         } else {
           console.error('No se encontró un paciente asociado al usuario logueado');
@@ -187,9 +190,11 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
             console.log('Paciente encontrado por nombre/apellido:', this.paciente);
             this.loadMisTurnos();
             this.loadTratamientos();
+            this.loadChatHistory();
             this.addWelcomeMessage(); // Agregar mensaje después de cargar datos
           } else {
             console.error('No se pudo encontrar información del paciente');
+            this.loadChatHistory();
             this.addWelcomeMessage(); // Agregar mensaje genérico si no se encuentra paciente
             this.isLoading = false;
           }
@@ -342,6 +347,25 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Cargar historial del chat desde ChatService
+  loadChatHistory(): void {
+    const history = this.chatService.getConversationHistory();
+    if (history.length > 0) {
+      // Convertir el historial del ChatService al formato del componente
+      this.messages = history.map(msg => ({
+        text: msg.content,
+        isUser: msg.role === 'user',
+        timestamp: msg.timestamp
+      }));
+      
+      // Mostrar contexto de conversación si es una continuación
+      if (this.chatService.isContinuingConversation()) {
+        const summary = this.chatService.getConversationSummary();
+        console.log('Continuando conversación en vistaPaciente:', summary);
+      }
+    }
+  }
+
   // Chatbot methods
   addWelcomeMessage(): void {
     const nombrePaciente = this.paciente?.nombre || this.user?.nombre || 'Paciente';
@@ -368,6 +392,15 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
       if (messageText) {
         this.handleHybridChat(messageText);
         this.chatForm.reset();
+        
+        // Sincronizar con ChatService y mostrar contexto si es necesario
+        this.syncWithChatService();
+        
+        // Mostrar sugerencia de siguiente paso si es apropiado
+        const suggestedNextStep = this.chatService.getSuggestedNextStep();
+        if (suggestedNextStep) {
+          console.log('Sugerencia del chatbot en vistaPaciente:', suggestedNextStep);
+        }
       }
     }
   }
@@ -386,75 +419,53 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
 
     this.scrollToBottom();
 
-    // Intentar respuesta local primero
-    const localResponse = this.getLocalResponse(message);
+    // Determinar el tipo de usuario
+    const userType = 'patient'; // Este componente es solo para pacientes
     
-    if (localResponse) {
-      // Simular typing
-      this.isTyping = true;
-      setTimeout(() => {
-        this.messages.push({
-          text: localResponse,
-          isUser: false,
-          timestamp: new Date()
-        });
-        this.isTyping = false;
-        this.scrollToBottom();
-      }, 1000);
-    } else {
-      // Usar API externa
-      this.isTyping = true;
-      this.chatbotService.sendMessage(message).subscribe({
-        next: (response) => {
-          this.messages.push({
-            text: response.message || 'Lo siento, no pude procesar tu consulta.',
-            isUser: false,
-            timestamp: new Date()
-          });
-          this.isTyping = false;
-          this.scrollToBottom();
-        },
-        error: () => {
-          this.messages.push({
-            text: 'Lo siento, hay un problema técnico. Por favor, intenta más tarde.',
-            isUser: false,
-            timestamp: new Date()
-          });
-          this.isTyping = false;
-          this.scrollToBottom();
-        }
+    // Verificar si es una continuación de conversación
+    const isContinuing = this.chatService.isContinuingConversation();
+    const lastTopic = this.chatService.getLastTopic();
+    
+    // Usar ChatService para generar respuesta con contexto
+    const chatResponse = this.chatService.generateResponse(message, userType);
+    
+    // Simular typing
+    this.isTyping = true;
+    setTimeout(() => {
+      this.messages.push({
+        text: chatResponse,
+        isUser: false,
+        timestamp: new Date()
       });
-    }
-  }
-
-  private getLocalResponse(message: string): string | null {
-    const msg = message.toLowerCase();
-    const nombrePaciente = this.paciente?.nombre || this.user?.nombre || 'Paciente';
-    
-    const localResponses: { [key: string]: string } = {
-      'hola': `¡Hola ${nombrePaciente}! ¿En qué puedo ayudarte con tus turnos?`,
-      'horarios': 'Nuestros horarios de atención son de lunes a viernes de 8:00 a 18:00 y sábados de 9:00 a 13:00.',
-      'precios': 'Los precios varían según el tratamiento. Puedes ver los precios específicos al seleccionar un tratamiento en "Reservar Turno".',
-      'tratamientos': `Ofrecemos consultas generales, limpiezas, empastes, extracciones y ortodoncia. Tienes ${this.pacienteStats.totalTurnos} turnos registrados.`,
-      'turnos': `Tienes ${this.pacienteStats.turnosReservados} turnos reservados y ${this.pacienteStats.turnosCompletados} completados.`,
-    };
-
-    for (const key in localResponses) {
-      if (msg.includes(key)) {
-        return localResponses[key];
+      this.isTyping = false;
+      this.scrollToBottom();
+      
+      // Sincronizar con ChatService
+      this.syncWithChatService();
+      
+      // Log del contexto para debugging
+      if (isContinuing && lastTopic) {
+        console.log(`Continuando conversación en vistaPaciente sobre: ${lastTopic}`);
       }
-    }
-
-    if (msg.includes('reservar') || msg.includes('sacar') || msg.includes('turno')) {
-      return 'Para reservar un turno, puedes hacer clic en "Reservar Turno" en tu dashboard. ¡Te guiaré paso a paso!';
-    }
-
-    if (msg.includes('cancelar')) {
-      return 'Para cancelar un turno, ve a "Mis Turnos" y haz clic en el botón rojo de cancelar junto al turno que deseas cancelar.';
-    }
-
-    return null;
+    }, 1000);
   }
+
+  // Sincronizar mensajes del componente con ChatService
+  private syncWithChatService(): void {
+    // El ChatService ya maneja su propio historial internamente
+    // Solo necesitamos asegurar que los mensajes del componente estén sincronizados
+    const history = this.chatService.getConversationHistory();
+    if (history.length > this.messages.length) {
+      // Si hay más mensajes en ChatService, actualizar el componente
+      this.messages = history.map(msg => ({
+        text: msg.content,
+        isUser: msg.role === 'user',
+        timestamp: msg.timestamp
+      }));
+    }
+  }
+
+
 
   private scrollToBottom(): void {
     setTimeout(() => {

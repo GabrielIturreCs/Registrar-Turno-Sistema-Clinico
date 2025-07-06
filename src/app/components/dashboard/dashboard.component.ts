@@ -118,6 +118,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.checkPacienteView();
     this.loadTurnosData();
     this.loadAdminStats();
+    this.loadChatHistory();
     this.addWelcomeMessage();
     this.loadDentistasActividad();
     this.loadPacientesActividad();
@@ -143,6 +144,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.alertaInterval?.unsubscribe();
+  }
+
+  // Cargar historial del chat desde ChatService con localStorage
+  loadChatHistory(): void {
+    const history = this.chatService.getConversationHistory();
+    if (history.length > 0) {
+      // Convertir el historial del ChatService al formato del componente
+      this.messages = history.map(msg => ({
+        text: msg.content,
+        isUser: msg.role === 'user',
+        timestamp: msg.timestamp
+      }));
+      
+      // Mostrar contexto de conversación si es una continuación
+      if (this.chatService.isContinuingConversation()) {
+        const summary = this.chatService.getConversationSummary();
+        console.log('Continuando conversación:', summary);
+      }
+    }
   }
 
   // Admin dashboard methods
@@ -274,6 +294,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.handleHybridChat(userMessage.text);
       this.chatForm.patchValue({ message: '' });
       this.scrollToBottom();
+      
+      // Sincronizar con ChatService y mostrar contexto si es necesario
+      this.syncWithChatService();
+      
+      // Mostrar sugerencia de siguiente paso si es apropiado
+      const suggestedNextStep = this.chatService.getSuggestedNextStep();
+      if (suggestedNextStep) {
+        console.log('Sugerencia del chatbot:', suggestedNextStep);
+      }
     }
   }
 
@@ -285,100 +314,59 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
     
     this.messages.push(userMessage);
-    this.handleHybridChat(question.action);
+    this.handleHybridChat(question.text);
     this.scrollToBottom();
   }
 
   private handleHybridChat(message: string): void {
     this.isTyping = true;
     
-    // Intentar respuesta local primero
-    const localResponse = this.getLocalResponse(message);
-    
-    if (localResponse) {
-      setTimeout(() => {
-        const botMessage: ChatMessage = {
-          text: localResponse,
-          isUser: false,
-          timestamp: new Date()
-        };
-        this.messages.push(botMessage);
-        this.isTyping = false;
-        this.scrollToBottom();
-      }, 800);
-    } else {
-      // Si no hay respuesta local, usar API externa
-      this.chatbotService.sendMessage(message).subscribe({
-        next: (response) => {
-          const botMessage: ChatMessage = {
-            text: response.success ? response.message : 'Lo siento, no pude procesar tu consulta en este momento.',
-            isUser: false,
-            timestamp: new Date()
-          };
-          this.messages.push(botMessage);
-          this.isTyping = false;
-          this.scrollToBottom();
-        },
-        error: () => {
-          const errorMessage: ChatMessage = {
-            text: 'Disculpa, estoy teniendo problemas de conexión. ¿Puedes intentar más tarde?',
-            isUser: false,
-            timestamp: new Date()
-          };
-          this.messages.push(errorMessage);
-          this.isTyping = false;
-          this.scrollToBottom();
-        }
-      });
-    }
-  }
-
-  private getLocalResponse(message: string): string | null {
-    // Determinar el tipo de usuario para el chat
+    // Determinar el tipo de usuario
     const userType = this.user?.tipoUsuario === 'dentista' ? 'dentist' : 'patient';
     
-    // Usar el ChatService para generar una respuesta específica según el tipo de usuario
+    // Verificar si es una continuación de conversación
+    const isContinuing = this.chatService.isContinuingConversation();
+    const lastTopic = this.chatService.getLastTopic();
+    
+    // Usar ChatService para generar respuesta con contexto
     const chatResponse = this.chatService.generateResponse(message, userType);
     
-    // Si hay una respuesta del ChatService, usarla
-    if (chatResponse) {
-      return chatResponse;
-    }
-
-    // Respuestas adicionales específicas del dashboard (como fallback)
-    const msg = message.toLowerCase();
-    
-    const localResponses: { [key: string]: string } = {
-      'turnos': `Tienes ${this.totalTurnos} turnos en total, ${this.turnosHoy} turnos para hoy.`,
-      'reservar': 'Para reservar un turno, puedes hacer clic en "Reservar Turno" o navegar a la sección correspondiente.',
-      'cancelar': 'Para cancelar un turno, puedes hacerlo directamente desde las tarjetas de turnos usando el botón "Cancelar".',
-      'estadisticas': `Estadísticas actuales: ${this.totalTurnos} turnos totales, ${this.turnosHoy} turnos hoy, ${this.filteredTurnos.length} turnos activos.`,
-      'proximo': this.proximoTurno ? `Tu próximo turno es el ${this.proximoTurno.fecha} a las ${this.proximoTurno.hora}.` : 'No tienes turnos próximos programados.',
-      'tratamientos': 'Ofrecemos: Consulta General ($5000), Limpieza Dental ($8000), Empastes ($12000), Extracciones ($15000), y Ortodoncia.',
-      'gracias': '¡De nada! ¿Hay algo más en lo que pueda ayudarte?',
-      'ayuda': 'Desde el dashboard puedo ayudarte con: estadísticas de turnos, información sobre tu próximo turno, navegación, y consultas generales.'
-    };
-
-    // Buscar palabras clave en el mensaje
-    for (const key in localResponses) {
-      if (msg.includes(key)) {
-        return localResponses[key];
+    setTimeout(() => {
+      const botMessage: ChatMessage = {
+        text: chatResponse,
+        isUser: false,
+        timestamp: new Date()
+      };
+      this.messages.push(botMessage);
+      this.isTyping = false;
+      this.scrollToBottom();
+      
+      // Sincronizar con ChatService
+      this.syncWithChatService();
+      
+      // Log del contexto para debugging
+      if (isContinuing && lastTopic) {
+        console.log(`Continuando conversación sobre: ${lastTopic}`);
       }
-    }
-
-    // Respuestas contextuales más avanzadas
-    if (msg.includes('cuando') || msg.includes('cuándo')) {
-      return this.proximoTurno ? 
-        `Tu próximo turno es el ${this.proximoTurno.fecha} a las ${this.proximoTurno.hora} para ${this.proximoTurno.tratamiento}.` :
-        'No tienes turnos próximos programados. ¿Te gustaría reservar uno?';
-    }
-    
-    if (msg.includes('cuantos') || msg.includes('cantidad')) {
-      return `Tienes ${this.totalTurnos} turnos en total. ${this.turnosHoy} son para hoy y ${this.filteredTurnos.length} están activos.`;
-    }
-
-    return null; // No hay respuesta local, usar API
+    }, 800);
   }
+
+  // Sincronizar mensajes del componente con ChatService
+  private syncWithChatService(): void {
+    // El ChatService ya maneja su propio historial internamente
+    // Solo necesitamos asegurar que los mensajes del componente estén sincronizados
+    const history = this.chatService.getConversationHistory();
+    if (history.length > this.messages.length) {
+      // Si hay más mensajes en ChatService, actualizar el componente
+      this.messages = history.map(msg => ({
+        text: msg.content,
+        isUser: msg.role === 'user',
+        timestamp: msg.timestamp
+      }));
+    }
+  }
+
+
 
   private scrollToBottom(): void {
     setTimeout(() => {

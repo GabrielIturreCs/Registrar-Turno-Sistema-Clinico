@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ChatbotService } from '../../services/ChatBot.service';
+import { ChatService } from '../../services/chat.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
 import { TurnoService } from '../../services/turno.service';
 import { PacienteService } from '../../services/paciente.service';
@@ -95,6 +96,7 @@ export class ReservarComponent implements OnInit {
     private route: ActivatedRoute,
     private fb: FormBuilder,
     private chatbotService: ChatbotService,
+    private chatService: ChatService,
     private turnoService: TurnoService,
     private pacienteService: PacienteService,
     private dataRefreshService: DataRefreshService,
@@ -111,6 +113,7 @@ export class ReservarComponent implements OnInit {
     this.loadUserData();
     this.loadPacientes();
     this.loadTratamientos();
+    this.loadChatHistory();
     this.addWelcomeMessage();
     this.generateCalendar();
     this.loadOccupiedSlots();
@@ -179,6 +182,25 @@ export class ReservarComponent implements OnInit {
     }, 500); // Give more time for user data to load
   }
 
+  // Cargar historial del chat desde ChatService con localStorage
+  loadChatHistory(): void {
+    const history = this.chatService.getConversationHistory();
+    if (history.length > 0) {
+      // Convertir el historial del ChatService al formato del componente
+      this.messages = history.map(msg => ({
+        text: msg.content,
+        isUser: msg.role === 'user',
+        timestamp: msg.timestamp
+      }));
+      
+      // Mostrar contexto de conversación si es una continuación
+      if (this.chatService.isContinuingConversation()) {
+        const summary = this.chatService.getConversationSummary();
+        console.log('Continuando conversación en reservar:', summary);
+      }
+    }
+  }
+
   // Chatbot methods
   addWelcomeMessage(): void {
     const welcomeMessage: ChatMessage = {
@@ -208,6 +230,15 @@ export class ReservarComponent implements OnInit {
       this.handleHybridChat(userMessage.text);
       this.chatForm.patchValue({ message: '' });
       this.scrollToBottom();
+      
+      // Sincronizar con ChatService y mostrar contexto si es necesario
+      this.syncWithChatService();
+      
+      // Mostrar sugerencia de siguiente paso si es apropiado
+      const suggestedNextStep = this.chatService.getSuggestedNextStep();
+      if (suggestedNextStep) {
+        console.log('Sugerencia del chatbot en reservar:', suggestedNextStep);
+      }
     }
   }
 
@@ -219,91 +250,59 @@ export class ReservarComponent implements OnInit {
     };
     
     this.messages.push(userMessage);
-    this.handleHybridChat(question.action);
+    this.handleHybridChat(question.text);
     this.scrollToBottom();
   }
 
   private handleHybridChat(message: string): void {
     this.isTyping = true;
     
-    // Intentar respuesta local primero
-    const localResponse = this.getLocalResponse(message);
+    // Determinar el tipo de usuario
+    const userType = this.user?.tipoUsuario === 'dentista' ? 'dentist' : 'patient';
     
-    if (localResponse) {
-      setTimeout(() => {
-        const botMessage: ChatMessage = {
-          text: localResponse,
-          isUser: false,
-          timestamp: new Date()
-        };
-        this.messages.push(botMessage);
-        this.isTyping = false;
-        this.scrollToBottom();
-      }, 800);
-    } else {
-      // Si no hay respuesta local, usar API externa
-      this.chatbotService.sendMessage(message).subscribe({
-        next: (response) => {
-          const botMessage: ChatMessage = {
-            text: response.success ? response.message : 'Lo siento, no pude procesar tu consulta en este momento.',
-            isUser: false,
-            timestamp: new Date()
-          };
-          this.messages.push(botMessage);
-          this.isTyping = false;
-          this.scrollToBottom();
-        },
-        error: () => {
-          const errorMessage: ChatMessage = {
-            text: 'Disculpa, estoy teniendo problemas de conexión. ¿Puedes intentar más tarde?',
-            isUser: false,
-            timestamp: new Date()
-          };
-          this.messages.push(errorMessage);
-          this.isTyping = false;
-          this.scrollToBottom();
-        }
-      });
-    }
-  }
-
-  private getLocalResponse(message: string): string | null {
-    const msg = message.toLowerCase();
+    // Verificar si es una continuación de conversación
+    const isContinuing = this.chatService.isContinuingConversation();
+    const lastTopic = this.chatService.getLastTopic();
     
-    const localResponses: { [key: string]: string } = {
-      'hola': '¡Hola! ¿En qué puedo ayudarte con tu reserva de turno?',
-      'tratamientos': 'Ofrecemos: Consulta General ($5000), Limpieza Dental ($8000), Empastes ($12000), Extracciones ($15000), y Ortodoncia ($10000).',
-      'precios': 'Nuestros precios son: Consulta General $5000, Limpieza $8000, Empaste $12000, Extracción $15000, Ortodoncia $10000.',
-      'horarios': 'Nuestros horarios de atención son de lunes a viernes de 8:00 a 18:00 y sábados de 9:00 a 13:00.',
-      'reserva': 'Para reservar, simplemente completa el formulario seleccionando fecha, hora y tratamiento. ¡Es muy fácil!',
-      'disponibilidad': 'Puedes ver las fechas disponibles en el calendario. Te recomiendo reservar con anticipación.',
-      'cancelar': 'Si necesitas cancelar tu turno más tarde, podrás hacerlo desde "Mis Turnos" en el dashboard.',
-      'gracias': '¡De nada! ¿Hay algo más que quieras saber antes de reservar tu turno?',
-      'ayuda': 'Puedo ayudarte con: información de tratamientos, precios, horarios disponibles, y el proceso de reserva.'
-    };
-
-    // Buscar palabras clave en el mensaje
-    for (const key in localResponses) {
-      if (msg.includes(key)) {
-        return localResponses[key];
+    // Usar ChatService para generar respuesta con contexto
+    const chatResponse = this.chatService.generateResponse(message, userType);
+    
+    setTimeout(() => {
+      const botMessage: ChatMessage = {
+        text: chatResponse,
+        isUser: false,
+        timestamp: new Date()
+      };
+      this.messages.push(botMessage);
+      this.isTyping = false;
+      this.scrollToBottom();
+      
+      // Sincronizar con ChatService
+      this.syncWithChatService();
+      
+      // Log del contexto para debugging
+      if (isContinuing && lastTopic) {
+        console.log(`Continuando conversación en reservar sobre: ${lastTopic}`);
       }
-    }
-
-    // Respuestas contextuales más avanzadas
-    if (msg.includes('cuando') || msg.includes('cuándo') || msg.includes('fecha')) {
-      return 'Puedes seleccionar cualquier fecha desde hoy en adelante en el campo "Fecha". Nuestros horarios son de 8:00 a 18:00 de lunes a viernes.';
-    }
-    
-    if (msg.includes('cuanto') || msg.includes('cuesta') || msg.includes('precio')) {
-      return 'Los precios varían por tratamiento: Consulta ($5000), Limpieza ($8000), Empaste ($12000), Extracción ($15000), Ortodoncia ($10000). ¿Te interesa alguno en particular?';
-    }
-
-    if (msg.includes('donde') || msg.includes('ubicacion')) {
-      return 'Nuestra clínica está ubicada en el centro de la ciudad. Una vez que reserves tu turno, te enviaremos la dirección exacta.';
-    }
-
-    return null; // No hay respuesta local, usar API
+    }, 800);
   }
+
+  // Sincronizar mensajes del componente con ChatService
+  private syncWithChatService(): void {
+    // El ChatService ya maneja su propio historial internamente
+    // Solo necesitamos asegurar que los mensajes del componente estén sincronizados
+    const history = this.chatService.getConversationHistory();
+    if (history.length > this.messages.length) {
+      // Si hay más mensajes en ChatService, actualizar el componente
+      this.messages = history.map(msg => ({
+        text: msg.content,
+        isUser: msg.role === 'user',
+        timestamp: msg.timestamp
+      }));
+    }
+  }
+
+
 
   private scrollToBottom(): void {
     setTimeout(() => {

@@ -4,6 +4,7 @@ import { FormsModule, FormBuilder, FormGroup, Validators, ReactiveFormsModule } 
 import { Router } from '@angular/router';
 import { User, Turno, Tratamiento, Paciente } from '../../interfaces';
 import { ChatbotService } from '../../services/ChatBot.service';
+import { ChatService } from '../../services/chat.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
 import { TurnoService } from '../../services/turno.service';
 import { PacienteService } from '../../services/paciente.service';
@@ -59,6 +60,7 @@ export class TurnosComponent implements OnInit {
     private router: Router,
     private fb: FormBuilder,
     private chatbotService: ChatbotService,
+    private chatService: ChatService,
     private turnoService: TurnoService,
     private pacienteService: PacienteService,
     private notificationService: NotificationService
@@ -76,7 +78,27 @@ export class TurnosComponent implements OnInit {
     if (this.user?.tipoUsuario === 'paciente') {
       this.currentView = 'mis-turnos';
       this.loadPacienteData(); // Cargar datos del paciente
+      this.loadChatHistory();
       this.addWelcomeMessage();
+    }
+  }
+
+  // Cargar historial del chat desde ChatService con localStorage
+  loadChatHistory(): void {
+    const history = this.chatService.getConversationHistory();
+    if (history.length > 0) {
+      // Convertir el historial del ChatService al formato del componente
+      this.messages = history.map(msg => ({
+        text: msg.content,
+        isUser: msg.role === 'user',
+        timestamp: msg.timestamp
+      }));
+      
+      // Mostrar contexto de conversación si es una continuación
+      if (this.chatService.isContinuingConversation()) {
+        const summary = this.chatService.getConversationSummary();
+        console.log('Continuando conversación en turnos:', summary);
+      }
     }
   }
 
@@ -109,6 +131,15 @@ export class TurnosComponent implements OnInit {
       this.handleHybridChat(userMessage.text);
       this.chatForm.patchValue({ message: '' });
       this.scrollToBottom();
+      
+      // Sincronizar con ChatService y mostrar contexto si es necesario
+      this.syncWithChatService();
+      
+      // Mostrar sugerencia de siguiente paso si es apropiado
+      const suggestedNextStep = this.chatService.getSuggestedNextStep();
+      if (suggestedNextStep) {
+        console.log('Sugerencia del chatbot en turnos:', suggestedNextStep);
+      }
     }
   }
 
@@ -120,87 +151,59 @@ export class TurnosComponent implements OnInit {
     };
     
     this.messages.push(userMessage);
-    this.handleHybridChat(question.action);
+    this.handleHybridChat(question.text);
     this.scrollToBottom();
   }
 
   private handleHybridChat(message: string): void {
     this.isTyping = true;
     
-    // Intentar respuesta local primero
-    const localResponse = this.getLocalResponse(message);
+    // Determinar el tipo de usuario
+    const userType = this.user?.tipoUsuario === 'dentista' ? 'dentist' : 'patient';
     
-    if (localResponse) {
-      setTimeout(() => {
-        const botMessage: ChatMessage = {
-          text: localResponse,
-          isUser: false,
-          timestamp: new Date()
-        };
-        this.messages.push(botMessage);
-        this.isTyping = false;
-        this.scrollToBottom();
-      }, 800);
-    } else {
-      // Si no hay respuesta local, usar API externa
-      this.chatbotService.sendMessage(message).subscribe({
-        next: (response) => {
-          const botMessage: ChatMessage = {
-            text: response.success ? response.message : 'Lo siento, no pude procesar tu consulta en este momento.',
-            isUser: false,
-            timestamp: new Date()
-          };
-          this.messages.push(botMessage);
-          this.isTyping = false;
-          this.scrollToBottom();
-        },
-        error: () => {
-          const errorMessage: ChatMessage = {
-            text: 'Disculpa, estoy teniendo problemas de conexión. ¿Puedes intentar más tarde?',
-            isUser: false,
-            timestamp: new Date()
-          };
-          this.messages.push(errorMessage);
-          this.isTyping = false;
-          this.scrollToBottom();
-        }
-      });
-    }
-  }
-
-  private getLocalResponse(message: string): string | null {
-    const msg = message.toLowerCase();
+    // Verificar si es una continuación de conversación
+    const isContinuing = this.chatService.isContinuingConversation();
+    const lastTopic = this.chatService.getLastTopic();
     
-    const localResponses: { [key: string]: string } = {
-      'hola': '¡Hola! ¿En qué puedo ayudarte hoy?',
-      'turnos': 'Puedo ayudarte con información sobre tus turnos. ¿Quieres ver tus turnos próximos o necesitas agendar uno nuevo?',
-      'reservar': 'Para reservar un turno, puedes hacer clic en "Nuevo Turno" o decirme qué tipo de consulta necesitas.',
-      'cancelar': 'Si necesitas cancelar un turno, puedes hacerlo desde la tabla de turnos usando el botón rojo con una X.',
-      'horarios': 'Nuestros horarios de atención son de lunes a viernes de 8:00 a 18:00 y sábados de 9:00 a 13:00.',
-      'precios': 'Los precios varían según el tratamiento. Una consulta general cuesta $5000, limpieza dental $8000.',
-      'tratamientos': 'Ofrecemos: Consulta General ($5000), Limpieza Dental ($8000), Empastes ($12000), Extracciones ($15000), y Ortodoncia.',
-      'gracias': '¡De nada! ¿Hay algo más en lo que pueda ayudarte?',
-      'ayuda': 'Puedo ayudarte con: ver turnos, reservar turnos, cancelar turnos, información sobre tratamientos y precios.'
-    };
-
-    // Buscar palabras clave en el mensaje
-    for (const key in localResponses) {
-      if (msg.includes(key)) {
-        return localResponses[key];
+    // Usar ChatService para generar respuesta con contexto
+    const chatResponse = this.chatService.generateResponse(message, userType);
+    
+    setTimeout(() => {
+      const botMessage: ChatMessage = {
+        text: chatResponse,
+        isUser: false,
+        timestamp: new Date()
+      };
+      this.messages.push(botMessage);
+      this.isTyping = false;
+      this.scrollToBottom();
+      
+      // Sincronizar con ChatService
+      this.syncWithChatService();
+      
+      // Log del contexto para debugging
+      if (isContinuing && lastTopic) {
+        console.log(`Continuando conversación en turnos sobre: ${lastTopic}`);
       }
-    }
-
-    // Respuestas contextuales más avanzadas
-    if (msg.includes('cuando') || msg.includes('cuándo')) {
-      return 'Nuestros horarios son de lunes a viernes de 8:00 a 18:00, y sábados de 9:00 a 13:00.';
-    }
-    
-    if (msg.includes('cuanto') || msg.includes('cuesta') || msg.includes('precio')) {
-      return 'Los precios varían por tratamiento: Consulta ($5000), Limpieza ($8000), Empaste ($12000), Extracción ($15000). ¿Te interesa alguno en particular?';
-    }
-
-    return null; // No hay respuesta local, usar API
+    }, 800);
   }
+
+  // Sincronizar mensajes del componente con ChatService
+  private syncWithChatService(): void {
+    // El ChatService ya maneja su propio historial internamente
+    // Solo necesitamos asegurar que los mensajes del componente estén sincronizados
+    const history = this.chatService.getConversationHistory();
+    if (history.length > this.messages.length) {
+      // Si hay más mensajes en ChatService, actualizar el componente
+      this.messages = history.map(msg => ({
+        text: msg.content,
+        isUser: msg.role === 'user',
+        timestamp: msg.timestamp
+      }));
+    }
+  }
+
+
 
   private scrollToBottom(): void {
     setTimeout(() => {
