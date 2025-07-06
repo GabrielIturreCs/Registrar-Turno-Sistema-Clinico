@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { User, Turno, Paciente } from '../../interfaces';
 import { ChatbotService } from '../../services/ChatBot.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
+import { ActionButton } from '../../interfaces/message.interface';
 import { TurnoService } from '../../services/turno.service';
 import { PacienteService } from '../../services/paciente.service';
 import { interval, Subscription } from 'rxjs';
@@ -352,9 +353,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     
     setTimeout(() => {
       const botMessage: ChatMessage = {
-        text: chatResponse,
+        text: chatResponse.content,
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        actions: chatResponse.actions || []
       };
       this.messages.push(botMessage);
       this.isTyping = false;
@@ -382,7 +384,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.messages = history.map(msg => ({
           text: msg.content,
           isUser: msg.role === 'user',
-          timestamp: msg.timestamp
+          timestamp: msg.timestamp,
+          actions: msg.actions || []
         }));
       }
     }

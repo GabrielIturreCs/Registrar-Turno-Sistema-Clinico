@@ -6,6 +6,7 @@ import { User, Turno, Tratamiento, Paciente } from '../../interfaces';
 import { ChatbotService } from '../../services/ChatBot.service';
 import { ChatService } from '../../services/chat.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
+import { ActionButton } from '../../interfaces/message.interface';
 import { TurnoService } from '../../services/turno.service';
 import { TratamientoService } from '../../services/tratamiento.service';
 import { PacienteService } from '../../services/paciente.service';
@@ -436,9 +437,10 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
     this.isTyping = true;
     setTimeout(() => {
       this.messages.push({
-        text: chatResponse,
+        text: chatResponse.content,
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        actions: chatResponse.actions || []
       });
       this.isTyping = false;
       this.scrollToBottom();
@@ -463,7 +465,8 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
       this.messages = history.map(msg => ({
         text: msg.content,
         isUser: msg.role === 'user',
-        timestamp: msg.timestamp
+        timestamp: msg.timestamp,
+        actions: msg.actions || []
       }));
     }
   }
