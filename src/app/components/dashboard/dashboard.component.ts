@@ -155,6 +155,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loadChatHistory(): void {
     // Solo cargar historial si es dentista (no administrador)
     if (this.user?.tipoUsuario === 'dentista') {
+      // Cambiar al usuario actual para cargar su historial específico
+      this.chatService.switchUser();
+      
       const history = this.chatService.getConversationHistory();
       if (history.length > 0) {
         // Convertir el historial del ChatService al formato del componente

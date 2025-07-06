@@ -90,6 +90,16 @@ export class ChatService {
         return;
       }
 
+      // Verificar si ya estamos cargando el usuario correcto
+      const lastLoadedUserId = this.getLastLoadedUserId();
+      if (lastLoadedUserId === currentUserId) {
+        console.log('Ya cargado el historial del usuario:', currentUserId);
+        return;
+      }
+
+      // Limpiar contexto actual antes de cargar el nuevo
+      this.clearCurrentContext();
+      
       const storageKey = this.getStorageKey(currentUserId);
       const contextKey = this.getContextKey(currentUserId);
       
@@ -104,11 +114,26 @@ export class ChatService {
             msg.timestamp = new Date(msg.timestamp);
           }
         });
+      } else {
+        // Si no hay historial, inicializar array vacío
+        this.conversationHistory = [];
       }
       
       if (savedContext) {
         this.userContext = JSON.parse(savedContext);
+      } else {
+        // Si no hay contexto, inicializar con valores por defecto
+        this.userContext = {
+          userType: 'patient',
+          lastTopic: '',
+          conversationStep: 0,
+          preferences: {}
+        };
       }
+      
+      // Guardar el ID del usuario cargado
+      this.setLastLoadedUserId(currentUserId);
+      
     } catch (error) {
       console.warn('Error loading from localStorage:', error);
       this.clearHistory();
@@ -126,6 +151,32 @@ export class ChatService {
       console.warn('Error getting current user ID:', error);
     }
     return null;
+  }
+
+  private clearCurrentContext(): void {
+    this.conversationHistory = [];
+    this.userContext = {
+      userType: 'patient',
+      lastTopic: '',
+      conversationStep: 0,
+      preferences: {}
+    };
+  }
+
+  private getLastLoadedUserId(): string | null {
+    try {
+      return localStorage.getItem('lastLoadedUserId');
+    } catch (error) {
+      return null;
+    }
+  }
+
+  private setLastLoadedUserId(userId: string): void {
+    try {
+      localStorage.setItem('lastLoadedUserId', userId);
+    } catch (error) {
+      console.warn('Error setting last loaded user ID:', error);
+    }
   }
 
   // --- CONTEXT MANAGEMENT ---
@@ -872,6 +923,22 @@ export class ChatService {
     this.userContext.conversationStep = 0;
     this.userContext.lastTopic = '';
     this.saveToLocalStorage();
+  }
+
+  // Método para cambiar de usuario y cargar su historial
+  switchUser(userId?: string): void {
+    const newUserId = userId || this.getCurrentUserId();
+    if (newUserId) {
+      console.log('Cambiando a usuario:', newUserId);
+      
+      // Limpiar el contexto actual antes de cargar el nuevo usuario
+      this.clearCurrentContext();
+      
+      // Cargar el historial del nuevo usuario
+      this.loadFromLocalStorage(newUserId);
+      
+      console.log('Historial cargado para usuario:', newUserId, 'Mensajes:', this.conversationHistory.length);
+    }
   }
 
   // Método para obtener estadísticas de la conversación

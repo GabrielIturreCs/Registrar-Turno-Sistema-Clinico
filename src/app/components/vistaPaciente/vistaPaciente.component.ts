@@ -349,6 +349,9 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
 
   // Cargar historial del chat desde ChatService
   loadChatHistory(): void {
+    // Cambiar al usuario actual para cargar su historial específico
+    this.chatService.switchUser();
+    
     const history = this.chatService.getConversationHistory();
     if (history.length > 0) {
       // Convertir el historial del ChatService al formato del componente
