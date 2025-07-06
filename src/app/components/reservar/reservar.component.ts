@@ -125,20 +125,39 @@ export class ReservarComponent implements OnInit {
       this.totalSteps = 5;
     }
 
-    // Detectar resultado de pago por query param
+    // Detectar resultado de pago por query param con manejo mejorado
     this.route.queryParams.subscribe(params => {
-      if (params['payment'] === 'success') {
-        this.registrarTurnoDespuesDePago();
+      console.log('Query params recibidos:', params);
+      
+      // Verificar si viene de pago exitoso
+      if (params['payment'] === 'success' || params['returnFromPayment'] === 'true') {
+        console.log('✅ Detectado retorno de pago exitoso');
+        this.handleSuccessfulPaymentReturn();
       }
+      
+      // Verificar si viene de pago fallido
       if (params['payment'] === 'failure') {
+        console.log('❌ Detectado pago fallido');
         this.currentStep = this.shouldSelectPaciente ? 6 : 5;
         this.paymentSuccess = false;
         this.notificationService.showWarning('El pago no se completó. Puedes intentar nuevamente o contactar con soporte.');
       }
+      
+      // Verificar si viene de pago pendiente
       if (params['payment'] === 'pending') {
+        console.log('⏳ Detectado pago pendiente');
         this.currentStep = this.shouldSelectPaciente ? 6 : 5;
         this.paymentSuccess = false;
         this.notificationService.showInfo('Tu pago está pendiente de confirmación. Te notificaremos cuando se complete.');
+      }
+      
+      // Verificar si se especifica un paso específico
+      if (params['step']) {
+        const step = parseInt(params['step']);
+        if (step >= 1 && step <= this.totalSteps) {
+          console.log(`📍 Navegando al paso ${step}`);
+          this.currentStep = step;
+        }
       }
     });
 
@@ -293,9 +312,41 @@ export class ReservarComponent implements OnInit {
     if (typeof window !== 'undefined' && window.localStorage) {
       const userStr = localStorage.getItem('user');
       if (userStr) {
-        this.user = JSON.parse(userStr);
+        try {
+          this.user = JSON.parse(userStr);
+          console.log('Usuario cargado:', this.user);
+        } catch (error) {
+          console.error('Error al cargar usuario:', error);
+          this.user = null;
+        }
       } else {
-        this.router.navigate(['/login']);
+        console.log('No se encontró información de usuario en localStorage');
+        
+        // Si no hay usuario pero viene de pago exitoso, intentar recuperar información
+        const urlParams = new URLSearchParams(window.location.search);
+        const isReturnFromPayment = urlParams.get('returnFromPayment') === 'true' || 
+                                   urlParams.get('payment') === 'success';
+        
+        if (isReturnFromPayment) {
+          console.log('🔄 Detectado retorno de pago sin usuario, intentando recuperar sesión');
+          // Intentar recuperar información del usuario desde sessionStorage
+          const backupUserStr = sessionStorage.getItem('user_backup');
+          if (backupUserStr) {
+            try {
+              this.user = JSON.parse(backupUserStr);
+              console.log('✅ Usuario recuperado desde backup:', this.user);
+            } catch (error) {
+              console.error('Error al recuperar usuario desde backup:', error);
+              this.user = null;
+            }
+          } else {
+            console.log('⚠️ No se encontró backup de usuario');
+            this.user = null;
+          }
+        } else {
+          console.log('Redirigiendo a login');
+          this.router.navigate(['/login']);
+        }
       }
     }
   }
@@ -624,6 +675,7 @@ export class ReservarComponent implements OnInit {
       return;
     }
     this.isLoading = true;
+    
     // Obtener el pacienteId correcto
     const pacienteId = await this.getPacienteId();
     if (!pacienteId) {
@@ -631,6 +683,7 @@ export class ReservarComponent implements OnInit {
       this.notificationService.showError('Error: No se pudo obtener el ID del paciente');
       return;
     }
+    
     // Obtener el email del paciente
     const paciente = this.pacientes.find(p => 
       (p._id === pacienteId) || (p.id?.toString() === pacienteId)
@@ -640,10 +693,35 @@ export class ReservarComponent implements OnInit {
       this.notificationService.showError('Error: No se pudo obtener la información del paciente');
       return;
     }
+    
+    // Guardar información del turno en sessionStorage antes de redirigir al pago
+    const turnoInfo = {
+      fecha: this.selectedDate,
+      hora: this.selectedTime,
+      tratamiento: this.selectedTreatment,
+      paciente: this.selectedPaciente,
+      pacienteId: pacienteId,
+      userType: this.user?.tipoUsuario || 'paciente',
+      timestamp: new Date().toISOString()
+    };
+    
+    console.log('💾 Guardando información del turno:', turnoInfo);
+    sessionStorage.setItem('turno_pendiente', JSON.stringify(turnoInfo));
+    
+    // También guardar en localStorage como backup
+    localStorage.setItem('turno_info_backup', JSON.stringify(turnoInfo));
+    
+    // Guardar backup del usuario en sessionStorage
+    if (this.user) {
+      sessionStorage.setItem('user_backup', JSON.stringify(this.user));
+      console.log('💾 Backup de usuario guardado');
+    }
+    
     // Obtener el monto del tratamiento
     const monto = this.selectedTreatment.precio || 5000; // Precio por defecto si no está definido
     const descripcion = this.selectedTreatment.descripcion || 'Turno médico';
     const userType = this.user?.tipoUsuario || 'paciente';
+    
     // SOLO crear preferencia de pago, NO registrar turno aún
     this.mercadoPagoService.createTurnoPayment(
       'temp', // id temporal, el backend no lo usará
@@ -654,6 +732,7 @@ export class ReservarComponent implements OnInit {
     ).subscribe({
       next: (response: any) => {
         this.isLoading = false;
+        console.log('✅ Preferencia de pago creada, redirigiendo a MercadoPago');
         this.mercadoPagoService.redirectToPayment(response.init_point);
       },
       error: (error: any) => {
@@ -886,6 +965,63 @@ export class ReservarComponent implements OnInit {
       this.notificationService.showWarning('El pago no se completó. Puedes intentar nuevamente o contactar con soporte.');
       // Volver al dashboard
       this.volverAlInicio();
+    }
+  }
+
+  handleSuccessfulPaymentReturn(): void {
+    console.log('🔄 Manejando retorno de pago exitoso');
+    
+    // Verificar si hay información de pago en sessionStorage
+    const paymentInfoStr = sessionStorage.getItem('payment_success_info');
+    const paymentSuccess = sessionStorage.getItem('payment_success');
+    
+    if (paymentSuccess === 'true' || paymentInfoStr) {
+      console.log('✅ Información de pago encontrada en sessionStorage');
+      
+      // Ir al paso 5 (turno listo)
+      this.currentStep = this.shouldSelectPaciente ? 6 : 5;
+      this.paymentSuccess = true;
+      
+      // Intentar restaurar información del turno desde sessionStorage
+      let turnoInfoStr = sessionStorage.getItem('turno_pendiente');
+      if (!turnoInfoStr) {
+        // Si no está en sessionStorage, intentar desde localStorage como backup
+        turnoInfoStr = localStorage.getItem('turno_info_backup');
+        console.log('🔄 Intentando restaurar desde localStorage como backup');
+      }
+      
+      if (turnoInfoStr) {
+        try {
+          const turnoInfo = JSON.parse(turnoInfoStr);
+          this.selectedDate = turnoInfo.fecha;
+          this.selectedTime = turnoInfo.hora;
+          this.selectedTreatment = turnoInfo.tratamiento;
+          if (turnoInfo.paciente) {
+            this.selectedPaciente = turnoInfo.paciente;
+          }
+          console.log('✅ Información del turno restaurada');
+        } catch (error) {
+          console.error('Error al restaurar información del turno:', error);
+        }
+      } else {
+        console.log('⚠️ No se encontró información del turno en storage');
+      }
+      
+      // Limpiar storage
+      sessionStorage.removeItem('payment_success_info');
+      sessionStorage.removeItem('payment_success');
+      sessionStorage.removeItem('turno_pendiente');
+      sessionStorage.removeItem('user_backup');
+      localStorage.removeItem('turno_info_backup');
+      
+      // Actualizar datos
+      this.dataRefreshService.triggerRefresh('vistaPaciente');
+      this.turnoService.refreshTurnos();
+      
+      this.notificationService.showSuccess('¡Pago procesado exitosamente! Tu turno está confirmado.');
+    } else {
+      console.log('⚠️ No se encontró información de pago, intentando registrar turno');
+      this.registrarTurnoDespuesDePago();
     }
   }
 
