@@ -82,7 +82,10 @@ export class TurnosComponent implements OnInit {
       this.currentView = 'mis-turnos';
       this.loadPacienteData(); // Cargar datos del paciente
       this.loadChatHistory();
-      this.addWelcomeMessage();
+      // Solo agregar mensaje de bienvenida si no hay historial
+      if (this.messages.length === 0) {
+        this.addWelcomeMessage();
+      }
     }
     // Mostrar burbuja de bienvenida después de un retraso
     this.showWelcomeBubbleAfterDelay();
@@ -111,21 +114,21 @@ export class TurnosComponent implements OnInit {
   // Chatbot methods
   addWelcomeMessage(): void {
     const welcomeMessage: ChatMessage = {
-      text: '👋 ¡Hola! Soy tu **asistente virtual inteligente**.\n\n🤖 Estoy aquí para ayudarte con todo lo que necesites:\n\n• 📅 Reservar y gestionar tus turnos\n• 💳 Consultas sobre pagos\n• 📞 Información de contacto\n• 🏥 Servicios y tratamientos\n• ❓ Responder todas tus dudas\n\n¿En qué puedo ayudarte hoy?',
+      text: '🤖 **¡Perfecto! Estoy listo para ayudarte.**\n\n¿Qué necesitas hacer hoy?\n\n• 📅 **Gestionar mis turnos**\n• 💳 **Consultas sobre pagos**\n• 📞 **Contactar la clínica**\n• 🏥 **Información de servicios**\n\n💬 Escribe tu consulta o usa los botones de abajo:',
       isUser: false,
       timestamp: new Date(),
       actions: [
+        {
+          text: 'Ver Mis Turnos',
+          action: 'navigate:/misTurnos',
+          icon: 'calendar',
+          variant: 'primary'
+        },
         {
           text: 'Reservar Turno',
           action: 'navigate:/reservarTurno',
           icon: 'calendar-plus',
           variant: 'success'
-        },
-        {
-          text: 'Mis Turnos',
-          action: 'navigate:/misTurnos',
-          icon: 'calendar',
-          variant: 'primary'
         },
         {
           text: 'Contactar Clínica',
@@ -139,7 +142,10 @@ export class TurnosComponent implements OnInit {
   }
 
   // Métodos para la burbuja de bienvenida
-  openChatFromBubble(): void {
+  openChatFromBubble(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
     this.showWelcomeBubble = false;
     this.chatOpen = true;
     if (this.messages.length === 0) {
@@ -228,6 +234,7 @@ export class TurnosComponent implements OnInit {
     
     // Usar ChatService para generar respuesta con contexto
     const chatResponse = this.chatService.generateResponse(message, userType);
+    console.log('Respuesta del ChatService:', chatResponse);
     
     setTimeout(() => {
       const botMessage: ChatMessage = {
@@ -236,6 +243,7 @@ export class TurnosComponent implements OnInit {
         timestamp: new Date(),
         actions: chatResponse.actions || []
       };
+      console.log('Mensaje del bot con acciones:', botMessage);
       this.messages.push(botMessage);
       this.isTyping = false;
       this.scrollToBottom();
@@ -549,12 +557,14 @@ export class TurnosComponent implements OnInit {
 
   // Método para manejar acciones de botones del chat
   handleChatAction(action: ActionButton): void {
+    console.log('Acción ejecutada:', action);
     const actionType = action.action.split(':')[0];
     const actionValue = action.action.split(':').slice(1).join(':');
 
     switch (actionType) {
       case 'navigate':
         // Navegar a una ruta específica
+        console.log('Navegando a:', actionValue);
         this.router.navigate([actionValue]);
         break;
         

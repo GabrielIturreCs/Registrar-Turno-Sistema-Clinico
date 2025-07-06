@@ -1185,11 +1185,27 @@
   }
 }
 
-/* Welcome Bubble - Burbuja de bienvenida amigable */
+/* Chat Toggle Button - Posicionamiento relativo para la burbuja */
+.chat-toggle-btn {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  transition: all 0.3s ease;
+  position: relative; /* Importante para posicionar la burbuja */
+}
+
+/* Welcome Bubble - Burbuja de bienvenida que sale del ícono */
 .welcome-bubble {
   position: absolute;
-  bottom: 80px;
-  right: -10px;
+  bottom: 70px; /* Aparece arriba del botón */
+  right: -130px; /* Centrada respecto al botón */
   width: 320px;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 20px;
@@ -1296,7 +1312,7 @@
 .bubble-pointer {
   position: absolute;
   bottom: -8px;
-  right: 30px;
+  left: 160px; /* Posición exacta para apuntar al centro del botón */
   width: 16px;
   height: 16px;
   background: #ffffff;
@@ -1315,8 +1331,8 @@
 @media (max-width: 768px) {
   .welcome-bubble {
     width: 280px;
-    right: -5px;
-    bottom: 70px;
+    right: -110px; /* Ajustado para centrar en móviles */
+    bottom: 65px;
   }
   
   .bubble-content {
@@ -1335,7 +1351,7 @@
 @media (max-width: 480px) {
   .welcome-bubble {
     width: 260px;
-    right: 0px;
+    right: -100px; /* Más centrada en móviles pequeños */
   }
 }
 
