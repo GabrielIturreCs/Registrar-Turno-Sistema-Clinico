@@ -148,7 +148,9 @@ export class LoginComponent implements OnInit {
                   localStorage.setItem('user', JSON.stringify(res.user));
                   this.authService.setCurrentUser(res.user);
                   this.notificationService.showSuccess(`¡Bienvenido ${res.user.nombre || res.user.nombreUsuario || 'Usuario'}!`);
-                  this.redirectByUserType(res.user.tipoUsuario);
+                  
+                  // Usar el método redirectByUserType que ya maneja el flujo de perfil incompleto
+                  this.authService.redirectByUserType();
                 } else {
                   console.error('❌ Error en respuesta del backend:', res);
                   this.notificationService.showError(res.message || 'Error al iniciar sesión con Google.');

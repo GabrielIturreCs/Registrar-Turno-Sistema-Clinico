@@ -11,6 +11,10 @@ export interface User {
   direccion?: string;
   obraSocial?: string;
   email?: string;
+  hasCompleteProfile?: boolean;
+  needsProfileCompletion?: boolean;
+  patientId?: string;
+  picture?: string;
 }
 
 export interface Turno {

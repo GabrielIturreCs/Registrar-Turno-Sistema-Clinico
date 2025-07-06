@@ -8,33 +8,12 @@ import { environment } from '../environments/environment';
 import { User } from '../interfaces';
 import { NotificationService } from './notification.service';
 
-/*export interface User {
-  id: number;
-  nombreUsuario: string;
-  nombre: string;
-  apellido: string;
-  tipoUsuario: string;
-  dni?: string;
-  telefono?: string;
-  direccion?: string;
-  obraSocial?: string;
-}*/
-
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
-
-  // Datos de prueba
-  /*private testData = {
-    usuarios: [
-      { id: 1, nombreUsuario: 'admin', password: 'password', nombre: 'Admin', apellido: 'Sistema', tipoUsuario: 'administrador', dni: '00000000', telefono: '1100000000' },
-      { id: 2, nombreUsuario: 'dentista', password: 'password', nombre: 'Dr. María', apellido: 'González', tipoUsuario: 'dentista', dni: '12345678', telefono: '123456789' },
-      { id: 3, nombreUsuario: 'paciente1', password: 'password', nombre: 'Juan', apellido: 'Pérez', tipoUsuario: 'paciente', dni: '87654321', telefono: '987654321', obraSocial: 'OSDE' }
-    ]
-  };*/
 
   hostBase: string;
 
@@ -55,38 +34,6 @@ export class AuthService {
     }
   }
 
-  /*login(nombreUsuario: string, password: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const foundUser = this.testData.usuarios.find(u => 
-          u.nombreUsuario === nombreUsuario && 
-          u.password === password
-        );
-
-        if (foundUser) {
-          const user: User = {
-            id: foundUser.id,
-            nombreUsuario: foundUser.nombreUsuario,
-            nombre: foundUser.nombre,
-            apellido: foundUser.apellido,
-            tipoUsuario: foundUser.tipoUsuario,
-            dni: foundUser.dni,
-            telefono: foundUser.telefono,
-            obraSocial: foundUser.obraSocial
-          };
-
-          localStorage.setItem('token', 'fake-token-' + Date.now());
-          localStorage.setItem('rol', user.tipoUsuario);
-          localStorage.setItem('user', JSON.stringify(user));
-          
-          this.currentUserSubject.next(user);
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      }, 1000);
-    });
-  }*/
   public login(nombreUsuario: string, password: string):Observable<any> 
   { 
      const httpOption = { 
@@ -111,7 +58,7 @@ export class AuthService {
       headers: new HttpHeaders({
         'Content-Type': 'application/json'
       }),
-      withCredentials: true // Habilitar cookies
+      withCredentials: true
     };
     
     const body = JSON.stringify({ token: credential });
@@ -121,52 +68,49 @@ export class AuthService {
     console.log('📦 Body:', body);
     
     return this._http.post(url, body, httpOption).pipe(
-      tap(response => {
+      tap((response: any) => {
         console.log('✅ Respuesta exitosa del backend:', response);
       }),
       catchError(error => {
         console.error('❌ Error en petición al backend:', error);
-        console.error('❌ Error status:', error.status);
-        console.error('❌ Error message:', error.message);
-        console.error('❌ Error details:', error.error);
         return throwError(error);
       })
     );
   }
 
- /* register(userData: any): Promise<boolean> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Verificar si el usuario ya existe
-        const existingUser = this.testData.usuarios.find(u => 
-          u.nombreUsuario === userData.nombreUsuario || 
-          u.dni === userData.dni
-        );
+  // Verificar si el usuario de Google tiene un perfil de paciente completo
+  private checkPatientProfile(user: any): Observable<any> {
+    const httpOption = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    
+    return this._http.get(`${environment.apiUrl}/paciente/by-user/${user.id}`, httpOption);
+  }
 
-        if (existingUser) {
-          resolve(false);
-          return;
-        }
+  // Crear perfil de paciente para usuario de Google
+  public createPatientProfile(patientData: any): Observable<any> {
+    const httpOption = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    
+    return this._http.post(`${environment.apiUrl}/paciente`, patientData, httpOption);
+  }
 
-        // Agregar nuevo usuario
-        const newId = Math.max(...this.testData.usuarios.map(u => u.id)) + 1;
-        const newUser = {
-          id: newId,
-          nombreUsuario: userData.nombreUsuario,
-          password: userData.password,
-          nombre: userData.nombre,
-          apellido: userData.apellido,
-          tipoUsuario: userData.tipoUsuario,
-          dni: userData.dni,
-          telefono: userData.telefono,
-          obraSocial: userData.obraSocial
-        };
+  // Verificar si el usuario actual necesita completar su perfil
+  public needsProfileCompletion(): boolean {
+    const user = this.getCurrentUser();
+    return !!(user && (user.tipoUsuario === 'paciente') && !user.hasCompleteProfile);
+  }
 
-        this.testData.usuarios.push(newUser);
-        resolve(true);
-      }, 1000);
-    });
-  }*/
+  // Obtener ID del paciente para el usuario actual
+  public getCurrentPatientId(): string | null {
+    const user = this.getCurrentUser();
+    return user?.patientId || null;
+  }
 
   logout(): void {
     localStorage.clear();
@@ -180,6 +124,7 @@ export class AuthService {
 
   setCurrentUser(user: User): void {
     this.currentUserSubject.next(user);
+    localStorage.setItem('user', JSON.stringify(user));
   }
 
   isAuthenticated(): boolean {
@@ -198,6 +143,12 @@ export class AuthService {
       return;
     }
 
+    // Si es paciente de Google y no tiene perfil completo, redirigir a completar perfil
+    if (user.tipoUsuario === 'paciente' && user.needsProfileCompletion) {
+      this.router.navigate(['/complete-profile']);
+      return;
+    }
+
     switch (user.tipoUsuario) {
       case 'administrador':
         this.router.navigate(['/dashboard']);
@@ -206,10 +157,10 @@ export class AuthService {
         this.router.navigate(['/dashboard']);
         break;
       case 'paciente':
-        this.router.navigate(['/misTurnos']);
+        this.router.navigate(['/vistaPaciente']);
         break;
       default:
         this.router.navigate(['/']);
     }
   }
-} 
+}

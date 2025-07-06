@@ -18,6 +18,9 @@ interface User {
   nombre: string;
   apellido: string;
   tipoUsuario: string;
+  patientId?: string;
+  hasCompleteProfile?: boolean;
+  needsProfileCompletion?: boolean;
 }
 
 interface Paciente {
@@ -861,6 +864,12 @@ export class ReservarComponent implements OnInit {
   // Método para obtener el pacienteId correcto
   async getPacienteId(): Promise<string | null> {
     if (this.user?.tipoUsuario === 'paciente') {
+      // Si el usuario tiene patientId (usuario de Google con perfil completo)
+      if (this.user.patientId) {
+        console.log('Usando patientId del usuario de Google:', this.user.patientId);
+        return this.user.patientId;
+      }
+      
       // Para usuarios tipo paciente, buscar en la lista de pacientes el que tenga userId igual al user.id
       const paciente = this.pacientes.find(p => p.userId === this.user?.id?.toString());
       if (paciente) {
