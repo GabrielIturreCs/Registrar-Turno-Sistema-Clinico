@@ -62,17 +62,15 @@
 
       <div class="form-group">
         <label for="obraSocial">Obra Social *</label>
-        <input 
-          type="text" 
+        <select 
           id="obraSocial" 
           formControlName="obraSocial" 
-          placeholder="Ej: OSDE, Swiss Medical, PAMI"
           [class.error]="obraSocial?.invalid && obraSocial?.touched">
+          <option value="">Selecciona tu obra social</option>
+          <option *ngFor="let obra of obrasSociales" [value]="obra">{{ obra }}</option>
+        </select>
         <div *ngIf="obraSocial?.errors?.['required'] && obraSocial?.touched" class="error-message">
           La obra social es obligatoria
-        </div>
-        <div *ngIf="obraSocial?.errors?.['minlength'] && obraSocial?.touched" class="error-message">
-          La obra social debe tener al menos 2 caracteres
         </div>
       </div>
 

@@ -17,6 +17,20 @@ export class CompleteProfileComponent implements OnInit {
   currentUser: any;
   loading = false;
 
+  obrasSociales = [
+    'OSDE',
+    'Swiss Medical',
+    'PAMI',
+    'Medicus',
+    'Galeno',
+    'Sancor Salud',
+    'Omint',
+    'Accord Salud',
+    'Federada Salud',
+    'Prevención Salud',
+    'Otra'
+  ];
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -27,7 +41,7 @@ export class CompleteProfileComponent implements OnInit {
       telefono: ['', [Validators.required, Validators.pattern(/^\d{8,15}$/)]],
       dni: ['', [Validators.required, Validators.pattern(/^\d{7,8}$/)]],
       direccion: ['', [Validators.required, Validators.minLength(5)]],
-      obraSocial: ['', [Validators.required, Validators.minLength(2)]]
+      obraSocial: ['', [Validators.required]]
     });
   }
 
@@ -76,13 +90,17 @@ export class CompleteProfileComponent implements OnInit {
           userId: this.currentUser.id
         };
 
+        console.log('Datos del paciente a enviar:', patientData);
+        console.log('Usuario actual:', this.currentUser);
+
         this.authService.createPatientProfile(patientData).subscribe(
           (response: any) => {
-            if (response.success || response._id) {
+            console.log('Respuesta del servidor:', response);
+            if (response.success || response._id || response.paciente) {
               // Actualizar el usuario actual
               this.currentUser.hasCompleteProfile = true;
               this.currentUser.needsProfileCompletion = false;
-              this.currentUser.patientId = response._id || response.patient._id;
+              this.currentUser.patientId = response._id || response.paciente?._id;
               this.currentUser.telefono = patientData.telefono;
               this.currentUser.dni = patientData.dni;
               this.currentUser.direccion = patientData.direccion;
@@ -99,7 +117,9 @@ export class CompleteProfileComponent implements OnInit {
           },
           (error) => {
             console.error('Error creando perfil de paciente:', error);
-            this.notificationService.showError('Error al completar el perfil. Intenta nuevamente.');
+            console.error('Error details:', error.error);
+            const errorMessage = error.error?.msg || error.error?.message || 'Error al completar el perfil. Intenta nuevamente.';
+            this.notificationService.showError(errorMessage);
           }
         );
       } catch (error) {
