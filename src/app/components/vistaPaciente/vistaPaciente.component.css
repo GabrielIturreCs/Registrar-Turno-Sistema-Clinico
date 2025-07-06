@@ -720,7 +720,6 @@
   bottom: 20px;
   right: 20px;
   z-index: 1000;
-  position: relative; /* Importante para posicionar la burbuja */
 }
 
 .chat-toggle-btn {
@@ -1635,11 +1634,11 @@ h6 {
 /* ======================
    BURBUJA DE BIENVENIDA
    ====================== */
-/* Welcome Bubble - Burbuja de bienvenida que sale del ícono hacia la derecha (igual que turnos) */
+/* Welcome Bubble - Burbuja de bienvenida que sale del ícono hacia la derecha */
 .welcome-bubble {
-  position: absolute;
-  bottom: 80px; /* Aparece arriba del botón */
-  right: -150px; /* Posicionada para que salga hacia la derecha (igual que turnos) */
+  position: fixed;
+  bottom: 100px; /* Aparece justo arriba del ícono */
+  right: 20px; /* Alineada con el ícono */
   width: 320px;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 20px;
@@ -1746,7 +1745,7 @@ h6 {
 .bubble-pointer {
   position: absolute;
   bottom: -8px;
-  left: 160px; /* Posición exacta para apuntar al centro del botón (igual que turnos) */
+  right: 30px; /* Centrado con respecto al ícono que está abajo */
   width: 16px;
   height: 16px;
   background: #ffffff;
@@ -1765,8 +1764,8 @@ h6 {
 @media (max-width: 768px) {
   .welcome-bubble {
     width: 280px;
-    right: -110px; /* Ajustado para centrar en móviles (igual que turnos) */
-    bottom: 65px;
+    right: 10px; /* Ajustado para centrar en móviles */
+    bottom: 90px;
   }
   
   .bubble-content {
@@ -1780,12 +1779,21 @@ h6 {
   .bubble-submessage {
     font-size: 11px;
   }
+  
+  .bubble-pointer {
+    right: 25px; /* Centrado para móviles */
+  }
 }
 
 @media (max-width: 480px) {
   .welcome-bubble {
     width: 260px;
-    right: -100px; /* Más centrada en móviles pequeños (igual que turnos) */
+    right: 5px; /* Más centrada en móviles pequeños */
+    bottom: 85px;
+  }
+  
+  .bubble-pointer {
+    right: 20px; /* Centrado para móviles pequeños */
   }
 }
 
