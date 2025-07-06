@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-pago-exitoso',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './pago-exitoso.component.html',
   styleUrls: ['./pago-exitoso.component.css']
 })
