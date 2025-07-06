@@ -118,8 +118,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.checkPacienteView();
     this.loadTurnosData();
     this.loadAdminStats();
-    this.loadChatHistory();
-    this.addWelcomeMessage();
+    
+    // Solo cargar chat para dentistas
+    if (this.user?.tipoUsuario === 'dentista') {
+      this.loadChatHistory();
+      this.addWelcomeMessage();
+    }
+    
     this.loadDentistasActividad();
     this.loadPacientesActividad();
     this.loadTratamientosActividad();
@@ -148,19 +153,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Cargar historial del chat desde ChatService con localStorage
   loadChatHistory(): void {
-    const history = this.chatService.getConversationHistory();
-    if (history.length > 0) {
-      // Convertir el historial del ChatService al formato del componente
-      this.messages = history.map(msg => ({
-        text: msg.content,
-        isUser: msg.role === 'user',
-        timestamp: msg.timestamp
-      }));
-      
-      // Mostrar contexto de conversación si es una continuación
-      if (this.chatService.isContinuingConversation()) {
-        const summary = this.chatService.getConversationSummary();
-        console.log('Continuando conversación:', summary);
+    // Solo cargar historial si es dentista (no administrador)
+    if (this.user?.tipoUsuario === 'dentista') {
+      const history = this.chatService.getConversationHistory();
+      if (history.length > 0) {
+        // Convertir el historial del ChatService al formato del componente
+        this.messages = history.map(msg => ({
+          text: msg.content,
+          isUser: msg.role === 'user',
+          timestamp: msg.timestamp
+        }));
+        
+        // Mostrar contexto de conversación si es una continuación
+        if (this.chatService.isContinuingConversation()) {
+          const summary = this.chatService.getConversationSummary();
+          console.log('Continuando conversación:', summary);
+        }
       }
     }
   }
@@ -258,32 +266,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Chatbot methods
   addWelcomeMessage(): void {
-    let welcomeText = '¡Hola! Soy tu asistente virtual del dashboard. ¿En qué puedo ayudarte?';
-    
-    // Personalizar mensaje según el tipo de usuario
+    // Solo mostrar mensaje de bienvenida para dentistas
     if (this.user?.tipoUsuario === 'dentista') {
-      welcomeText = 'Hola Doctor/a. Soy DentalBot, tu asistente para la gestión de la clínica. Puedo ayudarte con:\n\n🔹 Gestión de citas y agenda\n🔹 Información de pacientes\n🔹 Seguimiento de tratamientos\n🔹 Reportes y estadísticas\n🔹 Control de inventario\n🔹 Configuración del sistema\n\n¿En qué puedo asistirte hoy?';
-    } else if (this.user?.tipoUsuario === 'paciente') {
-      welcomeText = '¡Hola! Soy DentalBot 🦷\n\nEstoy aquí para ayudarte con información sobre nuestros servicios dentales, horarios y responder tus consultas generales.\n\n¿En qué puedo ayudarte hoy?';
+      const welcomeText = 'Hola Doctor/a. Soy DentalBot, tu asistente para la gestión de la clínica. Puedo ayudarte con:\n\n🔹 Gestión de citas y agenda\n🔹 Información de pacientes\n🔹 Seguimiento de tratamientos\n🔹 Reportes y estadísticas\n🔹 Control de inventario\n🔹 Configuración del sistema\n\n¿En qué puedo asistirte hoy?';
+      
+      const welcomeMessage: ChatMessage = {
+        text: welcomeText,
+        isUser: false,
+        timestamp: new Date()
+      };
+      this.messages.push(welcomeMessage);
     }
-    
-    const welcomeMessage: ChatMessage = {
-      text: welcomeText,
-      isUser: false,
-      timestamp: new Date()
-    };
-    this.messages.push(welcomeMessage);
   }
 
   toggleChat(): void {
-    this.chatOpen = !this.chatOpen;
-    if (this.chatOpen && this.messages.length === 0) {
-      this.addWelcomeMessage();
+    // Solo permitir chat para dentistas
+    if (this.user?.tipoUsuario === 'dentista') {
+      this.chatOpen = !this.chatOpen;
+      if (this.chatOpen && this.messages.length === 0) {
+        this.addWelcomeMessage();
+      }
     }
   }
 
   onSubmit(): void {
-    if (this.chatForm.valid && this.chatForm.value.message.trim()) {
+    // Solo permitir envío de mensajes para dentistas
+    if (this.user?.tipoUsuario === 'dentista' && this.chatForm.valid && this.chatForm.value.message.trim()) {
       const userMessage: ChatMessage = {
         text: this.chatForm.value.message,
         isUser: true,
@@ -307,22 +315,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   handleQuickQuestion(question: QuickQuestion): void {
-    const userMessage: ChatMessage = {
-      text: question.text,
-      isUser: true,
-      timestamp: new Date()
-    };
-    
-    this.messages.push(userMessage);
-    this.handleHybridChat(question.text);
-    this.scrollToBottom();
+    // Solo permitir preguntas rápidas para dentistas
+    if (this.user?.tipoUsuario === 'dentista') {
+      const userMessage: ChatMessage = {
+        text: question.text,
+        isUser: true,
+        timestamp: new Date()
+      };
+      
+      this.messages.push(userMessage);
+      this.handleHybridChat(question.text);
+      this.scrollToBottom();
+    }
   }
 
   private handleHybridChat(message: string): void {
+    // Solo procesar mensajes para dentistas
+    if (this.user?.tipoUsuario !== 'dentista') {
+      return;
+    }
+    
     this.isTyping = true;
     
-    // Determinar el tipo de usuario
-    const userType = this.user?.tipoUsuario === 'dentista' ? 'dentist' : 'patient';
+    // Determinar el tipo de usuario (siempre dentista en este contexto)
+    const userType = 'dentist';
     
     // Verificar si es una continuación de conversación
     const isContinuing = this.chatService.isContinuingConversation();
@@ -353,16 +369,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Sincronizar mensajes del componente con ChatService
   private syncWithChatService(): void {
-    // El ChatService ya maneja su propio historial internamente
-    // Solo necesitamos asegurar que los mensajes del componente estén sincronizados
-    const history = this.chatService.getConversationHistory();
-    if (history.length > this.messages.length) {
-      // Si hay más mensajes en ChatService, actualizar el componente
-      this.messages = history.map(msg => ({
-        text: msg.content,
-        isUser: msg.role === 'user',
-        timestamp: msg.timestamp
-      }));
+    // Solo sincronizar para dentistas
+    if (this.user?.tipoUsuario === 'dentista') {
+      // El ChatService ya maneja su propio historial internamente
+      // Solo necesitamos asegurar que los mensajes del componente estén sincronizados
+      const history = this.chatService.getConversationHistory();
+      if (history.length > this.messages.length) {
+        // Si hay más mensajes en ChatService, actualizar el componente
+        this.messages = history.map(msg => ({
+          text: msg.content,
+          isUser: msg.role === 'user',
+          timestamp: msg.timestamp
+        }));
+      }
     }
   }
 

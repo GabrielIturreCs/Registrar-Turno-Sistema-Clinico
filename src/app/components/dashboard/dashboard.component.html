@@ -366,3 +366,75 @@
   </div>
 </div>
 <!-- Fin Dashboard Principal -->
+
+<!-- Chatbot - Solo para dentistas -->
+<div *ngIf="user?.tipoUsuario === 'dentista'" class="chatbot-container">
+  <!-- Botón de toggle del chat -->
+  <div class="chat-toggle-btn" (click)="toggleChat()" [class.open]="chatOpen">
+    <img src="/assets/images/logo.png" alt="Chat" class="chat-toggle-img" *ngIf="!chatOpen">
+    <i class="fas fa-times" *ngIf="chatOpen"></i>
+  </div>
+
+  <!-- Ventana del chat -->
+  <div class="chat-window" [class.open]="chatOpen">
+    <div class="chat-header">
+      <h5 class="mb-0">
+        <i class="fas fa-robot"></i> DentalBot - Asistente Virtual
+      </h5>
+      <button class="btn-close" (click)="toggleChat()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="chat-messages" #chatMessages>
+      <div *ngFor="let message of messages" 
+           class="message" 
+           [class.user-message]="message.isUser"
+           [class.bot-message]="!message.isUser">
+        <div class="message-content">
+          <div class="message-text" [innerHTML]="message.text"></div>
+          <div class="message-time">{{ message.timestamp | date:'shortTime' }}</div>
+        </div>
+      </div>
+      
+      <!-- Indicador de escritura -->
+      <div *ngIf="isTyping" class="message bot-message">
+        <div class="message-content">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preguntas rápidas -->
+    <div class="quick-questions" *ngIf="messages.length <= 1">
+      <div class="quick-questions-title">Preguntas frecuentes:</div>
+      <div class="quick-questions-list">
+        <button *ngFor="let question of quickQuestions" 
+                class="quick-question-btn"
+                (click)="handleQuickQuestion(question)">
+          {{ question.text }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulario de entrada -->
+    <form class="chat-input-form" [formGroup]="chatForm" (ngSubmit)="onSubmit()">
+      <div class="input-group">
+        <input type="text" 
+               class="form-control" 
+               formControlName="message"
+               placeholder="Escribe tu mensaje..."
+               [disabled]="isTyping">
+        <button type="submit" 
+                class="btn btn-primary"
+                [disabled]="!chatForm.valid || isTyping">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
