@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { Message } from '..//interfaces/message.interface'
+import { Message, ActionButton } from '..//interfaces/message.interface'
 
 @Injectable({
   providedIn: 'root'
@@ -217,7 +217,7 @@ export class ChatService {
   }
 
   // --- ENHANCED RESPONSE GENERATION ---
-  generateResponse(userMessage: string, userType: 'patient' | 'dentist' = 'patient'): string {
+  generateResponse(userMessage: string, userType: 'patient' | 'dentist' = 'patient'): { content: string, actions?: ActionButton[] } {
     const message = userMessage.toLowerCase();
     this.addToHistory('user', userMessage);
     
@@ -225,16 +225,16 @@ export class ChatService {
     this.setUserType(userType);
     this.incrementConversationStep();
     
-    let response = '';
+    let responseData: { content: string, actions?: ActionButton[] };
     if (userType === 'dentist') {
-      response = this.generateDentistResponse(message);
+      responseData = { content: this.generateDentistResponse(message) };
     } else {
-      response = this.generatePatientResponse(message);
+      responseData = this.generatePatientResponseWithActions(message);
     }
     
-    this.addToHistory('assistant', response);
+    this.addToHistory('assistant', responseData.content, responseData.actions);
     this.saveToLocalStorage();
-    return response;
+    return responseData;
   }
 
   // --- DENTISTAS ---
@@ -244,6 +244,231 @@ export class ChatService {
   }
 
   // --- PACIENTES ---
+  private generatePatientResponseWithActions(message: string): { content: string, actions?: ActionButton[] } {
+    // Detectar tema de conversación
+    let currentTopic = '';
+    
+    // NAVEGACIÓN Y ACCIONES DEL SISTEMA
+    if (message.includes('cancelar turno') || message.includes('cancelar mi turno') || message.includes('cancelar cita') ||
+        message.includes('anular turno') || message.includes('eliminar turno') || message.includes('no puedo ir') ||
+        message.includes('no podré asistir') || message.includes('tengo que cancelar')) {
+      currentTopic = 'cancelar_turno';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        const actions: ActionButton[] = [
+          {
+            text: 'Ver Mis Turnos',
+            action: 'navigate:/misTurnos',
+            icon: 'calendar',
+            variant: 'primary'
+          },
+          {
+            text: 'Llamar a la Clínica',
+            action: 'call:' + this.clinicContext.phone,
+            icon: 'phone',
+            variant: 'secondary'
+          }
+        ];
+        
+        return {
+          content: `❌ **Cancelar turno**\n\n**Pasos para cancelar tu turno:**\n1. Haz clic en "Ver Mis Turnos" aquí abajo\n2. Busca el turno que deseas cancelar\n3. Haz clic en el botón rojo con ❌\n4. Confirma la cancelación\n\n**Política de cancelación:**\n- Cancela hasta 24 horas antes\n- Reembolso automático si pagaste\n- Sin penalización por cancelación\n\n¿Necesitas ayuda para encontrar tu turno?`,
+          actions
+        };
+      } else if (step === 2) {
+        const actions: ActionButton[] = [
+          {
+            text: 'Ir a Mis Turnos',
+            action: 'navigate:/misTurnos',
+            icon: 'calendar',
+            variant: 'success'
+          }
+        ];
+        
+        return {
+          content: `Para cancelar tu turno específico:\n\n**Si ya encontraste tu turno:**\n- Haz clic en el botón rojo ❌\n- Confirma la cancelación\n- Recibirás confirmación por email\n\n**Si no puedes encontrarlo:**\n- Verifica la fecha del turno\n- Actualiza la página\n- Contacta al ${this.clinicContext.phone}\n\n**Después de cancelar:**\n- Reembolso procesado en 24-48 horas\n- Turno disponible para otros pacientes\n- Puedes reservar uno nuevo cuando quieras`,
+          actions
+        };
+      }
+    }
+
+    // REPROGRAMAR TURNO
+    if (message.includes('reprogramar') || message.includes('cambiar turno') || message.includes('cambiar fecha') ||
+        message.includes('cambiar hora') || message.includes('mover turno') || message.includes('reagendar') ||
+        message.includes('cambiar cita') || message.includes('nueva fecha') || message.includes('otro día')) {
+      currentTopic = 'reprogramar_turno';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        const actions: ActionButton[] = [
+          {
+            text: 'Ver Mis Turnos',
+            action: 'navigate:/misTurnos',
+            icon: 'calendar',
+            variant: 'primary'
+          },
+          {
+            text: 'Reservar Nuevo Turno',
+            action: 'navigate:/reservarTurno',
+            icon: 'plus',
+            variant: 'success'
+          }
+        ];
+        
+        return {
+          content: `🔄 **Reprogramar turno**\n\n**Cómo reprogramar tu turno:**\n1. Haz clic en "Ver Mis Turnos" aquí abajo\n2. Encuentra tu turno actual\n3. Haz clic en "Reprogramar" (icono de calendario)\n4. Selecciona nueva fecha y hora\n5. Confirma el cambio\n\n**Importante:**\n- Reprograma hasta 24 horas antes\n- Sujeto a disponibilidad\n- Sin costo adicional\n- Mantiene el mismo tratamiento\n\n¿Qué fecha te gustaría cambiar?`,
+          actions
+        };
+      }
+    }
+
+    // RESERVAR TURNO PASO A PASO
+    if (message.includes('reservar turno') || message.includes('agendar') || message.includes('nuevo turno') ||
+        message.includes('sacar turno') || message.includes('cita') || message.includes('como reservar') ||
+        message.includes('hacer reserva') || message.includes('solicitar turno') || message.includes('pedir turno')) {
+      currentTopic = 'reservar_turno';
+      this.setLastTopic(currentTopic);
+      
+      const step = this.getConversationStep();
+      if (step === 1) {
+        const actions: ActionButton[] = [
+          {
+            text: 'Reservar Turno Ahora',
+            action: 'navigate:/reservarTurno',
+            icon: 'calendar-plus',
+            variant: 'success'
+          },
+          {
+            text: 'Ver Horarios',
+            action: 'show-schedule',
+            icon: 'clock',
+            variant: 'info'
+          }
+        ];
+        
+        return {
+          content: `📅 **Reservar nuevo turno**\n\n**Proceso simple y rápido:**\n1. Haz clic en "Reservar Turno Ahora"\n2. Selecciona fecha en el calendario\n3. Elige horario disponible\n4. Confirma tratamiento\n5. Realiza el pago\n\n**Disponibilidad:**\n- Lunes a Viernes: 8:00 - 20:00\n- Sábados: 8:00 - 14:00\n- Turnos cada 30 minutos\n\n¿Qué tratamiento necesitas?`,
+          actions
+        };
+      }
+    }
+
+    // HISTORIAL DE TURNOS
+    if (message.includes('historial') || message.includes('mis turnos') || message.includes('turnos anteriores') ||
+        message.includes('ver turnos') || message.includes('lista de turnos')) {
+      currentTopic = 'historial_turnos';
+      this.setLastTopic(currentTopic);
+      
+      const actions: ActionButton[] = [
+        {
+          text: 'Ver Mis Turnos',
+          action: 'navigate:/misTurnos',
+          icon: 'list',
+          variant: 'primary'
+        },
+        {
+          text: 'Panel Principal',
+          action: 'navigate:/vistaPaciente',
+          icon: 'home',
+          variant: 'secondary'
+        }
+      ];
+      
+      return {
+        content: `📋 **Historial de turnos**\n\n**En tu historial puedes ver:**\n- Turnos realizados y pendientes\n- Turnos cancelados\n- Tratamientos recibidos\n- Pagos realizados\n- Fechas y horarios\n- Dentista que te atendió\n\n**Funciones disponibles:**\n- Ver detalles completos\n- Descargar comprobantes\n- Solicitar certificados\n- Revisar tratamientos\n\n¿Buscas algo específico en tu historial?`,
+        actions
+      };
+    }
+
+    // PAGOS Y ESTADO DEL PAGO
+    if (message.includes('pagar') || message.includes('pago') || message.includes('cuánto cuesta') ||
+        message.includes('precio') || message.includes('estado del pago') || message.includes('factura')) {
+      currentTopic = 'pagos_sistema';
+      this.setLastTopic(currentTopic);
+      
+      const actions: ActionButton[] = [
+        {
+          text: 'Ver Estado de Pagos',
+          action: 'navigate:/misTurnos',
+          icon: 'credit-card',
+          variant: 'primary'
+        },
+        {
+          text: 'Contactar Soporte',
+          action: 'call:' + this.clinicContext.phone,
+          icon: 'help-circle',
+          variant: 'warning'
+        }
+      ];
+      
+      return {
+        content: `💳 **Pagos y facturación**\n\n**Métodos de pago disponibles:**\n- MercadoPago (tarjetas, efectivo)\n- Pago en clínica (efectivo, tarjeta)\n- Transferencia bancaria\n- Obras sociales\n\n**Estados de pago:**\n- ✅ Pagado\n- ⏳ Pendiente\n- ❌ Fallido\n- 💰 Reembolsado\n\n**Para ver el estado de tus pagos, haz clic en el botón de abajo.**\n\n¿Necesitas ayuda con algún pago específico?`,
+        actions
+      };
+    }
+
+    // CONTACTO CON LA CLÍNICA
+    if (message.includes('contactar') || message.includes('llamar') || message.includes('teléfono') ||
+        message.includes('whatsapp') || message.includes('email') || message.includes('contacto') ||
+        message.includes('ubicación') || message.includes('dirección')) {
+      currentTopic = 'contacto_clinica';
+      this.setLastTopic(currentTopic);
+      
+      const actions: ActionButton[] = [
+        {
+          text: 'Llamar Ahora',
+          action: 'call:' + this.clinicContext.phone,
+          icon: 'phone',
+          variant: 'success'
+        },
+        {
+          text: 'WhatsApp',
+          action: 'whatsapp:' + this.clinicContext.whatsapp,
+          icon: 'message-circle',
+          variant: 'success'
+        },
+        {
+          text: 'Cómo Llegar',
+          action: 'map:' + this.clinicContext.address,
+          icon: 'map-pin',
+          variant: 'info'
+        }
+      ];
+      
+      return {
+        content: `📞 **Contacto con la clínica**\n\n**Medios de contacto disponibles:**\n📞 **Teléfono:** ${this.clinicContext.phone}\n📱 **WhatsApp:** ${this.clinicContext.whatsapp}\n📧 **Email:** ${this.clinicContext.email}\n\n**Dirección:**\n📍 ${this.clinicContext.address}\n\n**Horarios de atención:**\n- Lunes a Viernes: 8:00 - 20:00\n- Sábados: 8:00 - 14:00\n- Emergencias: 24/7\n\nUsa los botones de abajo para contactarte rápidamente:`,
+        actions
+      };
+    }
+
+    // DATOS PERSONALES Y PERFIL
+    if (message.includes('datos personales') || message.includes('perfil') || message.includes('cambiar datos') ||
+        message.includes('actualizar') || message.includes('obra social')) {
+      currentTopic = 'datos_personales';
+      this.setLastTopic(currentTopic);
+      
+      const actions: ActionButton[] = [
+        {
+          text: 'Editar Mi Perfil',
+          action: 'navigate:/vistaPaciente',
+          icon: 'user',
+          variant: 'primary'
+        }
+      ];
+      
+      return {
+        content: `👤 **Datos personales y perfil**\n\n**Datos que puedes actualizar:**\n- Nombre y apellido\n- Teléfono de contacto\n- Email\n- Dirección\n- Obra social\n- Fecha de nacimiento\n- Información médica relevante\n\n**Importante:**\n- Mantén tus datos actualizados\n- Verifica tu email para notificaciones\n- Obra social actualizada para coberturas\n\nHaz clic en "Editar Mi Perfil" para actualizar tu información:`,
+        actions
+      };
+    }
+
+    // Si no hay tema específico, usar el método original
+    return { content: this.generatePatientResponse(message) };
+  }
+
+  // Método original para compatibilidad
   private generatePatientResponse(message: string): string {
     // Detectar tema de conversación
     let currentTopic = '';
@@ -1018,22 +1243,31 @@ export class ChatService {
     return topicNames[topic] || topic;
   }
 
-  createMessage(role: "user" | "assistant", content: string): Message {
+  createMessage(role: "user" | "assistant", content: string, actions?: ActionButton[]): Message {
     return {
       id: this.generateId(),
       role,
       content,
-      timestamp: new Date()
+      timestamp: new Date(),
+      actions: actions || []
     }
   }
 
-  addToHistory(role: "user" | "assistant", content: string): void {
-    const message = this.createMessage(role, content);
+  createMessageWithActions(role: "user" | "assistant", content: string, actions: ActionButton[]): Message {
+    return this.createMessage(role, content, actions);
+  }
+
+  addToHistory(role: "user" | "assistant", content: string, actions?: ActionButton[]): void {
+    const message = this.createMessage(role, content, actions);
     this.conversationHistory.push(message);
     if (this.conversationHistory.length > 20) {
       this.conversationHistory = this.conversationHistory.slice(-20);
     }
     this.saveToLocalStorage();
+  }
+
+  addToHistoryWithActions(role: "user" | "assistant", content: string, actions: ActionButton[]): void {
+    this.addToHistory(role, content, actions);
   }
 
   getConversationHistory(): Message[] {

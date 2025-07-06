@@ -6,6 +6,7 @@ import { User, Turno, Tratamiento, Paciente } from '../../interfaces';
 import { ChatbotService } from '../../services/ChatBot.service';
 import { ChatService } from '../../services/chat.service';
 import { ChatMessage, QuickQuestion } from '../../interfaces/chatbot.interface';
+import { ActionButton } from '../../interfaces/message.interface';
 import { TurnoService } from '../../services/turno.service';
 import { PacienteService } from '../../services/paciente.service';
 import { NotificationService } from '../../services/notification.service';
@@ -91,7 +92,8 @@ export class TurnosComponent implements OnInit {
       this.messages = history.map(msg => ({
         text: msg.content,
         isUser: msg.role === 'user',
-        timestamp: msg.timestamp
+        timestamp: msg.timestamp,
+        actions: msg.actions || []
       }));
       
       // Mostrar contexto de conversación si es una continuación
@@ -107,7 +109,8 @@ export class TurnosComponent implements OnInit {
     const welcomeMessage: ChatMessage = {
       text: '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte con tus turnos?',
       isUser: false,
-      timestamp: new Date()
+      timestamp: new Date(),
+      actions: []
     };
     this.messages.push(welcomeMessage);
   }
@@ -170,9 +173,10 @@ export class TurnosComponent implements OnInit {
     
     setTimeout(() => {
       const botMessage: ChatMessage = {
-        text: chatResponse,
+        text: chatResponse.content,
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        actions: chatResponse.actions || []
       };
       this.messages.push(botMessage);
       this.isTyping = false;
@@ -198,7 +202,8 @@ export class TurnosComponent implements OnInit {
       this.messages = history.map(msg => ({
         text: msg.content,
         isUser: msg.role === 'user',
-        timestamp: msg.timestamp
+        timestamp: msg.timestamp,
+        actions: msg.actions || []
       }));
     }
   }
@@ -482,5 +487,80 @@ export class TurnosComponent implements OnInit {
 
   closeSuccessModal() {
     this.showSuccessModal = false;
+  }
+
+  // Método para manejar acciones de botones del chat
+  handleChatAction(action: ActionButton): void {
+    const actionType = action.action.split(':')[0];
+    const actionValue = action.action.split(':').slice(1).join(':');
+
+    switch (actionType) {
+      case 'navigate':
+        // Navegar a una ruta específica
+        this.router.navigate([actionValue]);
+        break;
+        
+      case 'call':
+        // Iniciar llamada telefónica
+        if (typeof window !== 'undefined') {
+          window.open(`tel:${actionValue}`, '_self');
+        }
+        break;
+        
+      case 'whatsapp':
+        // Abrir WhatsApp
+        if (typeof window !== 'undefined') {
+          const whatsappUrl = `https://wa.me/${actionValue.replace(/\D/g, '')}`;
+          window.open(whatsappUrl, '_blank');
+        }
+        break;
+        
+      case 'email':
+        // Abrir cliente de email
+        if (typeof window !== 'undefined') {
+          window.open(`mailto:${actionValue}`, '_self');
+        }
+        break;
+        
+      case 'map':
+        // Abrir mapa con la dirección
+        if (typeof window !== 'undefined') {
+          const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(actionValue)}`;
+          window.open(mapUrl, '_blank');
+        }
+        break;
+        
+      case 'show-schedule':
+        // Mostrar horarios (agregar lógica específica)
+        this.showScheduleInfo();
+        break;
+        
+      default:
+        console.warn('Acción no reconocida:', action.action);
+    }
+  }
+
+  // Método auxiliar para mostrar información de horarios
+  private showScheduleInfo(): void {
+    const scheduleMessage: ChatMessage = {
+      text: `📅 **Horarios de atención:**\n\n• Lunes a Viernes: 8:00 - 20:00\n• Sábados: 8:00 - 14:00\n• Domingos: Cerrado\n\n📞 Emergencias 24/7: (011) 4567-8901`,
+      isUser: false,
+      timestamp: new Date()
+    };
+    
+    this.messages.push(scheduleMessage);
+    this.scrollToBottom();
+  }
+
+  // Método para formatear el texto del mensaje
+  formatMessageText(text: string): string {
+    return text
+      .replace(/\n/g, '<br>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`(.*?)`/g, '<code>$1</code>')
+      .replace(/###\s(.*?)(?=\n|$)/g, '<h4>$1</h4>')
+      .replace(/##\s(.*?)(?=\n|$)/g, '<h3>$1</h3>')
+      .replace(/#\s(.*?)(?=\n|$)/g, '<h2>$1</h2>');
   }
 }
