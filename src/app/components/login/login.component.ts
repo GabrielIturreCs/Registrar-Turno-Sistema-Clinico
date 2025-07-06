@@ -6,6 +6,7 @@ import { User } from '../../interfaces';
 import { LoginForm } from '../../interfaces';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
+import { environment } from '../../environments/environment.prod';
 
 /*interface User {
   id: number;
@@ -121,7 +122,7 @@ export class LoginComponent implements OnInit {
   // Método para login con Google
   loginWithGoogle() {
     
-    const clientId = '289556059590-492hb4ibk081c42f3ldkjk62ohbmoppm.apps.googleusercontent.com';
+    const clientId = environment.googleClientId;
     // @ts-ignore
     google.accounts.id.initialize({
       client_id: clientId,
