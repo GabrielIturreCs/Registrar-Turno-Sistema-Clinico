@@ -13,6 +13,19 @@ export function authGuard(role: string | string[] = ''): CanActivateFn {
     console.log('AuthGuard: Usuario:', user ? 'Presente' : 'Ausente');
     console.log('AuthGuard: Rol requerido:', role);
     
+    // Verificar si viene de un pago exitoso (caso especial)
+    const urlParams = new URLSearchParams(state.url.split('?')[1] || '');
+    const isReturnFromPayment = urlParams.get('returnFromPayment') === 'true' || 
+                               urlParams.get('payment') === 'success' ||
+                               sessionStorage.getItem('payment_success') === 'true';
+    
+    if (isReturnFromPayment) {
+      console.log('AuthGuard: Detectado retorno de pago exitoso, permitiendo acceso');
+      // Si viene de pago exitoso, permitir acceso incluso sin token
+      // El componente se encargará de manejar la autenticación
+      return true;
+    }
+    
     if (!token) {
       console.log('AuthGuard: No hay token, redirigiendo a login');
       return false;
