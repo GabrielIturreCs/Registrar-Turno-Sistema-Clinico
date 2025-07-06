@@ -1,7 +1,7 @@
 // src/environments/environment.prod.ts
 export const environment = {
   production: true,
-  apiUrl: 'https://registro-de-turno-sistema-odontologico.onrender.com/api', // Backend en Render
-  googleClientId: "289556059590-492hb4ibk081c42f3ldkjk62ohbmoppm.apps.googleusercontent.com",
+  apiUrl: 'https://backend-develop-nu3j.onrender.com/api', // Backend en Render
+  googleClientId: "585856608795-5tnd7elkktntqm7b95g4livkppcjgp1u.apps.googleusercontent.com",
   someFeatureToggle: true
 };
