@@ -6,50 +6,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-payment-callback',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="container mt-5">
-      <div class="row justify-content-center">
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-body text-center">
-              <div *ngIf="status === 'success'" class="text-success">
-                <i class="fas fa-check-circle fa-3x mb-3"></i>
-                <h3>¡Pago Exitoso!</h3>
-                <p>Tu turno ha sido confirmado y pagado correctamente.</p>
-                <button class="btn btn-success" (click)="goToMisTurnos()">
-                  Ver Mis Turnos
-                </button>
-              </div>
-              
-              <div *ngIf="status === 'failure'" class="text-danger">
-                <i class="fas fa-times-circle fa-3x mb-3"></i>
-                <h3>Pago Fallido</h3>
-                <p>Hubo un problema con el pago. Por favor, intenta nuevamente.</p>
-                <button class="btn btn-danger" (click)="goToReservar()">
-                  Intentar Nuevamente
-                </button>
-              </div>
-              
-              <div *ngIf="status === 'pending'" class="text-warning">
-                <i class="fas fa-clock fa-3x mb-3"></i>
-                <h3>Pago Pendiente</h3>
-                <p>Tu pago está siendo procesado. Te notificaremos cuando se complete.</p>
-                <button class="btn btn-warning" (click)="goToMisTurnos()">
-                  Ver Mis Turnos
-                </button>
-              </div>
-              
-              <div *ngIf="!status" class="text-info">
-                <i class="fas fa-spinner fa-spin fa-3x mb-3"></i>
-                <h3>Procesando...</h3>
-                <p>Estamos procesando tu pago...</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `
+  templateUrl: './payment-callback.component.html',
+  styleUrls: ['./payment-callback.component.css']
 })
 export class PaymentCallbackComponent implements OnInit {
   status: string | null = null;
@@ -64,18 +22,70 @@ export class PaymentCallbackComponent implements OnInit {
     this.route.url.subscribe(segments => {
       if (segments.length >= 2) {
         this.status = segments[1].path; // success, failure, pending
+        console.log('Status detectado:', this.status);
       }
     });
 
     // También obtener parámetros de query si los hay
     this.route.queryParams.subscribe(params => {
       console.log('Payment callback params:', params);
-      // Aquí puedes procesar los parámetros adicionales de MercadoPago
+      
+      // Procesar parámetros de MercadoPago
+      const collectionId = params['collection_id'];
+      const collectionStatus = params['collection_status'];
+      const externalReference = params['external_reference'];
+      
+      if (collectionId && collectionStatus) {
+        console.log('Parámetros de MercadoPago:', { collectionId, collectionStatus, externalReference });
+        
+        // Guardar información del pago
+        const paymentInfo = {
+          paymentId: collectionId,
+          paymentStatus: collectionStatus,
+          externalReference: externalReference,
+          timestamp: new Date().toISOString()
+        };
+        
+        if (collectionStatus === 'approved') {
+          console.log('✅ Pago aprobado, guardando información');
+          sessionStorage.setItem('payment_success_info', JSON.stringify(paymentInfo));
+          sessionStorage.setItem('payment_success', 'true');
+          
+          // Redirigir al paso 5 del wizard de reserva
+          setTimeout(() => {
+            this.router.navigate(['/reservarTurno'], { 
+              queryParams: { 
+                payment: 'success',
+                step: '5',
+                returnFromPayment: 'true'
+              } 
+            });
+          }, 2000);
+        } else if (collectionStatus === 'pending') {
+          console.log('⏳ Pago pendiente');
+          sessionStorage.setItem('payment_pending', 'true');
+          setTimeout(() => {
+            this.router.navigate(['/reservarTurno'], { 
+              queryParams: { 
+                payment: 'pending',
+                step: '5'
+              } 
+            });
+          }, 2000);
+        } else if (collectionStatus === 'rejected' || collectionStatus === 'failure') {
+          console.log('❌ Pago fallido');
+          sessionStorage.setItem('payment_failed', 'true');
+          setTimeout(() => {
+            this.router.navigate(['/reservarTurno'], { 
+              queryParams: { 
+                payment: 'failure',
+                step: '5'
+              } 
+            });
+          }, 2000);
+        }
+      }
     });
-  }
-
-  goToMisTurnos() {
-    this.router.navigate(['/misTurnos']);
   }
 
   goToReservar() {

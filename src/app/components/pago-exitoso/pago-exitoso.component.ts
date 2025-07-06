@@ -25,12 +25,24 @@ export class PagoExitosoComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    console.log('🎉 PagoExitosoComponent inicializado');
+    
     this.route.queryParams.subscribe(params => {
+      console.log('📋 Parámetros recibidos:', params);
+      
       this.paymentId = params['collection_id'] || params['payment_id'];
       this.paymentStatus = params['collection_status'] || params['status'];
       this.externalReference = params['external_reference'];
 
+      console.log('💳 Datos del pago:', {
+        paymentId: this.paymentId,
+        paymentStatus: this.paymentStatus,
+        externalReference: this.externalReference
+      });
+
       if (this.paymentId && this.paymentStatus === 'approved') {
+        console.log('✅ Pago aprobado, procesando...');
+        
         // Guardar información del pago exitoso en sessionStorage
         const paymentInfo = {
           paymentId: this.paymentId,
@@ -42,21 +54,30 @@ export class PagoExitosoComponent implements OnInit {
         
         // Marcar el pago como exitoso
         sessionStorage.setItem('payment_success', 'true');
+        localStorage.setItem('pago_exitoso', 'true');
         
-        this.message = '¡Tu pago ha sido aprobado! Redirigiendo...';
+        this.message = '¡Tu pago ha sido aprobado! Redirigiendo al paso 5...';
+        this.loading = false;
+        
+        // Redirigir inmediatamente a reservar con parámetros específicos para el paso 5
         setTimeout(() => {
-          // Redirigir a reservar con parámetros específicos para el paso 5
+          console.log('🔄 Redirigiendo a /reservarTurno con parámetros de pago exitoso');
           this.router.navigate(['/reservarTurno'], { 
             queryParams: { 
               payment: 'success',
               step: '5',
-              returnFromPayment: 'true'
+              returnFromPayment: 'true',
+              paymentId: this.paymentId
             } 
           });
-        }, 2000);
+        }, 1500);
+        
       } else if (this.paymentStatus === 'pending') {
+        console.log('⏳ Pago pendiente');
         this.message = 'Tu pago está pendiente. Te notificaremos cuando se complete.';
         sessionStorage.setItem('payment_pending', 'true');
+        this.loading = false;
+        
         setTimeout(() => {
           this.router.navigate(['/reservarTurno'], { 
             queryParams: { 
@@ -64,10 +85,14 @@ export class PagoExitosoComponent implements OnInit {
               step: '5'
             } 
           });
-        }, 2000);
+        }, 1500);
+        
       } else if (this.paymentStatus === 'rejected' || this.paymentStatus === 'failure') {
+        console.log('❌ Pago fallido');
         this.message = 'Tu pago ha sido rechazado. Por favor, intenta de nuevo.';
         sessionStorage.setItem('payment_failed', 'true');
+        this.loading = false;
+        
         setTimeout(() => {
           this.router.navigate(['/reservarTurno'], { 
             queryParams: { 
@@ -75,8 +100,10 @@ export class PagoExitosoComponent implements OnInit {
               step: '5'
             } 
           });
-        }, 2000);
+        }, 1500);
+        
       } else {
+        console.log('❓ Estado de pago desconocido:', this.paymentStatus);
         this.message = 'No se pudo determinar el estado del pago.';
         this.loading = false;
       }
@@ -84,12 +111,28 @@ export class PagoExitosoComponent implements OnInit {
   }
 
   volverAReservar() {
-    // Redirigir a reservar con parámetros específicos
+    console.log('🔄 Botón "Volver a reservar" clickeado');
+    
+    // Asegurar que los datos del pago estén guardados
+    if (this.paymentId) {
+      const paymentInfo = {
+        paymentId: this.paymentId,
+        paymentStatus: this.paymentStatus,
+        externalReference: this.externalReference,
+        timestamp: new Date().toISOString()
+      };
+      sessionStorage.setItem('payment_success_info', JSON.stringify(paymentInfo));
+      sessionStorage.setItem('payment_success', 'true');
+      localStorage.setItem('pago_exitoso', 'true');
+    }
+    
+    // Redirigir a reservar con parámetros específicos para el paso 5
     this.router.navigate(['/reservarTurno'], { 
       queryParams: { 
         payment: 'success',
         step: '5',
-        returnFromPayment: 'true'
+        returnFromPayment: 'true',
+        paymentId: this.paymentId
       } 
     });
   }

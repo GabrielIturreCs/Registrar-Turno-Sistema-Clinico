@@ -14,6 +14,12 @@ export class PagoFallidoComponent implements OnInit {
   ngOnInit(): void {}
 
   volverAReservar() {
-    this.router.navigate(['/reservar']);
+    this.router.navigate(['/reservarTurno'], { 
+      queryParams: { 
+        payment: 'failure',
+        step: '5',
+        returnFromPayment: 'true'
+      } 
+    });
   }
 } 

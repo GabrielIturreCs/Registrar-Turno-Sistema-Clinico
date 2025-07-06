@@ -133,6 +133,7 @@ export class ReservarComponent implements OnInit {
       if (params['payment'] === 'success' || params['returnFromPayment'] === 'true') {
         console.log('✅ Detectado retorno de pago exitoso');
         this.handleSuccessfulPaymentReturn();
+        return; // Salir temprano para evitar conflictos
       }
       
       // Verificar si viene de pago fallido
@@ -141,6 +142,7 @@ export class ReservarComponent implements OnInit {
         this.currentStep = this.shouldSelectPaciente ? 6 : 5;
         this.paymentSuccess = false;
         this.notificationService.showWarning('El pago no se completó. Puedes intentar nuevamente o contactar con soporte.');
+        return;
       }
       
       // Verificar si viene de pago pendiente
@@ -149,14 +151,15 @@ export class ReservarComponent implements OnInit {
         this.currentStep = this.shouldSelectPaciente ? 6 : 5;
         this.paymentSuccess = false;
         this.notificationService.showInfo('Tu pago está pendiente de confirmación. Te notificaremos cuando se complete.');
+        return;
       }
       
-      // Verificar si se especifica un paso específico
-      if (params['step']) {
-        const step = parseInt(params['step']);
-        if (step >= 1 && step <= this.totalSteps) {
-          console.log(`📍 Navegando al paso ${step}`);
-          this.currentStep = step;
+      // Verificar si hay un paso específico en los parámetros
+      if (params['step'] === '5') {
+        console.log('🎯 Detectado paso 5 en parámetros');
+        this.currentStep = this.shouldSelectPaciente ? 6 : 5;
+        if (params['payment'] === 'success') {
+          this.paymentSuccess = true;
         }
       }
     });

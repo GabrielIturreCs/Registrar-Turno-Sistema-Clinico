@@ -14,6 +14,12 @@ export class PagoPendienteComponent implements OnInit {
   ngOnInit(): void {}
 
   volverAReservar() {
-    this.router.navigate(['/reservar']);
+    this.router.navigate(['/reservarTurno'], { 
+      queryParams: { 
+        payment: 'pending',
+        step: '5',
+        returnFromPayment: 'true'
+      } 
+    });
   }
 } 
