@@ -52,6 +52,7 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
   // Chatbot properties
   @ViewChild('chatMessages') chatMessages!: ElementRef;
   chatOpen = false;
+  showWelcomeBubble = false; // Nueva propiedad para la burbuja
   messages: ChatMessage[] = [];
   chatForm: FormGroup;
   isTyping = false;
@@ -84,7 +85,6 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
     // Suscribirse al servicio de refresh
     this.refreshSubscription = this.dataRefreshService.refresh$.subscribe((component) => {
       if (component === 'vistaPaciente' || component === 'all') {
-        console.log('Recibida notificación de refresh para vistaPaciente');
         this.refreshData();
       }
     });
@@ -94,7 +94,6 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         if (event.url === '/vistaPaciente') {
-          console.log('Navegando a vista paciente, recargando datos...');
           setTimeout(() => this.refreshData(), 100); // Pequeño delay para asegurar que el componente esté listo
         }
       });
@@ -103,10 +102,15 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
     if (typeof window !== 'undefined') {
       window.addEventListener('focus', () => {
         if (this.router.url === '/vistaPaciente') {
-          console.log('Ventana recibió foco, recargando datos...');
           this.refreshData();
         }
       });
+    }
+
+    // Inicializar chatbot y burbuja de bienvenida
+    if (this.user?.tipoUsuario === 'paciente') {
+      this.loadChatHistory();
+      this.showWelcomeBubbleAfterDelay();
     }
   }
 
@@ -120,18 +124,10 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
   }
 
   refreshData(): void {
-    console.log('Refrescando datos del paciente...');
     this.isLoading = true;
     this.loadPacienteData();
     // loadPacienteData ya llama a loadMisTurnos(), así que no lo duplicamos
     this.loadTratamientos();
-    
-    // Mostrar un mensaje temporal de actualización
-    setTimeout(() => {
-      if (!this.isLoading) {
-        console.log('Datos actualizados correctamente');
-      }
-    }, 1000);
   }
 
   loadUserData(): void {
@@ -139,7 +135,6 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
       const userData = localStorage.getItem('user');
       if (userData) {
         this.user = JSON.parse(userData);
-        console.log('Usuario paciente logueado:', this.user);
         
         // Verificar que sea realmente un paciente
         if (this.user?.tipoUsuario !== 'paciente') {
@@ -167,13 +162,10 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
     // Obtener todos los pacientes y buscar el que corresponde al usuario logueado
     this.pacienteService.getPacientes().subscribe({
       next: (pacientes) => {
-        console.log('Pacientes obtenidos:', pacientes);
-        
         // Buscar el paciente que tiene el userId igual al id del usuario logueado
         this.paciente = pacientes.find((p: any) => p.userId === this.user?.id?.toString()) || null;
         
         if (this.paciente) {
-          console.log('Paciente encontrado:', this.paciente);
           // Una vez que tenemos el paciente, cargar sus turnos y tratamientos
           this.loadMisTurnos();
           this.loadTratamientos();
@@ -188,7 +180,6 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
           ) || null;
           
           if (this.paciente) {
-            console.log('Paciente encontrado por nombre/apellido:', this.paciente);
             this.loadMisTurnos();
             this.loadTratamientos();
             this.loadChatHistory();
@@ -220,9 +211,6 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
     // Forzar recarga desde backend para obtener el estado actualizado
     this.turnoService.getTurnosFromAPI().subscribe({
       next: (turnos) => {
-        console.log('Todos los turnos obtenidos:', turnos.length);
-        console.log('Paciente actual ID:', this.paciente?.id || this.paciente?._id);
-        
         // Filtrar turnos usando el ID del paciente obtenido
         const pacienteId = this.paciente?.id?.toString() || this.paciente?._id?.toString();
         
@@ -231,7 +219,6 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
           if (pacienteId && turno.pacienteId) {
             const idMatch = turno.pacienteId.toString() === pacienteId;
             if (idMatch) {
-              console.log('Turno encontrado por pacienteId:', turno);
               return true;
             }
           }
@@ -242,7 +229,6 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
             const apellidoMatch = turno.apellido.toLowerCase().trim() === this.paciente.apellido.toLowerCase().trim();
             
             if (nombreMatch && apellidoMatch) {
-              console.log('Turno encontrado por nombre/apellido:', turno);
               return true;
             }
           }
@@ -250,14 +236,7 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
           return false;
         });
         
-        console.log(`Turnos filtrados para ${this.paciente?.nombre} ${this.paciente?.apellido}:`, this.misTurnos.length);
-        console.log('Mis turnos finales:', this.misTurnos);
-        
-        if (this.misTurnos.length > 0) {
-          console.log('Primer turno:', this.misTurnos[0]);
-          console.log('Campos disponibles:', Object.keys(this.misTurnos[0]));
-        } else {
-          console.log('No se encontraron turnos para este paciente');
+        if (this.misTurnos.length === 0) {
         }
         
         this.calculateStats();
@@ -348,35 +327,86 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Cargar historial del chat desde ChatService
+  // Cargar historial del chat desde ChatService con localStorage
   loadChatHistory(): void {
-    // Cambiar al usuario actual para cargar su historial específico
-    this.chatService.switchUser();
-    
     const history = this.chatService.getConversationHistory();
     if (history.length > 0) {
       // Convertir el historial del ChatService al formato del componente
       this.messages = history.map(msg => ({
         text: msg.content,
         isUser: msg.role === 'user',
-        timestamp: msg.timestamp
+        timestamp: msg.timestamp,
+        actions: msg.actions || []
       }));
       
       // Mostrar contexto de conversación si es una continuación
       if (this.chatService.isContinuingConversation()) {
         const summary = this.chatService.getConversationSummary();
-        console.log('Continuando conversación en vistaPaciente:', summary);
+        // Conversación continuada desde otra vista
       }
     }
   }
 
   // Chatbot methods
+  openChatFromBubble(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.showWelcomeBubble = false;
+    this.chatOpen = true;
+    if (this.messages.length === 0) {
+      this.addWelcomeMessage();
+    }
+    this.scrollToBottom();
+  }
+
+  closeWelcomeBubble(event: Event): void {
+    event.stopPropagation();
+    this.showWelcomeBubble = false;
+    // Guardar preferencia para no mostrar la burbuja nuevamente
+    localStorage.setItem('welcomeBubbleShown', 'true');
+  }
+
+  private showWelcomeBubbleAfterDelay(): void {
+    // Verificar si ya se mostró la burbuja anteriormente
+    const bubbleShown = localStorage.getItem('welcomeBubbleShown');
+    
+    if (!bubbleShown) {
+      setTimeout(() => {
+        this.showWelcomeBubble = true;
+        // Auto-ocultar después de 10 segundos
+        setTimeout(() => {
+          this.showWelcomeBubble = false;
+        }, 10000);
+      }, 2000); // Mostrar después de 2 segundos
+    }
+  }
+
   addWelcomeMessage(): void {
-    const nombrePaciente = this.paciente?.nombre || this.user?.nombre || 'Paciente';
     const welcomeMessage: ChatMessage = {
-      text: `¡Hola ${nombrePaciente}! ¿En qué puedo ayudarte hoy? Puedes preguntarme sobre turnos, tratamientos o horarios.`,
+      text: '🤖 **¡Perfecto! Estoy listo para ayudarte.**\n\n¿Qué necesitas hacer hoy?\n\n• 📅 **Gestionar mis turnos**\n• 💳 **Consultas sobre pagos**\n• 📞 **Contactar la clínica**\n• 🏥 **Información de servicios**\n\n💬 Escribe tu consulta o usa los botones de abajo:',
       isUser: false,
-      timestamp: new Date()
+      timestamp: new Date(),
+      actions: [
+        {
+          text: 'Ver Mis Turnos',
+          action: 'navigate:/misTurnos',
+          icon: 'calendar',
+          variant: 'primary'
+        },
+        {
+          text: 'Reservar Turno',
+          action: 'navigate:/reservarTurno',
+          icon: 'calendar-plus',
+          variant: 'success'
+        },
+        {
+          text: 'Contactar Clínica',
+          action: 'call:(011) 4567-8901',
+          icon: 'phone',
+          variant: 'info'
+        }
+      ]
     };
     this.messages.push(welcomeMessage);
   }
@@ -384,6 +414,10 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
   toggleChat(): void {
     this.chatOpen = !this.chatOpen;
     if (this.chatOpen) {
+      this.showWelcomeBubble = false; // Ocultar burbuja si se abre el chat
+      if (this.messages.length === 0) {
+        this.addWelcomeMessage();
+      }
       setTimeout(() => {
         this.scrollToBottom();
       }, 100);
@@ -447,11 +481,6 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
       
       // Sincronizar con ChatService
       this.syncWithChatService();
-      
-      // Log del contexto para debugging
-      if (isContinuing && lastTopic) {
-        console.log(`Continuando conversación en vistaPaciente sobre: ${lastTopic}`);
-      }
     }, 1000);
   }
 
@@ -469,6 +498,83 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
         actions: msg.actions || []
       }));
     }
+  }
+
+  // Método para formatear el texto del mensaje
+  formatMessageText(text: string): string {
+    return text
+      .replace(/\n/g, '<br>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`(.*?)`/g, '<code>$1</code>')
+      .replace(/###\s(.*?)(?=\n|$)/g, '<h4>$1</h4>')
+      .replace(/##\s(.*?)(?=\n|$)/g, '<h3>$1</h3>')
+      .replace(/#\s(.*?)(?=\n|$)/g, '<h2>$1</h2>');
+  }
+
+  // Método para manejar acciones de botones del chat
+  handleChatAction(action: ActionButton): void {
+    console.log('Acción ejecutada:', action);
+    const actionType = action.action.split(':')[0];
+    const actionValue = action.action.split(':').slice(1).join(':');
+
+    switch (actionType) {
+      case 'navigate':
+        // Navegar a una ruta específica
+        console.log('Navegando a:', actionValue);
+        this.router.navigate([actionValue]);
+        break;
+        
+      case 'call':
+        // Iniciar llamada telefónica
+        if (typeof window !== 'undefined') {
+          window.open(`tel:${actionValue}`, '_self');
+        }
+        break;
+        
+      case 'whatsapp':
+        // Abrir WhatsApp
+        if (typeof window !== 'undefined') {
+          const whatsappUrl = `https://wa.me/${actionValue.replace(/\D/g, '')}`;
+          window.open(whatsappUrl, '_blank');
+        }
+        break;
+        
+      case 'email':
+        // Abrir cliente de email
+        if (typeof window !== 'undefined') {
+          window.open(`mailto:${actionValue}`, '_self');
+        }
+        break;
+        
+      case 'map':
+        // Abrir mapa con la dirección
+        if (typeof window !== 'undefined') {
+          const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(actionValue)}`;
+          window.open(mapUrl, '_blank');
+        }
+        break;
+        
+      case 'show-schedule':
+        // Mostrar horarios (agregar lógica específica)
+        this.showScheduleInfo();
+        break;
+        
+      default:
+        console.warn('Acción no reconocida:', action.action);
+    }
+  }
+
+  // Método auxiliar para mostrar información de horarios
+  private showScheduleInfo(): void {
+    const scheduleMessage: ChatMessage = {
+      text: `📅 **Horarios de atención:**\n\n• Lunes a Viernes: 8:00 - 20:00\n• Sábados: 8:00 - 14:00\n• Domingos: Cerrado\n\n📞 Emergencias 24/7: (011) 4567-8901`,
+      isUser: false,
+      timestamp: new Date()
+    };
+    
+    this.messages.push(scheduleMessage);
+    this.scrollToBottom();
   }
 
 

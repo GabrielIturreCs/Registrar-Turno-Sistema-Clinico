@@ -720,6 +720,7 @@
   bottom: 20px;
   right: 20px;
   z-index: 1000;
+  position: relative; /* Importante para posicionar la burbuja */
 }
 
 .chat-toggle-btn {
@@ -1629,4 +1630,183 @@ h6 {
   .chat-messages {
     max-height: calc(100vh - 180px);
   }
+}
+
+/* ======================
+   BURBUJA DE BIENVENIDA
+   ====================== */
+/* Welcome Bubble - Burbuja de bienvenida que sale del ícono hacia la izquierda */
+.welcome-bubble {
+  position: absolute;
+  bottom: 80px; /* Aparece arriba del botón */
+  right: 60px; /* Posicionada a la izquierda del botón (ajustado para vistaPaciente) */
+  width: 320px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 2px solid #e9ecef;
+  opacity: 0;
+  transform: translateY(20px) scale(0.8);
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 999;
+  cursor: pointer;
+}
+
+.welcome-bubble.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+  animation: bubbleEntrance 0.6s ease-out;
+}
+
+@keyframes bubbleEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.7);
+  }
+  60% {
+    transform: translateY(-5px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.bubble-content {
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+}
+
+.bubble-avatar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+}
+
+.bubble-avatar-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bubble-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.bubble-message {
+  font-size: 14px;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.bubble-submessage {
+  font-size: 12px;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+.bubble-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.bubble-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #495057;
+}
+
+.bubble-pointer {
+  position: absolute;
+  bottom: -8px;
+  right: 30px; /* Posición ajustada para apuntar al botón desde la izquierda */
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border-right: 2px solid #e9ecef;
+  border-bottom: 2px solid #e9ecef;
+  transform: rotate(45deg);
+}
+
+/* Hover effect para la burbuja */
+.welcome-bubble:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive para la burbuja */
+@media (max-width: 768px) {
+  .welcome-bubble {
+    width: 280px;
+    right: 40px; /* Ajustado para centrar en móviles */
+    bottom: 65px;
+  }
+  
+  .bubble-content {
+    padding: 14px;
+  }
+  
+  .bubble-message {
+    font-size: 13px;
+  }
+  
+  .bubble-submessage {
+    font-size: 11px;
+  }
+  
+  .bubble-pointer {
+    right: 25px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-bubble {
+    width: 260px;
+    right: 30px; /* Más centrada en móviles pequeños */
+  }
+  
+  .bubble-pointer {
+    right: 20px;
+  }
+}
+
+/* Animación de pulso para llamar la atención */
+@keyframes bubblePulse {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(0, 123, 255, 0.25);
+  }
+}
+
+.welcome-bubble.show {
+  animation: bubbleEntrance 0.6s ease-out, bubblePulse 3s ease-in-out infinite 2s;
 }
