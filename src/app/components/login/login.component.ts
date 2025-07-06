@@ -120,19 +120,37 @@ export class LoginComponent implements OnInit {
 
   // Método para login con Google
   loginWithGoogle() {
-    console.log('🔍 Iniciando login con Google...');
     
-    // Verificar si estamos en un navegador
-    if (typeof window !== 'undefined') {
-      // Obtener URL de autorización de Google del backend
-      const backendUrl = 'https://backend-develop-nu3j.onrender.com';
-      
-      // Redirigir directamente a Google OAuth
-      window.location.href = `${backendUrl}/api/google-auth/auth-url`;
-    } else {
-      console.error('Google Auth no disponible en este entorno');
-      this.notificationService.showError('Google Auth no disponible en este entorno');
-    }
+    const clientId = '289556059590-492hb4ibk081c42f3ldkjk62ohbmoppm.apps.googleusercontent.com';
+    // @ts-ignore
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: (response: any) => {
+        if (response.credential) {
+          this.authService.googleLogin(response.credential).subscribe(
+            (res) => {
+              if (res.success) {
+                localStorage.setItem('token', res.token);
+                localStorage.setItem('rol', res.user.tipoUsuario);
+                localStorage.setItem('user', JSON.stringify(res.user));
+                this.authService.setCurrentUser(res.user);
+                this.notificationService.showSuccess(`¡Bienvenido ${res.user.nombre || res.user.nombreUsuario || 'Usuario'}!`);
+                this.redirectByUserType(res.user.tipoUsuario);
+              } else {
+                this.notificationService.showError(res.message || 'Error al iniciar sesión con Google.');
+              }
+            },
+            (error) => {
+              this.notificationService.showError('Error de conexión con el servidor al intentar Google Login.');
+            }
+          );
+        } else {
+          this.notificationService.showError('No se recibió credencial de Google.');
+        }
+      }
+    });
+    // @ts-ignore
+    google.accounts.id.prompt();
   }
 
   navigateToRegister(): void {

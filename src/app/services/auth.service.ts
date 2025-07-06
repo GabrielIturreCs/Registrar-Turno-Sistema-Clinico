@@ -101,6 +101,17 @@ export class AuthService {
      return this._http.post(this.hostBase + 'login', body, httpOption); 
   }
 
+  public googleLogin(credential: string): Observable<any> {
+    const httpOption = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    const body = JSON.stringify({ token: credential });
+    
+    return this._http.post(environment.apiUrl + '/google-auth/verify-token', body, httpOption);
+  }
+
  /* register(userData: any): Promise<boolean> {
     return new Promise((resolve) => {
       setTimeout(() => {
