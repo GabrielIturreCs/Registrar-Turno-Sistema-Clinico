@@ -114,24 +114,24 @@ export class TurnosComponent implements OnInit {
   // Chatbot methods
   addWelcomeMessage(): void {
     const welcomeMessage: ChatMessage = {
-      text: '🤖 **¡Perfecto! Estoy listo para ayudarte.**\n\n¿Qué necesitas hacer hoy?\n\n• 📅 **Gestionar mis turnos**\n• 💳 **Consultas sobre pagos**\n• 📞 **Contactar la clínica**\n• 🏥 **Información de servicios**\n\n💬 Escribe tu consulta o usa los botones de abajo:',
+      text: '👋 **¡Hola! Soy tu asistente virtual inteligente.**\n\n🎯 **Estoy aquí para ayudarte con:**\n\n• 📅 **Gestionar tus turnos** (cancelar, reprogramar, ver historial)\n• 💳 **Consultas sobre pagos** y facturación\n• 📞 **Contactar la clínica** por WhatsApp o teléfono\n• 🏥 **Información de tratamientos** y servicios\n• 📋 **Actualizar tus datos** personales\n\n💬 **Puedes escribir consultas como:**\n• "Quiero cancelar un turno"\n• "¿Cuánto cuesta una limpieza?"\n• "Necesito reprogramar mi cita"\n\n**¿En qué puedo ayudarte hoy?**',
       isUser: false,
       timestamp: new Date(),
       actions: [
         {
-          text: 'Ver Mis Turnos',
+          text: '📅 Ver Mis Turnos',
           action: 'navigate:/misTurnos',
-          icon: 'calendar',
+          icon: 'calendar-check',
           variant: 'primary'
         },
         {
-          text: 'Reservar Turno',
+          text: '➕ Reservar Turno',
           action: 'navigate:/reservarTurno',
           icon: 'calendar-plus',
           variant: 'success'
         },
         {
-          text: 'Contactar Clínica',
+          text: '📞 Contactar Clínica',
           action: 'call:(011) 4567-8901',
           icon: 'phone',
           variant: 'info'
@@ -572,13 +572,33 @@ export class TurnosComponent implements OnInit {
       case 'navigate':
         // Navegar a una ruta específica
         console.log('Navegando a:', actionValue);
-        this.router.navigate([actionValue]);
+        
+        // Manejar navegación específica para "Mis Turnos"
+        if (actionValue === '/misTurnos') {
+          this.navigateTo('mis-turnos');
+          // Cerrar el chat después de navegar para mejor UX
+          this.chatOpen = false;
+          // Agregar mensaje de confirmación
+          this.addConfirmationMessage('🎯 **Perfecto!** Te he llevado a tu sección de turnos. Aquí puedes ver todos tus turnos y cancelar cualquiera que necesites.');
+        } else if (actionValue === '/reservarTurno') {
+          this.navigateTo('registrar-turno');
+          this.chatOpen = false;
+          this.addConfirmationMessage('📅 **¡Excelente!** Ahora puedes reservar tu nuevo turno. Completa el formulario y confirma tu cita.');
+        } else if (actionValue === '/vistaPaciente') {
+          this.router.navigate(['/vistaPaciente']);
+          this.chatOpen = false;
+        } else {
+          // Navegación general
+          this.router.navigate([actionValue]);
+          this.chatOpen = false;
+        }
         break;
         
       case 'call':
         // Iniciar llamada telefónica
         if (typeof window !== 'undefined') {
           window.open(`tel:${actionValue}`, '_self');
+          this.addConfirmationMessage(`📞 **Llamada iniciada** al ${actionValue}. Si no se abre automáticamente, puedes marcar este número desde tu teléfono.`);
         }
         break;
         
@@ -587,6 +607,7 @@ export class TurnosComponent implements OnInit {
         if (typeof window !== 'undefined') {
           const whatsappUrl = `https://wa.me/${actionValue.replace(/\D/g, '')}`;
           window.open(whatsappUrl, '_blank');
+          this.addConfirmationMessage(`💬 **WhatsApp abierto** para contactar al ${actionValue}. Puedes escribir tu consulta directamente.`);
         }
         break;
         
@@ -594,6 +615,7 @@ export class TurnosComponent implements OnInit {
         // Abrir cliente de email
         if (typeof window !== 'undefined') {
           window.open(`mailto:${actionValue}`, '_self');
+          this.addConfirmationMessage(`📧 **Email abierto** para contactar a ${actionValue}. Describe tu consulta en el mensaje.`);
         }
         break;
         
@@ -602,6 +624,7 @@ export class TurnosComponent implements OnInit {
         if (typeof window !== 'undefined') {
           const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(actionValue)}`;
           window.open(mapUrl, '_blank');
+          this.addConfirmationMessage(`🗺️ **Mapa abierto** con la ubicación de la clínica. Puedes ver las indicaciones para llegar.`);
         }
         break;
         
@@ -613,6 +636,18 @@ export class TurnosComponent implements OnInit {
       default:
         console.warn('Acción no reconocida:', action.action);
     }
+  }
+
+  // Método auxiliar para agregar mensajes de confirmación
+  private addConfirmationMessage(text: string): void {
+    setTimeout(() => {
+      this.messages.push({
+        text: text,
+        isUser: false,
+        timestamp: new Date()
+      });
+      this.scrollToBottom();
+    }, 500);
   }
 
   // Método auxiliar para mostrar información de horarios

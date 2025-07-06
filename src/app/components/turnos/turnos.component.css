@@ -71,19 +71,43 @@
 /* Chat Header */
 .chat-header {
   background: linear-gradient(135deg, #007bff, #0056b3);
-  color: white;
+  color: white !important;
   padding: 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-radius: 15px 15px 0 0;
 }
 
 .chat-header .fw-bold {
-  color: white !important; /* Asegurar que el título sea blanco */
+  color: white !important;
+  font-weight: bold !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  font-size: 1rem;
 }
 
 .chat-header .text-muted {
-  color: rgba(255, 255, 255, 0.8) !important; /* Estado "En línea" en blanco semi-transparente */
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-size: 0.8rem !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+.chat-header .ms-2 .fw-bold {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  font-weight: 600 !important;
+}
+
+.chat-header .ms-2 .text-muted {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  font-size: 0.75rem !important;
+}
+
+.chat-header .ms-2 .small {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  font-size: 0.75rem !important;
 }
 
 .chat-avatar {

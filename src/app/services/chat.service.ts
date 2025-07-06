@@ -248,7 +248,7 @@ export class ChatService {
     // Detectar tema de conversación
     let currentTopic = '';
     
-    // NAVEGACIÓN Y ACCIONES DEL SISTEMA
+    // NAVEGACIÓN Y ACCIONES DEL SISTEMA - CANCELAR TURNO
     if (message.includes('cancelar turno') || message.includes('cancelar mi turno') || message.includes('cancelar cita') ||
         message.includes('anular turno') || message.includes('eliminar turno') || message.includes('no puedo ir') ||
         message.includes('no podré asistir') || message.includes('tengo que cancelar')) {
@@ -259,13 +259,13 @@ export class ChatService {
       if (step === 1) {
         const actions: ActionButton[] = [
           {
-            text: 'Ver Mis Turnos',
+            text: '🗓️ Ir a Mis Turnos',
             action: 'navigate:/misTurnos',
-            icon: 'calendar',
+            icon: 'calendar-check',
             variant: 'primary'
           },
           {
-            text: 'Llamar a la Clínica',
+            text: '📞 Llamar a la Clínica',
             action: 'call:' + this.clinicContext.phone,
             icon: 'phone',
             variant: 'secondary'
@@ -273,21 +273,27 @@ export class ChatService {
         ];
         
         return {
-          content: `❌ **Cancelar turno**\n\n**Pasos para cancelar tu turno:**\n1. Haz clic en "Ver Mis Turnos" aquí abajo\n2. Busca el turno que deseas cancelar\n3. Haz clic en el botón rojo con ❌\n4. Confirma la cancelación\n\n**Política de cancelación:**\n- Cancela hasta 24 horas antes\n- Reembolso automático si pagaste\n- Sin penalización por cancelación\n\n¿Necesitas ayuda para encontrar tu turno?`,
+          content: `❌ **¿Necesitas cancelar un turno?**\n\n**Te ayudo paso a paso:**\n\n**✅ Método más rápido:**\n1. Haz clic en "🗓️ Ir a Mis Turnos" aquí abajo\n2. Encuentra tu turno programado\n3. Presiona el botón rojo "❌ Cancelar"\n4. Confirma la cancelación\n\n**📋 Política de cancelación:**\n- ⏰ Cancela hasta 24 horas antes\n- 💰 Reembolso automático si pagaste\n- 🆓 Sin penalización por cancelación\n- 📧 Confirmación por email\n\n**¿Deseas cancelar un turno específico?** Haz clic en el botón de arriba para acceder a tus turnos directamente.`,
           actions
         };
       } else if (step === 2) {
         const actions: ActionButton[] = [
           {
-            text: 'Ir a Mis Turnos',
+            text: '🗓️ Acceder a Mis Turnos',
             action: 'navigate:/misTurnos',
-            icon: 'calendar',
+            icon: 'calendar-check',
             variant: 'success'
+          },
+          {
+            text: '📞 Asistencia Telefónica',
+            action: 'call:' + this.clinicContext.phone,
+            icon: 'phone',
+            variant: 'info'
           }
         ];
         
         return {
-          content: `Para cancelar tu turno específico:\n\n**Si ya encontraste tu turno:**\n- Haz clic en el botón rojo ❌\n- Confirma la cancelación\n- Recibirás confirmación por email\n\n**Si no puedes encontrarlo:**\n- Verifica la fecha del turno\n- Actualiza la página\n- Contacta al ${this.clinicContext.phone}\n\n**Después de cancelar:**\n- Reembolso procesado en 24-48 horas\n- Turno disponible para otros pacientes\n- Puedes reservar uno nuevo cuando quieras`,
+          content: `**🔧 Ayuda adicional para cancelar:**\n\n**Si ya encontraste tu turno:**\n- ✅ Haz clic en el botón rojo ❌\n- ✅ Confirma la cancelación\n- ✅ Recibirás confirmación por email\n\n**Si tienes dificultades:**\n- 🔍 Verifica la fecha del turno\n- 🔄 Actualiza la página\n- 📞 Contacta al ${this.clinicContext.phone}\n\n**Después de cancelar:**\n- 💳 Reembolso procesado en 24-48 horas\n- 🆓 Turno disponible para otros pacientes\n- 📅 Puedes reservar uno nuevo cuando quieras\n\n**¿Necesitas que te guíe directamente?** Usa el botón de arriba.`,
           actions
         };
       }
@@ -304,21 +310,21 @@ export class ChatService {
       if (step === 1) {
         const actions: ActionButton[] = [
           {
-            text: 'Ver Mis Turnos',
+            text: '📅 Ver Mis Turnos',
             action: 'navigate:/misTurnos',
-            icon: 'calendar',
+            icon: 'calendar-week',
             variant: 'primary'
           },
           {
-            text: 'Reservar Nuevo Turno',
+            text: '➕ Reservar Nuevo Turno',
             action: 'navigate:/reservarTurno',
-            icon: 'plus',
+            icon: 'plus-circle',
             variant: 'success'
           }
         ];
         
         return {
-          content: `🔄 **Reprogramar turno**\n\n**Cómo reprogramar tu turno:**\n1. Haz clic en "Ver Mis Turnos" aquí abajo\n2. Encuentra tu turno actual\n3. Haz clic en "Reprogramar" (icono de calendario)\n4. Selecciona nueva fecha y hora\n5. Confirma el cambio\n\n**Importante:**\n- Reprograma hasta 24 horas antes\n- Sujeto a disponibilidad\n- Sin costo adicional\n- Mantiene el mismo tratamiento\n\n¿Qué fecha te gustaría cambiar?`,
+          content: `🔄 **¿Necesitas reprogramar tu turno?**\n\n**📋 Proceso paso a paso:**\n\n**✅ Método recomendado:**\n1. Haz clic en "📅 Ver Mis Turnos" aquí abajo\n2. Encuentra tu turno actual\n3. Presiona "🔄 Reprogramar" (icono de calendario)\n4. Selecciona nueva fecha y hora disponible\n5. Confirma el cambio\n\n**📌 Información importante:**\n- ⏰ Reprograma hasta 24 horas antes\n- 🆓 Sin costo adicional\n- 📋 Mantiene el mismo tratamiento\n- 🎯 Sujeto a disponibilidad\n- 📧 Confirmación por email\n\n**¿Para qué fecha te gustaría cambiar tu turno?**`,
           actions
         };
       }
@@ -335,13 +341,13 @@ export class ChatService {
       if (step === 1) {
         const actions: ActionButton[] = [
           {
-            text: 'Reservar Turno Ahora',
+            text: '📅 Reservar Turno Ahora',
             action: 'navigate:/reservarTurno',
             icon: 'calendar-plus',
             variant: 'success'
           },
           {
-            text: 'Ver Horarios',
+            text: '🕐 Ver Horarios',
             action: 'show-schedule',
             icon: 'clock',
             variant: 'info'
@@ -349,7 +355,7 @@ export class ChatService {
         ];
         
         return {
-          content: `📅 **Reservar nuevo turno**\n\n**Proceso simple y rápido:**\n1. Haz clic en "Reservar Turno Ahora"\n2. Selecciona fecha en el calendario\n3. Elige horario disponible\n4. Confirma tratamiento\n5. Realiza el pago\n\n**Disponibilidad:**\n- Lunes a Viernes: 8:00 - 20:00\n- Sábados: 8:00 - 14:00\n- Turnos cada 30 minutos\n\n¿Qué tratamiento necesitas?`,
+          content: `📅 **¿Quieres reservar un nuevo turno?**\n\n**🚀 Proceso rápido y sencillo:**\n\n**✅ Pasos a seguir:**\n1. Haz clic en "📅 Reservar Turno Ahora"\n2. Selecciona la fecha en el calendario\n3. Elige el horario disponible\n4. Confirma el tipo de tratamiento\n5. Realiza el pago seguro\n\n**📋 Horarios disponibles:**\n- 📅 Lunes a Viernes: 8:00 - 20:00\n- 📅 Sábados: 8:00 - 14:00\n- ⏰ Turnos cada 30 minutos\n- 🎯 Disponibilidad en tiempo real\n\n**¿Qué tipo de tratamiento necesitas?** ¡Comencemos tu reserva!`,
           actions
         };
       }
@@ -363,13 +369,13 @@ export class ChatService {
       
       const actions: ActionButton[] = [
         {
-          text: 'Ver Mis Turnos',
+          text: '📋 Ver Mis Turnos',
           action: 'navigate:/misTurnos',
-          icon: 'list',
+          icon: 'list-ul',
           variant: 'primary'
         },
         {
-          text: 'Panel Principal',
+          text: '🏠 Panel Principal',
           action: 'navigate:/vistaPaciente',
           icon: 'home',
           variant: 'secondary'
@@ -377,7 +383,7 @@ export class ChatService {
       ];
       
       return {
-        content: `📋 **Historial de turnos**\n\n**En tu historial puedes ver:**\n- Turnos realizados y pendientes\n- Turnos cancelados\n- Tratamientos recibidos\n- Pagos realizados\n- Fechas y horarios\n- Dentista que te atendió\n\n**Funciones disponibles:**\n- Ver detalles completos\n- Descargar comprobantes\n- Solicitar certificados\n- Revisar tratamientos\n\n¿Buscas algo específico en tu historial?`,
+        content: `📋 **¿Quieres revisar tu historial de turnos?**\n\n**📊 En tu historial encontrarás:**\n- 📅 Turnos realizados y pendientes\n- ❌ Turnos cancelados\n- 🦷 Tratamientos recibidos\n- 💰 Pagos realizados\n- 🕐 Fechas y horarios completos\n- 👨‍⚕️ Profesional que te atendió\n\n**🔧 Funciones disponibles:**\n- 👀 Ver detalles completos\n- 📄 Descargar comprobantes\n- 🏆 Solicitar certificados\n- 📋 Revisar tratamientos\n- 📊 Estadísticas personales\n\n**¿Buscas algo específico en tu historial?** Haz clic en el botón para acceder.`,
         actions
       };
     }
