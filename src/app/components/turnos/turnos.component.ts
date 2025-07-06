@@ -164,14 +164,21 @@ export class TurnosComponent implements OnInit {
   private showWelcomeBubbleAfterDelay(): void {
     // Verificar si ya se mostró la burbuja anteriormente
     const bubbleShown = localStorage.getItem('welcomeBubbleShown');
+    console.log('Burbuja de bienvenida - bubbleShown:', bubbleShown);
+    
     if (!bubbleShown) {
+      console.log('Mostrando burbuja de bienvenida...');
       setTimeout(() => {
         this.showWelcomeBubble = true;
+        console.log('Burbuja visible:', this.showWelcomeBubble);
         // Auto-ocultar después de 10 segundos
         setTimeout(() => {
           this.showWelcomeBubble = false;
+          console.log('Burbuja auto-ocultada');
         }, 10000);
       }, 2000); // Mostrar después de 2 segundos
+    } else {
+      console.log('Burbuja ya fue mostrada anteriormente');
     }
   }
 
@@ -630,5 +637,13 @@ export class TurnosComponent implements OnInit {
       .replace(/###\s(.*?)(?=\n|$)/g, '<h4>$1</h4>')
       .replace(/##\s(.*?)(?=\n|$)/g, '<h3>$1</h3>')
       .replace(/#\s(.*?)(?=\n|$)/g, '<h2>$1</h2>');
+  }
+
+  // Método para resetear la burbuja de bienvenida (solo para pruebas)
+  resetWelcomeBubble(): void {
+    localStorage.removeItem('welcomeBubbleShown');
+    this.showWelcomeBubble = false;
+    console.log('Burbuja de bienvenida reseteada');
+    this.showWelcomeBubbleAfterDelay();
   }
 }

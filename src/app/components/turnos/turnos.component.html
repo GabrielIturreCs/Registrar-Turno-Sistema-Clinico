@@ -1,3 +1,9 @@
+<!-- DEBUG: Botón temporal para resetear burbuja (eliminar en producción) -->
+<button class="btn btn-outline-secondary btn-sm" (click)="resetWelcomeBubble()" 
+        style="position: fixed; top: 10px; right: 10px; z-index: 10000;">
+  Reset Bubble
+</button>
+
 <!-- Contenedor centrado para la gestión de turnos -->
 <div class="d-flex justify-content-center align-items-center min-vh-100">
   <div class="w-100" style="max-width: 950px;">
@@ -252,14 +258,14 @@
     <div class="chatbot-widget">
       <!-- Floating Button -->
       <div class="chat-toggle-btn" (click)="toggleChat()" [class.open]="chatOpen">
-        <img src="/assets/images/logo.png" alt="Chat" class="chat-toggle-img" *ngIf="!chatOpen">
+        <img src="assets/images/logo.png" alt="Chat" class="chat-toggle-img" *ngIf="!chatOpen">
         <i class="fas fa-times" *ngIf="chatOpen"></i>
         
         <!-- Burbuja de presentación amigable que sale del ícono -->
         <div class="welcome-bubble" [class.show]="showWelcomeBubble && !chatOpen" (click)="openChatFromBubble($event)">
           <div class="bubble-content">
             <div class="bubble-avatar">
-              <img src="/assets/images/logo.png" alt="Asistente" class="bubble-avatar-img">
+              <img src="assets/images/logo.png" alt="Asistente" class="bubble-avatar-img">
             </div>
             <div class="bubble-text">
               <div class="bubble-message">
