@@ -78,6 +78,14 @@
   align-items: center;
 }
 
+.chat-header .fw-bold {
+  color: white !important; /* Asegurar que el título sea blanco */
+}
+
+.chat-header .text-muted {
+  color: rgba(255, 255, 255, 0.8) !important; /* Estado "En línea" en blanco semi-transparente */
+}
+
 .chat-avatar {
   width: 40px;
   height: 40px;
@@ -100,17 +108,27 @@
 }
 
 .btn-close-chat {
-  background: none;
-  border: none;
-  color: white;
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #dc3545;
+  font-size: 1.2rem;
   cursor: pointer;
-  padding: 5px;
-  border-radius: 50%;
-  transition: background 0.3s ease;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  margin-left: auto;
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-close-chat:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: #dc3545;
+  color: white;
+  border-color: #dc3545;
+  transform: scale(1.05);
 }
 
 /* Chat Body */
@@ -1201,11 +1219,11 @@
   position: relative; /* Importante para posicionar la burbuja */
 }
 
-/* Welcome Bubble - Burbuja de bienvenida que sale del ícono */
+/* Welcome Bubble - Burbuja de bienvenida que sale del ícono (posicionamiento igual a vistaPaciente) */
 .welcome-bubble {
-  position: absolute;
-  bottom: 80px; /* Aparece arriba del botón */
-  right: -150px; /* Ajustado para mejor posición */
+  position: fixed;
+  bottom: 100px; /* Justo arriba del ícono */
+  right: 20px; /* Alineada con el ícono */
   width: 320px;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 20px;
@@ -1312,7 +1330,7 @@
 .bubble-pointer {
   position: absolute;
   bottom: -8px;
-  left: 160px; /* Posición exacta para apuntar al centro del botón */
+  right: 30px; /* Centrado con respecto al ícono (igual que vistaPaciente) */
   width: 16px;
   height: 16px;
   background: #ffffff;
@@ -1331,8 +1349,8 @@
 @media (max-width: 768px) {
   .welcome-bubble {
     width: 280px;
-    right: -110px; /* Ajustado para centrar en móviles */
-    bottom: 65px;
+    right: 10px; /* Ajustado para centrar en móviles (igual que vistaPaciente) */
+    bottom: 90px;
   }
   
   .bubble-content {
@@ -1346,12 +1364,21 @@
   .bubble-submessage {
     font-size: 11px;
   }
+  
+  .bubble-pointer {
+    right: 25px; /* Centrado para móviles */
+  }
 }
 
 @media (max-width: 480px) {
   .welcome-bubble {
     width: 260px;
-    right: -100px; /* Más centrada en móviles pequeños */
+    right: 5px; /* Más centrada en móviles pequeños (igual que vistaPaciente) */
+    bottom: 85px;
+  }
+  
+  .bubble-pointer {
+    right: 20px; /* Centrado para móviles pequeños */
   }
 }
 

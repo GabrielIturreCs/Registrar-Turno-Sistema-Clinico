@@ -777,6 +777,14 @@
   align-items: center;
 }
 
+.chat-header .fw-bold {
+  color: white !important; /* Asegurar que el título sea blanco */
+}
+
+.chat-header .text-muted {
+  color: rgba(255, 255, 255, 0.8) !important; /* Estado "En línea" en blanco semi-transparente */
+}
+
 .chat-avatar {
   width: 40px;
   height: 40px;
@@ -797,19 +805,27 @@
 }
 
 .btn-close-chat {
-  background: none;
-  border: none;
-  color: white;
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #dc3545;
   font-size: 1.2rem;
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 4px;
+  padding: 0.5rem;
+  border-radius: 6px;
   transition: var(--transition);
   margin-left: auto;
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-close-chat:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: #dc3545;
+  color: white;
+  border-color: #dc3545;
+  transform: scale(1.05);
 }
 
 .chat-body {
