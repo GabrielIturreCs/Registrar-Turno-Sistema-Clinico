@@ -51,23 +51,50 @@ export class ChatService {
   };
 
   constructor() {
+    // Cargar historial del usuario actual al inicializar
     this.loadFromLocalStorage();
   }
 
   // --- LOCALSTORAGE METHODS ---
-  private saveToLocalStorage(): void {
+  private getStorageKey(userId: string): string {
+    return `chatbot_${userId}`;
+  }
+
+  private getContextKey(userId: string): string {
+    return `chatbot_context_${userId}`;
+  }
+
+  private saveToLocalStorage(userId?: string): void {
     try {
-      localStorage.setItem('chatbot_history', JSON.stringify(this.conversationHistory));
-      localStorage.setItem('chatbot_context', JSON.stringify(this.userContext));
+      const currentUserId = userId || this.getCurrentUserId();
+      if (!currentUserId) {
+        console.warn('No user ID available for saving chat');
+        return;
+      }
+
+      const storageKey = this.getStorageKey(currentUserId);
+      const contextKey = this.getContextKey(currentUserId);
+      
+      localStorage.setItem(storageKey, JSON.stringify(this.conversationHistory));
+      localStorage.setItem(contextKey, JSON.stringify(this.userContext));
     } catch (error) {
       console.warn('Error saving to localStorage:', error);
     }
   }
 
-  private loadFromLocalStorage(): void {
+  private loadFromLocalStorage(userId?: string): void {
     try {
-      const savedHistory = localStorage.getItem('chatbot_history');
-      const savedContext = localStorage.getItem('chatbot_context');
+      const currentUserId = userId || this.getCurrentUserId();
+      if (!currentUserId) {
+        console.warn('No user ID available for loading chat');
+        return;
+      }
+
+      const storageKey = this.getStorageKey(currentUserId);
+      const contextKey = this.getContextKey(currentUserId);
+      
+      const savedHistory = localStorage.getItem(storageKey);
+      const savedContext = localStorage.getItem(contextKey);
       
       if (savedHistory) {
         this.conversationHistory = JSON.parse(savedHistory);
@@ -86,6 +113,19 @@ export class ChatService {
       console.warn('Error loading from localStorage:', error);
       this.clearHistory();
     }
+  }
+
+  private getCurrentUserId(): string | null {
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        return user.id || user._id || null;
+      }
+    } catch (error) {
+      console.warn('Error getting current user ID:', error);
+    }
+    return null;
   }
 
   // --- CONTEXT MANAGEMENT ---
@@ -814,6 +854,17 @@ export class ChatService {
     this.userContext.conversationStep = 0;
     this.userContext.lastTopic = '';
     this.saveToLocalStorage();
+  }
+
+  clearHistoryForUser(userId: string): void {
+    try {
+      const storageKey = this.getStorageKey(userId);
+      const contextKey = this.getContextKey(userId);
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem(contextKey);
+    } catch (error) {
+      console.warn('Error clearing history for user:', error);
+    }
   }
 
   // Método para reiniciar solo el contexto (mantener historial)
