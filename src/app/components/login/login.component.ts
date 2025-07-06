@@ -121,37 +121,59 @@ export class LoginComponent implements OnInit {
 
   // Método para login con Google
   loginWithGoogle() {
+    console.log('🔍 === INICIANDO GOOGLE LOGIN ===');
+    console.log('Frontend URL:', window.location.origin);
+    console.log('Backend URL:', environment.apiUrl);
+    console.log('Google Client ID:', environment.googleClientId);
     
     const clientId = environment.googleClientId;
-    // @ts-ignore
-    google.accounts.id.initialize({
-      client_id: clientId,
-      callback: (response: any) => {
-        if (response.credential) {
-          this.authService.googleLogin(response.credential).subscribe(
-            (res) => {
-              if (res.success) {
-                localStorage.setItem('token', res.token);
-                localStorage.setItem('rol', res.user.tipoUsuario);
-                localStorage.setItem('user', JSON.stringify(res.user));
-                this.authService.setCurrentUser(res.user);
-                this.notificationService.showSuccess(`¡Bienvenido ${res.user.nombre || res.user.nombreUsuario || 'Usuario'}!`);
-                this.redirectByUserType(res.user.tipoUsuario);
-              } else {
-                this.notificationService.showError(res.message || 'Error al iniciar sesión con Google.');
+    
+    try {
+      // @ts-ignore
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: (response: any) => {
+          console.log('🔍 Google response recibido:', response);
+          
+          if (response.credential) {
+            console.log('✅ Credencial recibida, enviando al backend...');
+            
+            this.authService.googleLogin(response.credential).subscribe(
+              (res) => {
+                console.log('✅ Respuesta del backend:', res);
+                
+                if (res.success) {
+                  localStorage.setItem('token', res.token);
+                  localStorage.setItem('rol', res.user.tipoUsuario);
+                  localStorage.setItem('user', JSON.stringify(res.user));
+                  this.authService.setCurrentUser(res.user);
+                  this.notificationService.showSuccess(`¡Bienvenido ${res.user.nombre || res.user.nombreUsuario || 'Usuario'}!`);
+                  this.redirectByUserType(res.user.tipoUsuario);
+                } else {
+                  console.error('❌ Error en respuesta del backend:', res);
+                  this.notificationService.showError(res.message || 'Error al iniciar sesión con Google.');
+                }
+              },
+              (error) => {
+                console.error('❌ Error de conexión con el servidor:', error);
+                this.notificationService.showError('Error de conexión con el servidor al intentar Google Login.');
               }
-            },
-            (error) => {
-              this.notificationService.showError('Error de conexión con el servidor al intentar Google Login.');
-            }
-          );
-        } else {
-          this.notificationService.showError('No se recibió credencial de Google.');
+            );
+          } else {
+            console.error('❌ No se recibió credencial de Google');
+            this.notificationService.showError('No se recibió credencial de Google.');
+          }
         }
-      }
-    });
-    // @ts-ignore
-    google.accounts.id.prompt();
+      });
+      
+      console.log('🔍 Iniciando prompt de Google...');
+      // @ts-ignore
+      google.accounts.id.prompt();
+      
+    } catch (error) {
+      console.error('❌ Error en loginWithGoogle:', error);
+      this.notificationService.showError('Error al iniciar sesión con Google: ' + (error as any).message);
+    }
   }
 
   navigateToRegister(): void {

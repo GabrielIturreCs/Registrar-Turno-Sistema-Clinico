@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LoginForm } from '../interfaces';
 import { environment } from '../environments/environment';
@@ -102,14 +103,35 @@ export class AuthService {
   }
 
   public googleLogin(credential: string): Observable<any> {
+    console.log('🔍 === AUTH SERVICE: GOOGLE LOGIN ===');
+    console.log('Credential recibido:', credential);
+    console.log('Backend URL:', environment.apiUrl);
+    
     const httpOption = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json'
-      })
+      }),
+      withCredentials: true // Habilitar cookies
     };
-    const body = JSON.stringify({ token: credential });
     
-    return this._http.post(environment.apiUrl + '/google-auth/verify-token', body, httpOption);
+    const body = JSON.stringify({ token: credential });
+    const url = environment.apiUrl + '/google-auth/verify-token';
+    
+    console.log('🌐 Enviando petición a:', url);
+    console.log('📦 Body:', body);
+    
+    return this._http.post(url, body, httpOption).pipe(
+      tap(response => {
+        console.log('✅ Respuesta exitosa del backend:', response);
+      }),
+      catchError(error => {
+        console.error('❌ Error en petición al backend:', error);
+        console.error('❌ Error status:', error.status);
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error details:', error.error);
+        return throwError(error);
+      })
+    );
   }
 
  /* register(userData: any): Promise<boolean> {
