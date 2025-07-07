@@ -636,4 +636,34 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
     this.misTurnos = [];
     this.refreshData();
   }
+
+       getUserGreeting(): string {
+      if (!this.user) return 'Usuario';
+      
+      // Para usuarios con perfil completo (Dentista, Paciente, Administrador)
+      if (this.user.nombre && this.user.apellido) {
+        return `${this.user.nombre} ${this.user.apellido}`;
+      } else if (this.user.nombre) {
+        return this.user.nombre;
+      }
+      
+      // Para usuarios de Google con displayName
+      /*if (this.user.displayName) {
+        return this.user.displayName;
+      }*/
+      
+      // Para usuarios con solo nombreUsuario
+      if (this.user.nombreUsuario) {
+        return this.user.nombreUsuario.charAt(0).toUpperCase() + 
+               this.user.nombreUsuario.slice(1);
+      }
+      
+      // Último fallback
+      switch (this.user.tipoUsuario) {
+        case 'dentista': return 'Dentista';
+        case 'administrador': return 'Administrador';
+        case 'paciente': return 'Paciente';
+        default: return 'Usuario';
+      }
+    }
 }
