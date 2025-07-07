@@ -15,7 +15,7 @@ import { TratamientoService } from '../../services/tratamiento.service';
 import { ChatService } from '../../services/chat.service';
 import { NotificationService } from '../../services/notification.service';
 import { ReviewService, Review } from '../../services/review.service';
-// import { ReservarComponent } from '../reservar/reservar.component';
+import { PdfExportService } from '../../services/pdf-export.service';
 
 interface AdminStats {
   totalUsuarios: number;
@@ -122,7 +122,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private tratamientoService: TratamientoService,
     private chatService: ChatService,
     private notificationService: NotificationService,
-    private reviewService: ReviewService
+    private reviewService: ReviewService,
+    private pdfExportService: PdfExportService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -855,14 +856,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   exportReviews(): void {
-    const data = this.reviewService.exportReviews();
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `reseñas_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    if (this.filteredReviews.length === 0) {
+      this.notificationService.showWarning('No hay reseñas para exportar');
+      return;
+    }
+
+    try {
+      // Usar el servicio de PDF para exportar las reseñas
+      this.pdfExportService.exportarResenasPDF(
+        this.filteredReviews,
+        this.reviewStats,
+        this.reviewFilter
+      ).then(() => {
+        this.notificationService.showSuccess('Reseñas exportadas exitosamente a PDF');
+      }).catch((error) => {
+        console.error('Error al exportar reseñas:', error);
+        this.notificationService.showError('Error al exportar las reseñas');
+      });
+    } catch (error) {
+      console.error('Error al exportar reseñas:', error);
+      this.notificationService.showError('Error al exportar las reseñas');
+    }
   }
 
   approveReview(id: string): void {
