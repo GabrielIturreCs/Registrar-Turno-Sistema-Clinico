@@ -278,7 +278,158 @@
           </div>
         </div>
       </div>
+    </div>
 
+    <!-- Gestión de Reseñas -->
+    <div class="row mb-4 g-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="bi bi-star-fill"></i> Gestión de Reseñas
+            </h5>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-primary btn-sm" (click)="refreshReviews()">
+                <i class="bi bi-arrow-clockwise"></i> Actualizar
+              </button>
+              <button class="btn btn-outline-success btn-sm" (click)="exportReviews()">
+                <i class="bi bi-download"></i> Exportar
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Estadísticas de reseñas -->
+            <div class="row mb-4">
+              <div class="col-md-2 col-6 mb-3">
+                <div class="text-center">
+                  <div class="h4 text-primary">{{ reviewStats.total }}</div>
+                  <small class="text-muted">Total</small>
+                </div>
+              </div>
+              <div class="col-md-2 col-6 mb-3">
+                <div class="text-center">
+                  <div class="h4 text-warning">{{ reviewStats.pendientes }}</div>
+                  <small class="text-muted">Pendientes</small>
+                </div>
+              </div>
+              <div class="col-md-2 col-6 mb-3">
+                <div class="text-center">
+                  <div class="h4 text-success">{{ reviewStats.aprobadas }}</div>
+                  <small class="text-muted">Aprobadas</small>
+                </div>
+              </div>
+              <div class="col-md-2 col-6 mb-3">
+                <div class="text-center">
+                  <div class="h4 text-danger">{{ reviewStats.rechazadas }}</div>
+                  <small class="text-muted">Rechazadas</small>
+                </div>
+              </div>
+              <div class="col-md-4 col-12 mb-3">
+                <div class="text-center">
+                  <div class="h4 text-info">{{ reviewStats.promedio }}/5</div>
+                  <small class="text-muted">Calificación Promedio</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <select class="form-select" [(ngModel)]="reviewFilter" (change)="filterReviews()">
+                  <option value="">Todas las reseñas</option>
+                  <option value="pendiente">Pendientes</option>
+                  <option value="aprobado">Aprobadas</option>
+                  <option value="rechazado">Rechazadas</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Buscar por nombre o email..." [(ngModel)]="reviewSearch" (input)="filterReviews()">
+              </div>
+            </div>
+
+            <!-- Lista de reseñas -->
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Calificación</th>
+                    <th>Comentario</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let review of filteredReviews">
+                    <td>{{ review.fecha | date:'dd/MM/yyyy' }}</td>
+                    <td>
+                      <div><strong>{{ review.nombre }}</strong></div>
+                      <small class="text-muted">{{ review.email }}</small>
+                    </td>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <span class="me-2">{{ review.rating }}/5</span>
+                        <div class="stars-display">
+                          <i *ngFor="let star of [1,2,3,4,5]" 
+                             class="bi star-display" 
+                             [class.bi-star-fill]="star <= review.rating"
+                             [class.bi-star]="star > review.rating">
+                          </i>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="review-comment">{{ review.comentario }}</div>
+                      <div *ngIf="review.respuesta" class="review-response mt-2">
+                        <small class="text-muted"><strong>Respuesta:</strong> {{ review.respuesta }}</small>
+                      </div>
+                    </td>
+                    <td>
+                      <span [class]="getReviewStatusClass(review.estado)" class="badge">
+                        {{ getReviewStatusText(review.estado) }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <button *ngIf="review.estado === 'pendiente'" 
+                                class="btn btn-success" 
+                                (click)="approveReview(review.id)"
+                                title="Aprobar">
+                          <i class="bi bi-check"></i>
+                        </button>
+                        <button *ngIf="review.estado === 'pendiente'" 
+                                class="btn btn-danger" 
+                                (click)="rejectReview(review.id)"
+                                title="Rechazar">
+                          <i class="bi bi-x"></i>
+                        </button>
+                        <button class="btn btn-outline-primary" 
+                                (click)="respondToReview(review)"
+                                title="Responder">
+                          <i class="bi bi-chat"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" 
+                                (click)="deleteReview(review.id)"
+                                title="Eliminar">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mensaje cuando no hay reseñas -->
+            <div *ngIf="filteredReviews.length === 0" class="text-center text-muted py-4">
+              <i class="bi bi-star fa-3x mb-3"></i>
+              <h6>No hay reseñas para mostrar</h6>
+              <p>Las reseñas enviadas por los clientes aparecerán aquí.</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

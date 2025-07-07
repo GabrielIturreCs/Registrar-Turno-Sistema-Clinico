@@ -157,11 +157,11 @@
 .section-title {
   font-size: 2.5rem;
   margin-bottom: 40px;
-  background: linear-gradient(90deg, #046d94 40%, #4fd1ff 100%);
+  background: linear-gradient(90deg, #dddddd 40%, #4fd1ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  color: #046d94; /* fallback */
+  color: #b4d8e5; /* fallback */
   text-align: center;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }

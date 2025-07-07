@@ -14,6 +14,7 @@ import { DentistaService } from '../../services/dentista.service';
 import { TratamientoService } from '../../services/tratamiento.service';
 import { ChatService } from '../../services/chat.service';
 import { NotificationService } from '../../services/notification.service';
+import { ReviewService, Review } from '../../services/review.service';
 // import { ReservarComponent } from '../reservar/reservar.component';
 
 interface AdminStats {
@@ -96,6 +97,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private alertaInterval?: Subscription;
   cargandoAlertas = false;
 
+  // Review properties
+  reviews: Review[] = [];
+  filteredReviews: Review[] = [];
+  reviewStats: any = {
+    total: 0,
+    promedio: 0,
+    pendientes: 0,
+    aprobadas: 0,
+    rechazadas: 0
+  };
+  reviewFilter: string = '';
+  reviewSearch: string = '';
+
   constructor(
     private router: Router, 
     private route: ActivatedRoute,
@@ -107,7 +121,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private dentistaService: DentistaService,
     private tratamientoService: TratamientoService,
     private chatService: ChatService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private reviewService: ReviewService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -133,12 +148,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.user?.tipoUsuario === 'administrador') {
       this.cargarRendimientoSistema();
       this.generarAlertasSistema();
+      this.loadReviews();
       this.alertaInterval = interval(600000).subscribe(() => { // cada 10 minutos
         this.generarAlertasSistema();
         this.loadDentistasActividad();
         this.loadPacientesActividad();
         this.loadTratamientosActividad();
         this.loadTurnosActividad();
+        this.loadReviews();
       });
     }
     this.actividadService.actividad$.subscribe(actividad => {
@@ -799,6 +816,107 @@ export class DashboardComponent implements OnInit, OnDestroy {
         return 'paciente';
       default:
         return 'usuario';
+    }
+  }
+
+  // Review methods
+  loadReviews(): void {
+    this.reviews = this.reviewService.getAllReviews();
+    this.reviewStats = this.reviewService.getReviewStats();
+    this.filterReviews();
+  }
+
+  filterReviews(): void {
+    let filtered = [...this.reviews];
+
+    // Filtrar por estado
+    if (this.reviewFilter) {
+      filtered = filtered.filter(review => review.estado === this.reviewFilter);
+    }
+
+    // Filtrar por búsqueda
+    if (this.reviewSearch) {
+      const search = this.reviewSearch.toLowerCase();
+      filtered = filtered.filter(review => 
+        review.nombre.toLowerCase().includes(search) ||
+        review.email.toLowerCase().includes(search) ||
+        review.comentario.toLowerCase().includes(search)
+      );
+    }
+
+    // Ordenar por fecha más reciente
+    filtered.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+    
+    this.filteredReviews = filtered;
+  }
+
+  refreshReviews(): void {
+    this.loadReviews();
+  }
+
+  exportReviews(): void {
+    const data = this.reviewService.exportReviews();
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reseñas_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  approveReview(id: string): void {
+    const updated = this.reviewService.updateReviewStatus(id, 'aprobado');
+    if (updated) {
+      this.loadReviews();
+      alert('Reseña aprobada exitosamente');
+    }
+  }
+
+  rejectReview(id: string): void {
+    const updated = this.reviewService.updateReviewStatus(id, 'rechazado');
+    if (updated) {
+      this.loadReviews();
+      alert('Reseña rechazada');
+    }
+  }
+
+  respondToReview(review: Review): void {
+    const respuesta = prompt('Escribe tu respuesta a esta reseña:');
+    if (respuesta && respuesta.trim()) {
+      const updated = this.reviewService.updateReviewStatus(review.id, review.estado, respuesta.trim());
+      if (updated) {
+        this.loadReviews();
+        alert('Respuesta enviada exitosamente');
+      }
+    }
+  }
+
+  deleteReview(id: string): void {
+    if (confirm('¿Estás seguro de que quieres eliminar esta reseña?')) {
+      const deleted = this.reviewService.deleteReview(id);
+      if (deleted) {
+        this.loadReviews();
+        alert('Reseña eliminada exitosamente');
+      }
+    }
+  }
+
+  getReviewStatusClass(estado: string): string {
+    switch (estado) {
+      case 'pendiente': return 'badge bg-warning';
+      case 'aprobado': return 'badge bg-success';
+      case 'rechazado': return 'badge bg-danger';
+      default: return 'badge bg-secondary';
+    }
+  }
+
+  getReviewStatusText(estado: string): string {
+    switch (estado) {
+      case 'pendiente': return 'Pendiente';
+      case 'aprobado': return 'Aprobado';
+      case 'rechazado': return 'Rechazado';
+      default: return 'Sin estado';
     }
   }
 }

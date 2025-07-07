@@ -86,21 +86,49 @@
       </div>
     </div>
 
-    <!-- Newsletter Section -->
-    <div class="row newsletter-section">
+    <!-- Reseñas Section -->
+    <div class="row reviews-section">
       <div class="col-12">
-        <div class="newsletter-container">
-          <div class="newsletter-content">
-            <h5><i class="bi bi-envelope-paper"></i> Suscríbete a nuestro Newsletter</h5>
-            <p>Recibe consejos de salud dental, promociones especiales y novedades de la clínica.</p>
+        <div class="reviews-container">
+          <div class="reviews-content">
+            <h5><i class="bi bi-star-fill"></i> Deja tu Reseña</h5>
+            <p>Comparte tu experiencia con nosotros y ayúdanos a mejorar nuestro servicio.</p>
           </div>
-          <div class="newsletter-form">
-            <div class="input-group">
-              <input type="email" class="form-control" placeholder="Tu email aquí..." aria-label="Email para newsletter">
-              <button class="btn btn-primary" type="button">
-                <i class="bi bi-send"></i> Suscribirse
-              </button>
-            </div>
+          <div class="reviews-form">
+            <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <input type="text" class="form-control" formControlName="nombre" placeholder="Tu nombre" aria-label="Nombre para reseña">
+                </div>
+                <div class="col-md-6">
+                  <input type="email" class="form-control" formControlName="email" placeholder="Tu email" aria-label="Email para reseña">
+                </div>
+                <div class="col-12">
+                  <div class="rating-stars">
+                    <span class="star-label">Calificación:</span>
+                    <div class="stars">
+                      <i *ngFor="let star of [1,2,3,4,5]" 
+                         class="bi star-icon" 
+                         [class.bi-star-fill]="star <= reviewForm.get('rating')?.value"
+                         [class.bi-star]="star > reviewForm.get('rating')?.value"
+                         (click)="setRating(star)"
+                         [class.active]="star <= reviewForm.get('rating')?.value">
+                      </i>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <textarea class="form-control" formControlName="comentario" rows="3" placeholder="Cuéntanos tu experiencia..." aria-label="Comentario de reseña"></textarea>
+                </div>
+                <div class="col-12 text-end">
+                  <button type="submit" class="btn btn-primary" [disabled]="reviewForm.invalid || isSubmitting">
+                    <i class="bi bi-send"></i> 
+                    <span *ngIf="!isSubmitting">Enviar Reseña</span>
+                    <span *ngIf="isSubmitting">Enviando...</span>
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       </div>

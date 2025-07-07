@@ -2555,3 +2555,93 @@ body {
     padding: 12px;
   }
 }
+
+/* Review Management Styles */
+.stars-display {
+  display: flex;
+  gap: 2px;
+}
+
+.star-display {
+  font-size: 0.9rem;
+  color: #ffd700;
+}
+
+.star-display.bi-star {
+  color: #e9ecef;
+}
+
+.review-comment {
+  max-width: 300px;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+.review-response {
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 6px;
+  border-left: 3px solid #007bff;
+}
+
+.btn-group-sm .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.btn-group-sm .btn i {
+  font-size: 0.8rem;
+}
+
+/* Review stats cards */
+.review-stats-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.review-stats-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.review-stats-card .h4 {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+/* Review table responsive */
+@media (max-width: 768px) {
+  .review-comment {
+    max-width: 200px;
+    font-size: 0.9rem;
+  }
+  
+  .stars-display {
+    gap: 1px;
+  }
+  
+  .star-display {
+    font-size: 0.8rem;
+  }
+  
+  .btn-group-sm .btn {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .review-comment {
+    max-width: 150px;
+    font-size: 0.85rem;
+  }
+  
+  .review-response {
+    font-size: 0.8rem;
+    padding: 6px;
+  }
+}

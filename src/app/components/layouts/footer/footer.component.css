@@ -172,15 +172,15 @@
   line-height: 1.4;
 }
 
-/* Newsletter Section */
-.newsletter-section {
+/* Reviews Section */
+.reviews-section {
   padding: 2rem 0;
   border-top: 1px solid rgba(79, 209, 255, 0.2);
   border-bottom: 1px solid rgba(79, 209, 255, 0.2);
   margin: 2rem 0;
 }
 
-.newsletter-container {
+.reviews-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -192,7 +192,7 @@
   backdrop-filter: blur(10px);
 }
 
-.newsletter-content h5 {
+.reviews-content h5 {
   color: #4fd1ff;
   margin-bottom: 0.5rem;
   display: flex;
@@ -253,6 +253,98 @@
   background: linear-gradient(135deg, #76f1ff, #4fd1ff);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(79, 209, 255, 0.3);
+}
+
+/* Reviews Form Styles */
+.reviews-content p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.reviews-form {
+  flex: 1;
+  max-width: 500px;
+}
+
+.reviews-form .form-control {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(79, 209, 255, 0.3);
+  color: #fff;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.reviews-form .form-control:focus {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 0.2rem rgba(79, 209, 255, 0.25);
+  color: #fff;
+  border-color: #4fd1ff;
+}
+
+.reviews-form .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.rating-stars {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.star-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.stars {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.star-icon {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.star-icon.bi-star-fill,
+.star-icon.active {
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.star-icon:hover {
+  color: #ffd700;
+  transform: scale(1.1);
+}
+
+.reviews-form .btn {
+  background: linear-gradient(135deg, #4fd1ff, #046d94);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border-radius: 10px;
+}
+
+.reviews-form .btn:hover {
+  background: linear-gradient(135deg, #76f1ff, #4fd1ff);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(79, 209, 255, 0.3);
+}
+
+.reviews-form .btn:disabled {
+  background: rgba(255, 255, 255, 0.2);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Footer Bottom */
