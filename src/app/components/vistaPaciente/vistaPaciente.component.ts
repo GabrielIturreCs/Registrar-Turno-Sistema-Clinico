@@ -14,6 +14,7 @@ import { DataRefreshService } from '../../services/data-refresh.service';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { NotificationService } from '../../services/notification.service';
+import { FooterComponent } from '../layouts/footer/footer.component';
 
 interface PacienteStats {
   totalTurnos: number;
@@ -26,7 +27,7 @@ interface PacienteStats {
 
 @Component({
   selector: 'app-vistaPaciente',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule,FooterComponent],
   templateUrl: './vistaPaciente.component.html',
   styleUrls: ['./vistaPaciente.component.css']
 })
