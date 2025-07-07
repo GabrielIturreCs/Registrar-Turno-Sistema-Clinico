@@ -11,7 +11,8 @@
         </span>
         <div class="navbar-nav ms-auto align-items-center">
           <span class="navbar-text me-3">
-            Bienvenido, <span class="fw-semibold">{{ paciente?.nombre || user?.nombre || 'Paciente' }}</span>
+            <!--Bienvenido, <span class="fw-semibold">{{ paciente?.nombre || user?.nombre || 'Paciente' }}</span>-->
+             Bienvenido, <span class="fw-semibold">{{ getUserGreeting() }}</span>
             <span class="badge bg-success" style="margin-left: 8px;">paciente</span>
           </span>
           <button class="btn btn-outline-light btn-sm ms-2" (click)="logout()">
