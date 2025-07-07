@@ -28,6 +28,7 @@ export class CompleteProfileComponent implements OnInit {
     'Accord Salud',
     'Federada Salud',
     'Prevención Salud',
+    'Instituto de Seguros de Jujuy',
     'Otra'
   ];
 
