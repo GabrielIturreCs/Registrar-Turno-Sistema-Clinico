@@ -17,7 +17,7 @@
             type="tel" 
             id="telefono" 
             formControlName="telefono" 
-            placeholder="Ej: 1123456789"
+            placeholder="Ej: 3881234567"
             [class.error]="telefono?.invalid && telefono?.touched">
           <div *ngIf="telefono?.errors?.['required'] && telefono?.touched" class="error-message">
             El teléfono es obligatorio
@@ -50,7 +50,7 @@
           type="text" 
           id="direccion" 
           formControlName="direccion" 
-          placeholder="Ej: Av. Corrientes 1234, CABA"
+          placeholder="Ej: Av. Italo Palanca N°10"
           [class.error]="direccion?.invalid && direccion?.touched">
         <div *ngIf="direccion?.errors?.['required'] && direccion?.touched" class="error-message">
           La dirección es obligatoria
