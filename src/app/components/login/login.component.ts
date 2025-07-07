@@ -98,6 +98,8 @@ export class LoginComponent implements OnInit {
               localStorage.setItem('token', 'fake-token'); // O el token real si tu backend lo envía
               localStorage.setItem('rol', res.tipoUsuario);
               localStorage.setItem('user', JSON.stringify(res));
+
+              this.authService.setCurrentUser(res);
               
               // Mostrar notificación de éxito
               const nombreUsuario = res.nombre || res.nombreUsuario || 'Usuario';
