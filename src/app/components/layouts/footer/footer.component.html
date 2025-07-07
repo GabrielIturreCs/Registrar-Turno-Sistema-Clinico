@@ -165,7 +165,7 @@
   </div>
 
   <!-- Modal de Éxito -->
-  <div class="modal fade show" [class.d-block]="showSuccessModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div id="successModal" class="modal fade show" [class.d-block]="showSuccessModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header bg-success text-white">
@@ -189,7 +189,7 @@
   </div>
 
   <!-- Modal de Error -->
-  <div class="modal fade show" [class.d-block]="showErrorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+  <div id="errorModal" class="modal fade show" [class.d-block]="showErrorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header bg-danger text-white">
@@ -213,7 +213,7 @@
   </div>
 
   <!-- Backdrop para los modales -->
-  <div class="modal-backdrop fade show" [class.d-block]="showSuccessModal || showErrorModal"></div>
+  <div class="modal-backdrop fade show" *ngIf="showSuccessModal || showErrorModal"></div>
 
   <!-- Back to Top Button -->
   <button class="back-to-top" [class.show]="showBackToTop" (click)="scrollToTop()" aria-label="Volver arriba">
