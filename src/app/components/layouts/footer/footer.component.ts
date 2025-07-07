@@ -13,6 +13,11 @@ export class FooterComponent implements OnInit {
   showBackToTop = false;
   reviewForm: FormGroup;
   isSubmitting = false;
+  
+  // Propiedades para los modales
+  showSuccessModal = false;
+  showErrorModal = false;
+  errorMessage = '';
 
   constructor(
     private fb: FormBuilder,
@@ -22,7 +27,7 @@ export class FooterComponent implements OnInit {
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       rating: [0, [Validators.required, Validators.min(1), Validators.max(5)]],
-      comentario: ['', [Validators.required, Validators.minLength(10)]]
+      comentario: ['', [Validators.required, Validators.minLength(1)]]
     });
   }
 
@@ -68,15 +73,26 @@ export class FooterComponent implements OnInit {
         this.reviewForm.reset();
         this.reviewForm.patchValue({ rating: 0 });
         
-        // Mostrar mensaje de éxito
-        alert('¡Gracias por tu reseña! Será revisada por nuestro equipo.');
+        // Mostrar modal de éxito
+        this.showSuccessModal = true;
         
       } catch (error) {
         console.error('Error al enviar reseña:', error);
-        alert('Hubo un error al enviar tu reseña. Por favor, intenta nuevamente.');
+        this.errorMessage = 'Hubo un error al enviar tu reseña. Por favor, intenta nuevamente.';
+        this.showErrorModal = true;
       } finally {
         this.isSubmitting = false;
       }
     }
+  }
+
+  // Métodos para cerrar modales
+  closeSuccessModal(): void {
+    this.showSuccessModal = false;
+  }
+
+  closeErrorModal(): void {
+    this.showErrorModal = false;
+    this.errorMessage = '';
   }
 }
