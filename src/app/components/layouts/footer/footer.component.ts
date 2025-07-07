@@ -95,4 +95,20 @@ export class FooterComponent implements OnInit {
     this.showErrorModal = false;
     this.errorMessage = '';
   }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.reviewForm.get(fieldName);
+    return !!(field && field.invalid && (field.touched || field.dirty));
+  }
+
+  getFieldError(fieldName: string): string {
+    const field = this.reviewForm.get(fieldName);
+    if (field && field.errors && (field.touched || field.dirty)) {
+      if (field.errors['required']) return 'Este campo es obligatorio para poder enviar la reseña';
+      if (field.errors['email']) return 'Ingresa un email válido';
+      if (field.errors['minlength']) return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
+      if (field.errors['min']) return 'Debes seleccionar una calificación';
+    }
+    return '';
+  }
 }
