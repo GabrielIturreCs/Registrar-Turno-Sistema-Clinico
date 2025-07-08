@@ -488,29 +488,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   loadTurnosData(): void {
-    console.log('Dashboard: Iniciando carga de turnos...');
     this.turnoService.getTurnosFromAPI().subscribe({
       next: (turnos) => {
-        console.log('Dashboard: Turnos recibidos del backend:', turnos);
-        console.log('Dashboard: Cantidad de turnos recibidos:', turnos.length);
-        
-        if (turnos.length > 0) {
-          console.log('Dashboard: Primer turno de ejemplo:', turnos[0]);
-          console.log('Dashboard: Campos disponibles en el primer turno:', Object.keys(turnos[0]));
-        }
-        
-        if (this.selectedPaciente) {
+        // Solo filtra por paciente si está en modo vista de paciente
+        if (this.isPacienteView && this.selectedPaciente) {
           this.turnos = turnos.filter(turno => String(turno.pacienteId) === String(this.selectedPaciente!.id));
-          console.log('Dashboard: Turnos filtrados para paciente:', this.turnos);
         } else {
-          this.turnos = turnos;
-          console.log('Dashboard: Todos los turnos cargados:', this.turnos.length, 'turnos');
+          this.turnos = turnos; // TODOS los turnos
         }
       },
-      error: (error) => {
-        console.error('Dashboard: Error cargando turnos:', error);
-        this.turnos = [];
-      }
+      error: () => { this.turnos = []; }
     });
   }
 
