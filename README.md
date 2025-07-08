@@ -1,439 +1,374 @@
-# 🏥 Sistema de Gestión de Turnos - Clínica Dental
+# 🏥 SISTEMA DE GESTIÓN DE TURNOS - CLÍNICA DENTAL
+# 🎯 GRUPO 10 - UNIVERSIDAD NACIONAL DE JUJUY
+# 📅 AÑO: 2025
 
-## 🎯 **GRUPO 10 - Frontend Angular**
+================================================================================
+📋 INFORMACIÓN DEL PROYECTO
+================================================================================
 
-[![Angular](https://img.shields.io/badge/Angular-19.2.0-red.svg)](https://angular.io/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-blue.svg)](https://www.typescriptlang.org/)
-[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.7-purple.svg)](https://getbootstrap.com/)
+🎯 PROYECTO: Sistema de Gestión de Turnos para Clínica Dental
+🏢 INSTITUCIÓN: Universidad Nacional de Jujuy
+📅 AÑO: 2025
+👥 GRUPO: 10
+🛠️ STACK: Angular 19 + Node.js + MongoDB
 
-> **Sistema integral de gestión de turnos para clínicas dentales** desarrollado con Angular 19, integrando autenticación con Google OAuth, pagos con MercadoPago, y un dashboard administrativo completo.
+================================================================================
+🌐 URL DE LA APLICACIÓN DEPLOYADA
+================================================================================
 
----
+   https://registrar-turno-sistema-clinico.onrender.com
 
-## 📋 **Tabla de Contenidos**
+================================================================================
+📚 REPOSITORIOS ACTUALIZADOS
+================================================================================
 
-- [🚀 Características](#-características)
-- [🛠️ Tecnologías](#️-tecnologías)
-- [📦 Instalación](#-instalación)
-- [🔧 Configuración](#-configuración)
-- [🎮 Uso](#-uso)
-- [🏗️ Arquitectura](#️-arquitectura)
-- [🔌 APIs Integradas](#-apis-integradas)
-- [🔒 Seguridad](#-seguridad)
-- [📱 Responsive Design](#-responsive-design)
-- [🧪 Testing](#-testing)
-- [📦 Build y Deploy](#-build-y-deploy)
-- [🤝 Contribución](#-contribución)
-- [📄 Licencia](#-licencia)
-- [👥 Equipo](#-equipo)
+🔗 REPOSITORIO FRONTEND (Angular):
+   https://github.com/GabrielIturreCs/Registrar-Turno-Sistema-Clinico
 
----
+🔗 REPOSITORIO BACKEND (Node.js):
+   https://github.com/GabrielIturreCs/Registro-de-turno-Sistema-Odontologico-Backend
 
-## 🚀 **Características**
+================================================================================
+📦 GUÍA DE INSTALACIÓN COMPLETA
+================================================================================
 
-### ✨ **Funcionalidades Principales**
-- 🔐 **Autenticación Multi-rol**: Pacientes, Dentistas, Administradores
-- 🌐 **Login con Google OAuth 2.0**: Autenticación social segura
-- 📅 **Gestión de Turnos**: Reserva, reprogramación y cancelación
-- 💳 **Pagos Electrónicos**: Integración completa con MercadoPago
-- 📊 **Dashboard Administrativo**: Métricas en tiempo real
-- 🤖 **Chatbot Inteligente**: Atención automática al cliente
-- 📈 **Estadísticas Avanzadas**: Gráficos y reportes
-- 📄 **Exportación PDF**: Reportes descargables
-- 🔔 **Sistema de Notificaciones**: Alertas en tiempo real
-- 📱 **Diseño Responsive**: Compatible con todos los dispositivos
+🎯 OBJETIVO: Instalación reproducible en cualquier escenario
+⏱️ TIEMPO ESTIMADO: 15-20 minutos
+🖥️ SISTEMAS COMPATIBLES: Windows, macOS, Linux
 
-### 🎨 **Interfaz de Usuario**
-- **Bootstrap 5.3.7**: Framework CSS moderno y responsive
-- **Bootstrap Icons**: Iconografía consistente
-- **Chart.js**: Gráficos interactivos y dinámicos
-- **Angular Material**: Componentes Material Design
-- **Temas Personalizados**: Colores y estilos de la clínica
+-------------------------------------------------------------------------------
+📋 PRERREQUISITOS DEL SISTEMA
+-------------------------------------------------------------------------------
 
----
+✅ Node.js: Versión 18.0.0 o superior
+   - Descargar desde: https://nodejs.org/
+   - Verificar: node --version
 
-## 🛠️ **Tecnologías**
+✅ npm: Versión 9.0.0 o superior (incluido con Node.js)
+   - Verificar: npm --version
 
-### **Frontend Core**
-```json
-{
-  "framework": "Angular 19.2.0",
-  "lenguaje": "TypeScript 5.7.2",
-  "ui_framework": "Bootstrap 5.3.7",
-  "iconos": "Bootstrap Icons 1.13.1",
-  "graficos": "Chart.js 4.5.0 + ng2-charts 5.0.4",
-  "pdf": "jsPDF 3.0.1 + html2canvas 1.4.1",
-  "estado": "RxJS 7.8.0",
-  "ssr": "Angular SSR 19.2.11"
-}
-```
+✅ Git: Para clonar repositorios
+   - Descargar desde: https://git-scm.com/
+   - Verificar: git --version
 
-### **Dependencias Principales**
-- **@angular/core**: Framework principal
-- **@angular/router**: Enrutamiento de la aplicación
-- **@angular/forms**: Manejo de formularios reactivos
-- **@angular/common**: Utilidades comunes
-- **rxjs**: Programación reactiva
-- **zone.js**: Zonas de ejecución
+✅ MongoDB: Base de datos (local o Atlas)
+   - Local: https://www.mongodb.com/try/download/community
+   - Atlas (Recomendado): https://www.mongodb.com/atlas
 
-### **Herramientas de Desarrollo**
-- **@angular/cli**: CLI de Angular
-- **@angular-devkit/build-angular**: Herramientas de build
-- **typescript**: Compilador TypeScript
-- **karma + jasmine**: Framework de testing
+✅ Editor de Código: VS Code recomendado
+   - Descargar desde: https://code.visualstudio.com/
 
----
+-------------------------------------------------------------------------------
+🚀 INSTALACIÓN PASO A PASO
+-------------------------------------------------------------------------------
 
-## 📦 **Instalación**
+📁 PASO 1: CLONAR REPOSITORIOS
+# Crear directorio del proyecto
+mkdir sistema-turnos-dental
+cd sistema-turnos-dental
 
-### **Prerrequisitos**
-```bash
-# Node.js (versión 18 o superior)
-node --version  # v18.x.x o superior
+# Clonar repositorios por separado
+git clone https://github.com/GabrielIturreCs/Registrar-Turno-Sistema-Clinico
+git clone https://github.com/GabrielIturreCs/Registro-de-turno-Sistema-Odontologico-Backend
 
-# npm (incluido con Node.js)
-npm --version   # 9.x.x o superior
 
-# Angular CLI (se instalará automáticamente)
-ng version      # Angular CLI
-```
+📁 PASO 2: CONFIGURAR BACKEND
+# Navegar al directorio backend
+cd Registro-de-turno-Sistema-Odontologico-Backend
 
-### **Clonar el Repositorio**
-```bash
-# Clonar el repositorio
-git clone https://github.com/grupo10/sistema-turnos-dental.git
-
-# Navegar al directorio frontend
-cd Registrar-Turno-Sistema-Clinico
-```
-
-### **Instalar Dependencias**
-```bash
-# Instalar todas las dependencias
+# Instalar dependencias
 npm install
 
+# Crear archivo de variables de entorno
+cp .env.example .env
+# Editar .env con tus credenciales
+
 # Verificar instalación
-ng version
-```
+npm start
 
----
 
-## 🔧 **Configuración**
+📁 PASO 3: CONFIGURAR FRONTEND
+# Navegar al directorio frontend
+cd ../Registrar-Turno-Sistema-Clinico
 
-### **Variables de Entorno**
-Crear archivo `src/environments/environment.ts`:
+# Instalar dependencias
+npm install
 
-```typescript
+# Crear archivo de variables de entorno
+cp src/environments/environment.example.ts src/environments/environment.ts
+# Editar environment.ts con tus credenciales
+
+# Verificar instalación
+npm start
+
+
+-------------------------------------------------------------------------------
+🔧 CONFIGURACIÓN DE VARIABLES DE ENTORNO
+-------------------------------------------------------------------------------
+
+📄 BACKEND (.env)
+# Configuración del servidor
+NODE_ENV=development
+PORT=3000
+SERVER_URL=http://localhost:3000
+
+# Base de datos MongoDB
+MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/dental-clinic
+
+# JWT Secret
+JWT_SECRET=tu-jwt-secret-super-seguro
+
+# Google OAuth
+GOOGLE_CLIENT_ID=google-client-id
+GOOGLE_CLIENT_SECRET=google-client-secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/google-auth/callback
+
+# MercadoPago
+ACCESS_TOKEN=mercadopago-access-token
+
+# Frontend URL
+FRONTEND_URL=http://localhost:4200
+
+# Cookie Secret
+COOKIE_SECRET=tu-cookie-secret
+
+📄 FRONTEND (environment.ts)
+typescript:
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:3000/api',
   googleClientId: 'tu-google-client-id',
   mercadopagoPublicKey: 'tu-mercadopago-public-key'
 };
-```
 
-### **Configuración de Google OAuth**
-1. Ir a [Google Cloud Console](https://console.cloud.google.com/)
-2. Crear proyecto y habilitar Google+ API
-3. Configurar OAuth 2.0 credentials
-4. Agregar dominios autorizados
+-------------------------------------------------------------------------------
+🗄️ CONFIGURACIÓN DE BASE DE DATOS
+-------------------------------------------------------------------------------
 
-### **Configuración de MercadoPago**
-1. Crear cuenta en [MercadoPago](https://www.mercadopago.com/)
-2. Obtener Access Token y Public Key
-3. Configurar webhooks para notificaciones
+📊 OPCIÓN 1: MONGODB ATLAS (RECOMENDADO)
+1. Crear cuenta en https://www.mongodb.com/atlas
+2. Crear nuevo cluster (gratuito)
+3. Configurar IP whitelist (0.0.0.0/0 para desarrollo)
+4. Crear usuario de base de datos
+5. Obtener connection string
+6. Reemplazar en MONGODB_URI
 
----
+📊 OPCIÓN 2: MONGODB LOCAL
+1. Instalar MongoDB Community Edition
+2. Iniciar servicio MongoDB
+3. Usar URI: mongodb://localhost:27017/dental-clinic
 
-## 🎮 **Uso**
+-------------------------------------------------------------------------------
+🔐 CONFIGURACIÓN DE AUTENTICACIÓN
+-------------------------------------------------------------------------------
 
-### **Servidor de Desarrollo**
-```bash
-# Iniciar servidor de desarrollo
+🌐 GOOGLE OAUTH 2.0
+1. Ir a https://console.cloud.google.com/
+2. Crear nuevo proyecto
+3. Habilitar Google+ API
+4. Configurar OAuth 2.0 credentials
+5. Agregar URIs autorizados:
+   - http://localhost:4200
+   - http://localhost:3000/api/google-auth/callback
+6. Copiar Client ID y Client Secret
+
+💳 MERCADOPAGO
+1. Crear cuenta en https://www.mercadopago.com/
+2. Ir a Panel de Desarrolladores
+3. Obtener Access Token
+4. Obtener Public Key
+5. Configurar webhooks
+
+-------------------------------------------------------------------------------
+🎮 COMANDOS DE EJECUCIÓN
+-------------------------------------------------------------------------------
+
+🚀 DESARROLLO
+# Backend (Terminal 1)
+cd Registro-de-turno-Sistema-Odontologico-Backend
 npm start
-# o
-ng serve
+# Servidor en: http://localhost:3000
 
-# Servidor disponible en: http://localhost:4200
-```
+# Frontend (Terminal 2)
+cd Registrar-Turno-Sistema-Clinico
+npm start
+# Aplicación en: http://localhost:4200
 
-### **Build de Producción**
-```bash
-# Build optimizado para producción
+🏗️ PRODUCCIÓN
+# Backend
+cd Registro-de-turno-Sistema-Odontologico-Backend
 npm run build
+npm start
 
-# Build con SSR (Server-Side Rendering)
-npm run build:render
-```
-
-### **Testing**
-```bash
-# Ejecutar tests unitarios
-npm test
-
-# Ejecutar tests con coverage
-npm run test:coverage
-
-# Ejecutar tests e2e
-npm run e2e
-```
-
----
-
-## 🏗️ **Arquitectura**
-
-### **Estructura del Proyecto**
-```
-src/
-├── app/
-│   ├── components/           # Componentes de la aplicación
-│   │   ├── administrador/    # Panel de administración
-│   │   ├── dashboard/        # Dashboard principal
-│   │   ├── login/           # Autenticación
-│   │   ├── reservar/        # Reserva de turnos
-│   │   ├── estadistica/     # Reportes y estadísticas
-│   │   └── layouts/         # Componentes de layout
-│   ├── services/            # Servicios de la aplicación
-│   │   ├── auth.service.ts          # Autenticación
-│   │   ├── mercadopago.service.ts   # Integración MercadoPago
-│   │   ├── turno.service.ts         # Gestión de turnos
-│   │   └── ChatBot.service.ts       # Chatbot inteligente
-│   ├── guards/              # Guards de autenticación
-│   ├── interceptors/        # Interceptores HTTP
-│   ├── interfaces/          # Interfaces TypeScript
-│   └── environments/        # Configuración de entornos
-├── public/                  # Archivos públicos
-└── styles.css              # Estilos globales
-```
-
-### **Patrones de Diseño**
-- **Component-Based Architecture**: Componentes reutilizables
-- **Service Layer Pattern**: Lógica de negocio en servicios
-- **Observer Pattern**: RxJS para programación reactiva
-- **Dependency Injection**: Inyección de dependencias de Angular
-- **Guard Pattern**: Protección de rutas
-
----
-
-## 🔌 **APIs Integradas**
-
-### **Google OAuth 2.0**
-```typescript
-// Configuración del cliente OAuth
-google.accounts.id.initialize({
-  client_id: environment.googleClientId,
-  callback: (response) => {
-    // Procesar credencial de Google
-  }
-});
-```
-
-### **MercadoPago API**
-```typescript
-// Crear preferencia de pago
-this.mercadoPagoService.createTurnoPayment(
-  turnoId, 
-  pacienteEmail, 
-  monto, 
-  descripcion
-).subscribe(response => {
-  // Redirigir al pago
-});
-```
-
-### **APIs Internas**
-- **Autenticación**: `/api/usuario/login`
-- **Turnos**: `/api/turno/*`
-- **Pacientes**: `/api/paciente/*`
-- **Dentistas**: `/api/dentista/*`
-- **Tratamientos**: `/api/tratamiento/*`
-
----
-
-## 🔒 **Seguridad**
-
-### **Autenticación JWT**
-```typescript
-// Interceptor de autenticación
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
-  intercept(request: HttpRequest<any>, next: HttpHandler) {
-    const token = localStorage.getItem('token');
-    if (token) {
-      request = request.clone({
-        setHeaders: { Authorization: `Bearer ${token}` }
-      });
-    }
-    return next.handle(request);
-  }
-}
-```
-
-### **Guards de Protección**
-```typescript
-// Guard de autenticación
-export function authGuard(role: string): CanActivateFn {
-  return (route, state) => {
-    const token = localStorage.getItem('token');
-    const userRole = localStorage.getItem('rol');
-    
-    if (!token || userRole !== role) {
-      return false;
-    }
-    return true;
-  };
-}
-```
-
-### **Validación de Datos**
-- **Formularios Reactivos**: Validación en tiempo real
-- **Sanitización**: Prevención de XSS
-- **TypeScript**: Tipado estático
-- **CORS**: Configuración segura
-
----
-
-## 📱 **Responsive Design**
-
-
-### **Componentes Responsive**
-- **Navbar**: Colapsable en móviles
-- **Dashboard**: Grid adaptativo
-- **Formularios**: Layout flexible
-- **Tablas**: Scroll horizontal en móviles
-- **Gráficos**: Responsive con Chart.js
-
----
-
-## 🧪 **Testing**
-
-### **Tests Unitarios**
-```bash
-# Ejecutar todos los tests
-npm test
-
-# Tests con watch mode
-npm run test:watch
-
-# Tests con coverage
-npm run test:coverage
-```
-
-### **Tests E2E**
-```bash
-# Ejecutar tests e2e
-npm run e2e
-
-# Tests e2e con watch mode
-npm run e2e:watch
-```
-
-### **Cobertura de Código**
-- **Objetivo**: >80% de cobertura
-- **Frameworks**: Jasmine + Karma
-- **E2E**: Protractor
-- **Mocking**: Angular Testing Utilities
-
----
-
-## 📦 **Build y Deploy**
-
-### **Build de Desarrollo**
-```bash
-# Build de desarrollo
-ng build
-
-# Build con watch mode
-ng build --watch
-```
-
-### **Build de Producción**
-```bash
-# Build optimizado
+# Frontend
+cd Registrar-Turno-Sistema-Clinico
 npm run build
+npm run serve:prod
 
-# Build con SSR
-npm run build:render
+-------------------------------------------------------------------------------
+📱 FUNCIONALIDADES PRINCIPALES
+-------------------------------------------------------------------------------
 
-# Build para Render.com
-npm run build:render
-```
+✅ AUTENTICACIÓN
+- Login con Google OAuth 2.0
+- Registro de usuarios
+- JWT tokens seguros
+- Roles: Paciente, Dentista, Administrador
 
-### **Deploy en Render.com**
-```bash
-# Configuración automática
-# El repositorio se conecta automáticamente a Render.com
-# Build Command: npm run build:render
-# Publish Directory: dist/odontologiafrontend
-```
+✅ GESTIÓN DE TURNOS
+- Reserva de turnos
+- Reprogramación
+- Cancelación
+- Historial de turnos
 
-### **Variables de Entorno en Producción**
-```bash
-# Render.com Environment Variables
-NODE_ENV=production
-API_URL=https://backend-url.onrender.com/api
-GOOGLE_CLIENT_ID=google-client-id
-MERCADOPAGO_PUBLIC_KEY=mercadopago-public-key
-```
+✅ PAGOS ELECTRÓNICOS
+- Integración MercadoPago
+- Procesamiento seguro
+- Notificaciones automáticas
+- Estados de pago
 
----
+✅ DASHBOARD ADMIN
+- Estadísticas en tiempo real
+- Gestión de usuarios
+- Reportes PDF
+- Métricas de negocio
 
-## 🤝 **Contribución**
+✅ CHATBOT INTELIGENTE
+- Atención automática
+- Respuestas contextuales
+- Integración con sistema
 
-### **Flujo de Trabajo**
-1. **Fork** el repositorio
-2. **Clone** fork localmente
-3. **Crea** una rama para feature
-4. **Desarrolla**  funcionalidad
-5. **Tests** - Asegúrate de que pasen todos los tests
-6. **Commit** con mensajes descriptivos
-7. **Push** a tu fork
-8. **Pull Request** al repositorio principal
+-------------------------------------------------------------------------------
+🔧 ALMACENAMIENTOS UTILIZADOS
+-------------------------------------------------------------------------------
 
-### **Estándares de Código**
-```bash
-# Linting
-npm run lint
+🗄️ BASE DE DATOS PRINCIPAL
+- Tecnología: MongoDB 6.17.0
+- ODM: Mongoose 8.16.0
+- Hosting: MongoDB Atlas (Cloud)
+- Backup: Automático diario
 
-# Formateo de código
-npm run format
+📁 ALMACENAMIENTO DE ARCHIVOS
+- PDFs: Generación en memoria
+- Imágenes: URLs externas (Google OAuth)
+- Logs: Sistema de archivos local
 
-# Verificación de tipos
-npm run type-check
-```
+🍪 ALMACENAMIENTO DE SESIÓN
+- JWT Tokens: LocalStorage
+- Cookies: HttpOnly para seguridad
+- Estado: RxJS BehaviorSubject
 
-### **Convenciones de Naming**
-- **Componentes**: `kebab-case.component.ts`
-- **Servicios**: `kebab-case.service.ts`
-- **Interfaces**: `kebab-case.interface.ts`
-- **Constantes**: `UPPER_SNAKE_CASE`
-- **Variables**: `camelCase`
+📱 ALMACENAMIENTO LOCAL
+- Configuración: environment.ts
+- Cache: Angular HttpClient
+- Preferencias: LocalStorage
 
----
+-------------------------------------------------------------------------------
+🚀 DEPLOY EN RENDER.COM
+-------------------------------------------------------------------------------
 
+📦 FRONTEND DEPLOY
+1. Conectar repositorio GitHub a Render
+2. Configurar:
+   - Build Command: npm install && npm run build
+   - Start Command: npm run serve:prod
+   - Environment: Node.js 18
+3. Variables de entorno:
+   - NODE_ENV=production
+   - API_URL=https://backend-url.onrender.com
 
+📦 BACKEND DEPLOY
+1. Conectar repositorio GitHub a Render
+2. Configurar:
+   - Build Command: npm install
+   - Start Command: npm start
+   - Environment: Node.js 18
+3. Variables de entorno:
+   - Todas las variables del .env
 
-## 👥 **Equipo**
+-------------------------------------------------------------------------------
+📁 DOCUMENTACIÓN DE SWAGGER
+-------------------------------------------------------------------------------
+🌐 Acceso a la documentación interactiva
+Local: http://localhost:3000/api-docs
 
-### **Grupo 10 - Desarrollo Frontend**
+📄 Exportar la documentación (OpenAPI/Swagger)
 
-**🎯 Proyecto**: Sistema de Gestión de Turnos para Clínica Dental  
-**🏢 Institución**: Universidad nacional de jujuy
-**📅 Año**: 2025  
-**🛠️ Stack**: Angular 19 + TypeScript + Bootstrap  
+Ingresa a la URL de Swagger UI (ver arriba).
 
-### **Características del Equipo**
-- **Metodología Ágil**: Scrum/Kanban
-- **Control de Versiones**: Git + GitHub
-- **CI/CD**: Render.com automático
-- **Testing**: Cobertura completa
-- **Documentación**: README detallado
+En la parte superior derecha, haz clic en el botón o enlace que dice "Raw", "OpenAPI" o "swagger.json".
 
----
+Se abrirá el archivo JSON con toda la especificación de la API.
 
-## 🎉 **¡Gracias por usar nuestro sistema!**
+📝 ¿Qué incluye la documentación?
 
-Este proyecto representa el esfuerzo y dedicación del **Grupo 10** para crear una solución integral y moderna para la gestión de turnos en clínicas dentales. Esperamos que sea de gran utilidad para mejorar la experiencia tanto de los profesionales como de los pacientes.
+Listado de todos los endpoints (GET, POST, PUT, DELETE)
 
-🌟 ¡Desarrollado por el Grupo 10! 🌟
+Parámetros requeridos y opcionales
+
+Ejemplos de request y response
+
+Descripción de cada recurso y operación
+
+Pruebas interactivas desde el navegador
+
+-------------------------------------------------------------------------------
+🆘 SOLUCIÓN DE PROBLEMAS COMUNES
+-------------------------------------------------------------------------------
+
+❌ ERROR: Puerto 3000 ocupado
+# Cambiar puerto en .env
+PORT=3001
+# O matar proceso
+lsof -ti:3000 | xargs kill -9
+
+❌ ERROR: MongoDB no conecta
+# Verificar URI en .env
+# Verificar IP whitelist en Atlas
+# Verificar credenciales
+
+❌ ERROR: Google OAuth no funciona
+# Verificar URIs autorizados
+# Verificar Client ID/Secret
+# Verificar dominios autorizados
+
+❌ ERROR: MercadoPago no procesa
+# Verificar Access Token
+# Verificar Public Key
+# Verificar webhooks
+
+-------------------------------------------------------------------------------
+📞 SOPORTE Y CONTACTO
+-------------------------------------------------------------------------------
+
+👥 GRUPO 10 - UNIVERSIDAD NACIONAL DE JUJUY
+- Proyecto: Sistema de Gestión de Turnos Dental
+- Año: 2025
+- Materia: Programación y Servicios Web
+- Profesor: Alfredo Espinoza
+
+📧 CONTACTO
+- Email: 42856744@fi.unju.edu.ar
+- GitHub: https://github.com/ezequielmamani7/
+- Documentación: README.md en cada repositorio
+
+-------------------------------------------------------------------------------
+📄 LICENCIA
+-------------------------------------------------------------------------------
+
+📜 LICENCIA MIT
+- Uso libre para fines educativos
+- Atribución requerida
+- Sin garantías
+
+================================================================================
+🎉 ¡INSTALACIÓN COMPLETADA!
+================================================================================
+
+✅ La aplicación está lista para usar
+🌐 Frontend: http://localhost:4200
+🔧 Backend: http://localhost:3000
+📊 API Docs: http://localhost:3000/api
+
+🌟 ¡Desarrollado con ❤️ por el Grupo 10! 🌟 
 
