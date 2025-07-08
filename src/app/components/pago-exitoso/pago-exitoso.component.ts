@@ -2,13 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { TurnoService } from '../../services/turno.service';
 
 @Component({
   selector: 'app-pago-exitoso',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './pago-exitoso.component.html',
-  styleUrls: ['./pago-exitoso.component.css']
+  styleUrls: ['./pago-exitoso.component.css'],
+  providers: [TurnoService]
 })
 export class PagoExitosoComponent implements OnInit {
   paymentId: string | null = null;
@@ -21,7 +23,8 @@ export class PagoExitosoComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private turnoService: TurnoService
   ) {}
 
   ngOnInit(): void {
@@ -40,9 +43,12 @@ export class PagoExitosoComponent implements OnInit {
         externalReference: this.externalReference
       });
 
-      if (this.paymentId && this.paymentStatus === 'approved') {
-        console.log('✅ Pago aprobado, procesando...');
-        
+      if (this.paymentId && this.paymentStatus === 'approved' && this.externalReference) {
+        // Cambia el estado del turno a 'pagado'
+        this.turnoService.cambiarEstadoTurno(this.externalReference, 'pagado').subscribe({
+          next: () => this.turnoService.refreshTurnos(),
+          error: (err: any) => console.error('Error actualizando turno:', err)
+        });
         // Guardar información del pago exitoso en sessionStorage
         const paymentInfo = {
           paymentId: this.paymentId,
@@ -72,7 +78,12 @@ export class PagoExitosoComponent implements OnInit {
           });
         }, 1500);
         
-      } else if (this.paymentStatus === 'pending') {
+      } else if (this.paymentStatus === 'pending' && this.externalReference) {
+        // Cambia el estado del turno a 'pendiente'
+        this.turnoService.cambiarEstadoTurno(this.externalReference, 'pendiente').subscribe({
+          next: () => this.turnoService.refreshTurnos(),
+          error: (err: any) => console.error('Error actualizando turno:', err)
+        });
         console.log('⏳ Pago pendiente');
         this.message = 'Tu pago está pendiente. Te notificaremos cuando se complete.';
         sessionStorage.setItem('payment_pending', 'true');
@@ -87,7 +98,12 @@ export class PagoExitosoComponent implements OnInit {
           });
         }, 1500);
         
-      } else if (this.paymentStatus === 'rejected' || this.paymentStatus === 'failure') {
+      } else if ((this.paymentStatus === 'rejected' || this.paymentStatus === 'failure') && this.externalReference) {
+        // Cambia el estado del turno a 'cancelado'
+        this.turnoService.cambiarEstadoTurno(this.externalReference, 'cancelado').subscribe({
+          next: () => this.turnoService.refreshTurnos(),
+          error: (err: any) => console.error('Error actualizando turno:', err)
+        });
         console.log('❌ Pago fallido');
         this.message = 'Tu pago ha sido rechazado. Por favor, intenta de nuevo.';
         sessionStorage.setItem('payment_failed', 'true');
