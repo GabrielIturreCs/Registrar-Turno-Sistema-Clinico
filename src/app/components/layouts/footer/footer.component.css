@@ -543,3 +543,64 @@
     font-size: 2rem;
   }
 }
+
+/* --- RESPONSIVE REVIEWS SECTION --- */
+@media (max-width: 991px) {
+  .reviews-container {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+  .reviews-content, .reviews-form {
+    max-width: 100%;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .reviews-section {
+    padding: 1.2rem 0;
+    margin: 1.2rem 0;
+  }
+  .reviews-container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .reviews-form .form-control,
+  .reviews-form textarea {
+    font-size: 0.95rem;
+    padding: 0.6rem 0.8rem;
+  }
+  .reviews-form {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .reviews-section {
+    padding: 0.7rem 0;
+    margin: 0.7rem 0;
+  }
+  .reviews-container {
+    padding: 0.5rem;
+    border-radius: 8px;
+  }
+  .reviews-content h5 {
+    font-size: 1.1rem;
+  }
+  .reviews-form .btn {
+    width: 100%;
+    padding: 0.7rem 0;
+    font-size: 1rem;
+  }
+  .rating-stars {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  .stars {
+    gap: 0.3rem;
+  }
+}
