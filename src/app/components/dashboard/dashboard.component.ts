@@ -594,13 +594,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get filteredTurnos(): Turno[] {
+    // Normalizar la fecha para evitar problemas de formato
     return this.turnos
       .filter(turno => turno.estado !== 'cancelado')
       .sort((a, b) => {
-        // Ordenar por fecha (más recientes primero)
-        const fechaA = new Date(a.fecha).getTime();
-        const fechaB = new Date(b.fecha).getTime();
-        return fechaB - fechaA;
+        // Ordenar por fecha (más recientes primero), normalizando a YYYY-MM-DD
+        const fechaA = (a.fecha || '').slice(0, 10);
+        const fechaB = (b.fecha || '').slice(0, 10);
+        return fechaB.localeCompare(fechaA);
       });
   }
 
@@ -609,16 +610,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get turnosHoy(): number {
-    const today = new Date().toISOString().split('T')[0];
-    return this.turnos.filter(turno => turno.fecha === today).length;
+    const today = new Date().toISOString().slice(0, 10);
+    return this.turnos.filter(turno => (turno.fecha || '').slice(0, 10) === today).length;
   }
 
   get proximoTurno(): Turno | null {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().slice(0, 10);
     const futureTurnos = this.turnos
-      .filter(turno => turno.fecha >= today && turno.estado === 'reservado')
-      .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
-    
+      .filter(turno => (turno.fecha || '').slice(0, 10) >= today && turno.estado === 'reservado')
+      .sort((a, b) => ((a.fecha || '').slice(0, 10)).localeCompare((b.fecha || '').slice(0, 10)));
     return futureTurnos.length > 0 ? futureTurnos[0] : null;
   }
 

@@ -216,15 +216,21 @@ export class AgendaComponent implements OnInit {
   }
 
   get filteredTurnos(): Turno[] {
-    let filtered = this.turnos.filter(turno => turno.fecha === this.selectedDate);
+    // Normalizar la fecha seleccionada a YYYY-MM-DD
+    const selected = this.selectedDate.slice(0, 10);
+    let filtered = this.turnos.filter(turno => {
+      // Normalizar la fecha del turno a YYYY-MM-DD
+      const turnoFecha = (turno.fecha || '').slice(0, 10);
+      return turnoFecha === selected;
+    });
 
     // Filtrar por búsqueda
     if (this.searchTerm.trim() !== '') {
       const search = this.searchTerm.toLowerCase();
       filtered = filtered.filter(turno => 
-        turno.nombre?.toLowerCase().includes(search) ||
+        (turno.nombre?.toLowerCase().includes(search) ||
         turno.apellido?.toLowerCase().includes(search) ||
-        turno.tratamiento.toLowerCase().includes(search)
+        turno.tratamiento?.toLowerCase().includes(search))
       );
     }
 
