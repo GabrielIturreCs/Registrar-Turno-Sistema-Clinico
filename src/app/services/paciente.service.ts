@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Paciente } from '../interfaces';
 import { environment } from '../environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ import { environment } from '../environments/environment';
 export class PacienteService {
   private apiUrl = `${environment.apiUrl}/paciente`; 
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private authService: AuthService) { }
 
   getPacientes(): Observable<Paciente[]> {
     return this.http.get<Paciente[]>(this.apiUrl);
@@ -33,10 +34,12 @@ export class PacienteService {
   }
 
   getOdontograma(id: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}/odontograma`);
+    const headers = this.authService.getAuthHeaders();
+    return this.http.get<any>(`${this.apiUrl}/${id}/odontograma`, { headers });
   }
 
   updateOdontograma(id: string, odontograma: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}/odontograma`, { odontograma });
+    const headers = this.authService.getAuthHeaders();
+    return this.http.put<any>(`${this.apiUrl}/${id}/odontograma`, { odontograma }, { headers });
   }
 }

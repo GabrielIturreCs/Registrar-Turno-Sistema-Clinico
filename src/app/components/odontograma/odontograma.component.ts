@@ -33,17 +33,17 @@ export class OdontogramaComponent {
   constructor(private pacienteService: PacienteService) {}
 
   seleccionarDiente(num: string) {
+    if (!this.odontograma) return;
     this.dienteSeleccionado = num;
   }
 
   cambiarEstadoDiente(num: string, estado: any) {
-    if (this.odontograma[num]) {
-      this.odontograma[num].estado = estado.estado;
-      this.odontograma[num].color = estado.color;
-      // Guardar automáticamente en la base de datos
-      if (this.paciente && this.paciente._id) {
-        this.pacienteService.updateOdontograma(this.paciente._id, this.odontograma).subscribe();
-      }
+    if (!this.odontograma || !this.odontograma[num]) return;
+    this.odontograma[num].estado = estado.estado;
+    this.odontograma[num].color = estado.color;
+    // Guardar automáticamente en la base de datos
+    if (this.paciente && this.paciente._id) {
+      this.pacienteService.updateOdontograma(this.paciente._id, this.odontograma).subscribe();
     }
     this.dienteSeleccionado = null;
   }
