@@ -562,15 +562,30 @@ export class TurnosComponent implements OnInit {
 
   // Función para obtener etiqueta de estado más descriptiva
   getStatusLabel(estado: string): string {
+    // Mapear 'completado' a 'Pagado' visualmente
+    if (estado === 'completado') return 'Pagado';
     switch (estado) {
       case 'reservado': return 'Reservado';
       case 'reservado_pendiente_pago': return 'Reservado - Pago Pendiente';
       case 'pendiente_pago_online': return 'Esperando Pago Online';
       case 'pagado': return 'Pagado';
-      case 'completado': return 'Completado';
       case 'cancelado': return 'Cancelado';
       case 'pendiente': return 'Pendiente';
       default: return estado || 'Sin Estado';
+    }
+  }
+
+  getStatusClass(estado: string): string {
+    // Mapear 'completado' a 'pagado' visualmente
+    if (estado === 'completado') return 'badge bg-primary text-white';
+    switch (estado) {
+      case 'reservado': return 'badge bg-primary text-white';
+      case 'reservado_pendiente_pago': return 'badge bg-info text-white';
+      case 'pendiente_pago_online': return 'badge bg-warning text-dark';
+      case 'pagado': return 'badge bg-primary text-white';
+      case 'cancelado': return 'badge bg-danger text-white';
+      case 'pendiente': return 'badge bg-secondary text-white';
+      default: return 'badge bg-light text-dark';
     }
   }
 
@@ -683,20 +698,6 @@ export class TurnosComponent implements OnInit {
     }
 
     return filtered;
-  }
-
-  // Mejorar la función getStatusClass para incluir los nuevos estados
-  getStatusClass(estado: string): string {
-    switch (estado) {
-      case 'reservado': return 'badge bg-primary text-white';
-      case 'reservado_pendiente_pago': return 'badge bg-info text-white';
-      case 'pendiente_pago_online': return 'badge bg-warning text-dark';
-      case 'pagado': return 'badge bg-primary text-white';
-      case 'completado': return 'badge bg-dark text-white';
-      case 'cancelado': return 'badge bg-danger text-white';
-      case 'pendiente': return 'badge bg-secondary text-white';
-      default: return 'badge bg-light text-dark';
-    }
   }
 
   closeSuccessModal() {

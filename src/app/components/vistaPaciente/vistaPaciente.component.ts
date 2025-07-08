@@ -311,9 +311,10 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
   }
 
   getStatusClass(estado: string): string {
+    // Mapear 'completado' a 'pagado' visualmente
+    if (estado === 'completado') return 'badge bg-primary text-white';
     switch (estado) {
       case 'reservado': return 'badge bg-info text-white';
-      case 'completado': return 'badge bg-success';
       case 'cancelado': return 'badge bg-danger';
       case 'pendiente': return 'badge bg-secondary';
       case 'pendiente_pago': return 'badge bg-secondary text-white';
@@ -323,9 +324,10 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
   }
 
   getStatusText(estado: string): string {
+    // Mapear 'completado' a 'pagado' visualmente
+    if (estado === 'completado') return 'Pagado';
     switch (estado) {
       case 'reservado': return 'Reservado';
-      case 'completado': return 'Completado';
       case 'cancelado': return 'Cancelado';
       case 'pendiente': return 'Pendiente';
       case 'pendiente_pago': return 'Pendiente de Pago';

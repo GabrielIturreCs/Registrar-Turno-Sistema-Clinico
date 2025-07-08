@@ -54,7 +54,7 @@ export class AgendaComponent implements OnInit {
   loadTurnosData(): void {
     this.turnoService.getTurnosFromAPI().subscribe({
       next: (turnos) => {
-        this.turnos = turnos.filter(t => t.fecha === this.selectedDate);
+        this.turnos = turnos; // Guarda todos los turnos
       },
       error: () => {
         this.turnos = [];
