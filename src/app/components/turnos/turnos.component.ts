@@ -302,6 +302,12 @@ export class TurnosComponent implements OnInit {
     }
   }
 
+  // Función temporal para debugging - forzar recarga de turnos
+  forceReloadTurnos(): void {
+    console.log('🔄 Forzando recarga de turnos...');
+    this.loadTurnosData();
+  }
+
   loadTurnosData(): void {
     this.isLoading = true;
     console.log('🔄 Cargando turnos desde API...');
@@ -320,7 +326,9 @@ export class TurnosComponent implements OnInit {
             paymentId: turno.paymentId,
             metodoPago: turno.metodoPago,
             fechaPago: turno.fechaPago,
-            montoRecibido: turno.montoRecibido
+            montoRecibido: turno.montoRecibido,
+            // Mostrar el valor que se usará en la template
+            finalPaymentValue: turno.paymentStatus || turno.metodoPago || ''
           });
         });
         
@@ -451,21 +459,48 @@ export class TurnosComponent implements OnInit {
         return 'badge bg-info text-white';
       case 'efectivo': 
         return 'badge bg-secondary text-white';
+      case 'online':
+        return 'badge bg-primary text-white';
+      case '':
+      case null:
+      case undefined:
+        return 'badge bg-light text-dark';
       default: 
         return 'badge bg-light text-dark';
     }
   }
 
   getPaymentStatusLabel(paymentStatus: string): string {
-    switch (paymentStatus) {
+    // Debug logging
+    console.log('🔍 getPaymentStatusLabel called with:', {
+      paymentStatus,
+      type: typeof paymentStatus,
+      length: paymentStatus?.length
+    });
+    
+    // Normalizar el valor
+    const status = (paymentStatus || '').toLowerCase().trim();
+    
+    console.log('🔍 Normalized status:', status);
+    
+    switch (status) {
       case 'approved': return '✅ Pagado Online';
+      case 'pagado': return '✅ Pagado';
       case 'pending': return '⏳ Pago Pendiente';
+      case 'pendiente_pago_online': return '⏳ Esperando Pago Online';
       case 'rejected': return '❌ Pago Rechazado';
       case 'cancelled': return '🚫 Pago Cancelado';
       case 'refunded': return '💰 Reembolsado';
       case 'efectivo': return '💵 Pago en Efectivo';
-      case '': return '⏸️ Sin Procesar';
-      default: return '❓ ' + (paymentStatus || 'Sin Estado');
+      case 'online': return '🌐 Pago Online';
+      case '': 
+      case 'null':
+      case 'undefined':
+        return '⏸️ Sin Procesar';
+      default: 
+        // Mostrar el estado original si no reconocemos el valor
+        console.log('⚠️ Unknown payment status:', status);
+        return '❓ ' + paymentStatus;
     }
   }
 
