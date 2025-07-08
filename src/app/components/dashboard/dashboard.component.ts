@@ -17,6 +17,7 @@ import { NotificationService } from '../../services/notification.service';
 import { ReviewService, Review } from '../../services/review.service';
 import { PdfExportService } from '../../services/pdf-export.service';
 import { AuthService } from '../../services/auth.service';
+import { DataRefreshService } from '../../services/data-refresh.service';
 
 interface AdminStats {
   totalUsuarios: number;
@@ -111,6 +112,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   reviewFilter: string = '';
   reviewSearch: string = '';
 
+  private refreshSubscription?: Subscription;
+
   constructor(
     private router: Router, 
     private route: ActivatedRoute,
@@ -125,7 +128,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private reviewService: ReviewService,
     private pdfExportService: PdfExportService,
-    private authService: AuthService // <--- INYECTAR
+    private authService: AuthService, // <--- INYECTAR
+    private dataRefreshService: DataRefreshService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -137,13 +141,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.checkPacienteView();
     this.loadTurnosData();
     this.loadAdminStats();
-    
+    // Suscribirse a refresh global de turnos
+    this.refreshSubscription = this.dataRefreshService?.refresh$?.subscribe((component) => {
+      if (component === 'all' || component === 'dashboard' || component === 'agenda') {
+        this.loadTurnosData();
+      }
+    });
     // Solo cargar chat para dentistas
     if (this.user?.tipoUsuario === 'dentista') {
       this.loadChatHistory();
       this.addWelcomeMessage();
     }
-    
     this.loadDentistasActividad();
     this.loadPacientesActividad();
     this.loadTratamientosActividad();
@@ -170,6 +178,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.alertaInterval?.unsubscribe();
+    this.refreshSubscription?.unsubscribe();
   }
 
   // Cargar historial del chat desde ChatService con localStorage
