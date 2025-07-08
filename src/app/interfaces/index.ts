@@ -34,8 +34,14 @@ export interface Turno {
   pacienteId?: number | string;
   tratamientoId?: number | string;
   tipoUsuario?: string;
-  paymentStatus?: string; // Estado del pago
+  // Campos de pago mejorados
+  paymentStatus?: string; // Estado del pago (approved, pending, rejected, refunded, cancelled)
   paymentId?: string; // ID de pago de MercadoPago
+  metodoPago?: string; // Método de pago seleccionado (efectivo, online)
+  fechaPago?: string | Date; // Fecha cuando se procesó el pago
+  montoRecibido?: number; // Monto realmente recibido
+  paymentNotificationDate?: string | Date; // Fecha de notificación del webhook
+  paymentDetails?: any; // Detalles adicionales del pago
 }
 
 export interface Tratamiento {

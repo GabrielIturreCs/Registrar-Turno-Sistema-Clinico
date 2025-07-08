@@ -3,36 +3,66 @@
     <div class="col-md-6">
       <div class="card">
         <div class="card-body text-center">
-          <div *ngIf="status === 'success'" class="text-success">
+          
+          <!-- Estado de procesamiento -->
+          <div *ngIf="isProcessing" class="text-info">
+            <div class="spinner-border text-primary mb-3" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <h3>{{ message }}</h3>
+            <p class="text-muted">Por favor espera mientras actualizamos tu turno...</p>
+          </div>
+          
+          <!-- Estado de éxito -->
+          <div *ngIf="!isProcessing && status === 'success'" class="text-success">
             <i class="fas fa-check-circle fa-3x mb-3"></i>
             <h3>¡Pago Exitoso!</h3>
-            <p>Tu turno ha sido confirmado y pagado correctamente.</p>
-            <p class="text-muted">Redirigiendo...</p>
+            <p>Tu turno ha sido confirmado y el pago procesado correctamente.</p>
+            <div class="d-grid gap-2">
+              <button class="btn btn-success" (click)="goToVistaPaciente()">
+                <i class="fas fa-calendar-check me-2"></i>Ver Mis Turnos
+              </button>
+              <button class="btn btn-outline-success" (click)="goToReservar()">
+                <i class="fas fa-plus me-2"></i>Reservar Otro Turno
+              </button>
+            </div>
           </div>
           
-          <div *ngIf="status === 'failure'" class="text-danger">
-            <i class="fas fa-times-circle fa-3x mb-3"></i>
-            <h3>Pago Fallido</h3>
-            <p>Hubo un problema con el pago. Por favor, intenta nuevamente.</p>
-            <button class="btn btn-danger" (click)="goToReservar()">
-              Intentar Nuevamente
-            </button>
-          </div>
-          
-          <div *ngIf="status === 'pending'" class="text-warning">
+          <!-- Estado pendiente -->
+          <div *ngIf="!isProcessing && status === 'pending'" class="text-warning">
             <i class="fas fa-clock fa-3x mb-3"></i>
             <h3>Pago Pendiente</h3>
-            <p>Tu pago está siendo procesado. Te notificaremos cuando se complete.</p>
-            <button class="btn btn-warning" (click)="goToReservar()">
-              Volver a Reservar
-            </button>
+            <p>Tu pago está siendo procesado. Te notificaremos cuando se confirme.</p>
+            <div class="d-grid gap-2">
+              <button class="btn btn-warning" (click)="goToVistaPaciente()">
+                <i class="fas fa-home me-2"></i>Ir a Mis Turnos
+              </button>
+            </div>
           </div>
           
-          <div *ngIf="!status" class="text-info">
+          <!-- Estado de fallo -->
+          <div *ngIf="!isProcessing && (status === 'failure' || status === 'error')" class="text-danger">
+            <i class="fas fa-times-circle fa-3x mb-3"></i>
+            <h3>{{ status === 'error' ? 'Error de Sistema' : 'Pago Fallido' }}</h3>
+            <p *ngIf="status === 'failure'">Hubo un problema con el pago. Por favor, intenta nuevamente.</p>
+            <p *ngIf="status === 'error'">Error procesando el pago. Contacta al soporte si persiste.</p>
+            <div class="d-grid gap-2">
+              <button class="btn btn-danger" (click)="goToReservar()">
+                <i class="fas fa-redo me-2"></i>Intentar Nuevamente
+              </button>
+              <button class="btn btn-outline-danger" (click)="goToVistaPaciente()">
+                <i class="fas fa-home me-2"></i>Ir al Inicio
+              </button>
+            </div>
+          </div>
+          
+          <!-- Estado por defecto -->
+          <div *ngIf="!isProcessing && !status" class="text-info">
             <i class="fas fa-spinner fa-spin fa-3x mb-3"></i>
             <h3>Procesando...</h3>
-            <p>Estamos procesando tu pago...</p>
+            <p>Estamos procesando tu solicitud...</p>
           </div>
+          
         </div>
       </div>
     </div>

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-payment-callback',
@@ -11,84 +13,189 @@ import { CommonModule } from '@angular/common';
 })
 export class PaymentCallbackComponent implements OnInit {
   status: string | null = null;
+  isProcessing = true;
+  message = 'Procesando tu pago...';
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
+    // Debug logging
+    console.log('💳 PaymentCallbackComponent initialized');
+    console.log('🌐 API URL:', environment.apiUrl);
+    
     // Obtener el status desde la URL
     this.route.url.subscribe(segments => {
+      console.log('🔍 URL segments:', segments);
       if (segments.length >= 2) {
         this.status = segments[1].path; // success, failure, pending
-        console.log('Status detectado:', this.status);
+        console.log('✅ Status detectado:', this.status);
+      } else {
+        console.log('⚠️ No se pudo detectar status desde URL');
       }
     });
 
     // También obtener parámetros de query si los hay
     this.route.queryParams.subscribe(params => {
-      console.log('Payment callback params:', params);
+      console.log('📋 Payment callback params completos:', params);
       
       // Procesar parámetros de MercadoPago
       const collectionId = params['collection_id'];
       const collectionStatus = params['collection_status'];
       const externalReference = params['external_reference'];
       
-      if (collectionId && collectionStatus) {
-        console.log('Parámetros de MercadoPago:', { collectionId, collectionStatus, externalReference });
+      console.log('🔍 Parámetros extraídos:', { 
+        collectionId, 
+        collectionStatus, 
+        externalReference 
+      });
+      
+      if (collectionId && collectionStatus && externalReference) {
+        console.log('✅ Parámetros válidos encontrados - procediendo a actualizar turno');
         
-        // Guardar información del pago
-        const paymentInfo = {
-          paymentId: collectionId,
-          paymentStatus: collectionStatus,
-          externalReference: externalReference,
-          timestamp: new Date().toISOString()
-        };
-        
-        if (collectionStatus === 'approved') {
-          console.log('✅ Pago aprobado, guardando información');
-          sessionStorage.setItem('payment_success_info', JSON.stringify(paymentInfo));
-          sessionStorage.setItem('payment_success', 'true');
-          
-          // Redirigir al paso 5 del wizard de reserva
-          setTimeout(() => {
-            this.router.navigate(['/reservarTurno'], { 
-              queryParams: { 
-                payment: 'success',
-                step: '5',
-                returnFromPayment: 'true'
-              } 
-            });
-          }, 2000);
-        } else if (collectionStatus === 'pending') {
-          console.log('⏳ Pago pendiente');
-          sessionStorage.setItem('payment_pending', 'true');
-          setTimeout(() => {
-            this.router.navigate(['/reservarTurno'], { 
-              queryParams: { 
-                payment: 'pending',
-                step: '5'
-              } 
-            });
-          }, 2000);
-        } else if (collectionStatus === 'rejected' || collectionStatus === 'failure') {
-          console.log('❌ Pago fallido');
-          sessionStorage.setItem('payment_failed', 'true');
-          setTimeout(() => {
-            this.router.navigate(['/reservarTurno'], { 
-              queryParams: { 
-                payment: 'failure',
-                step: '5'
-              } 
-            });
-          }, 2000);
-        }
+        // Actualizar el turno con la información del pago
+        this.updateTurnoPaymentStatus(externalReference, collectionId, collectionStatus);
+      } else {
+        console.log('⚠️ Parámetros insuficientes - usando redirección simple');
+        // Si no hay parámetros de pago, simplemente redirigir
+        this.handleRedirect();
       }
     });
   }
 
+  async updateTurnoPaymentStatus(turnoId: string, paymentId: string, paymentStatus: string) {
+    try {
+      this.message = 'Actualizando estado del turno...';
+      console.log('🔄 Iniciando actualización de turno:', { turnoId, paymentId, paymentStatus });
+      
+      const updateUrl = `${environment.apiUrl}/payment-callback/update-payment-status`;
+      console.log('📡 URL de actualización:', updateUrl);
+      
+      const requestBody = {
+        turnoId: turnoId,
+        paymentId: paymentId,
+        paymentStatus: paymentStatus
+      };
+      console.log('📦 Request body:', requestBody);
+      
+      // Llamar al backend para actualizar el estado del pago
+      const response = await this.http.post(updateUrl, requestBody).toPromise();
+      
+      console.log('✅ Respuesta del servidor:', response);
+      
+      // Guardar información del pago
+      const paymentInfo = {
+        paymentId: paymentId,
+        paymentStatus: paymentStatus,
+        externalReference: turnoId,
+        timestamp: new Date().toISOString(),
+        turnoUpdated: true
+      };
+      
+      if (paymentStatus === 'approved') {
+        console.log('✅ Pago aprobado y turno actualizado');
+        sessionStorage.setItem('payment_success_info', JSON.stringify(paymentInfo));
+        sessionStorage.setItem('payment_success', 'true');
+        this.message = '¡Pago exitoso! Turno confirmado';
+        this.status = 'success';
+        
+        // Redirigir al paso 5 del wizard de reserva
+        setTimeout(() => {
+          this.router.navigate(['/reservarTurno'], { 
+            queryParams: { 
+              payment: 'success',
+              step: '5',
+              returnFromPayment: 'true'
+            } 
+          });
+        }, 2000);
+      } else if (paymentStatus === 'pending') {
+        console.log('⏳ Pago pendiente');
+        sessionStorage.setItem('payment_pending', 'true');
+        this.message = 'Pago pendiente de confirmación';
+        this.status = 'pending';
+        setTimeout(() => {
+          this.router.navigate(['/reservarTurno'], { 
+            queryParams: { 
+              payment: 'pending',
+              step: '5'
+            } 
+          });
+        }, 2000);
+      } else if (paymentStatus === 'rejected' || paymentStatus === 'failure') {
+        console.log('❌ Pago fallido');
+        sessionStorage.setItem('payment_failed', 'true');
+        this.message = 'Pago rechazado. Intenta nuevamente';
+        this.status = 'failure';
+        setTimeout(() => {
+          this.router.navigate(['/reservarTurno'], { 
+            queryParams: { 
+              payment: 'failure',
+              step: '5'
+            } 
+          });
+        }, 2000);
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Error actualizando turno - Detalles completos:', error);
+      console.error('❌ Error response:', error?.error);
+      console.error('❌ Error status:', error?.status);
+      console.error('❌ Error message:', error?.message);
+      
+      this.message = 'Error procesando el pago. Contacta al soporte.';
+      this.status = 'error';
+      
+      // Aún así, guardar información para intentar recuperar más tarde
+      const errorInfo = {
+        turnoId: turnoId,
+        paymentId: paymentId,
+        paymentStatus: paymentStatus,
+        error: {
+          message: error?.message,
+          status: error?.status,
+          details: error?.error
+        },
+        timestamp: new Date().toISOString()
+      };
+      
+      sessionStorage.setItem('payment_error_info', JSON.stringify(errorInfo));
+      console.log('💾 Error info guardada en sessionStorage para recuperación:', errorInfo);
+      
+      setTimeout(() => {
+        this.router.navigate(['/vistaPaciente']);
+      }, 3000);
+    } finally {
+      this.isProcessing = false;
+      console.log('✅ Procesamiento finalizado');
+    }
+  }
+
+  handleRedirect() {
+    // Redirección simple sin parámetros de pago
+    this.isProcessing = false;
+    
+    if (this.status === 'success') {
+      this.message = 'Pago procesado correctamente';
+    } else if (this.status === 'pending') {
+      this.message = 'Pago pendiente de confirmación';
+    } else if (this.status === 'failure') {
+      this.message = 'El pago no pudo procesarse';
+    }
+    
+    setTimeout(() => {
+      this.router.navigate(['/vistaPaciente']);
+    }, 2000);
+  }
+
   goToReservar() {
     this.router.navigate(['/reservarTurno']);
+  }
+
+  goToVistaPaciente() {
+    this.router.navigate(['/vistaPaciente']);
   }
 }

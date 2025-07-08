@@ -51,13 +51,13 @@
                   <td>{{ turno.tratamiento }}</td>
                   <td>
                     <span [class]="getStatusClass(turno.estado)">
-                      {{ turno.estado }}
+                      {{ getStatusLabel(turno.estado) }}
                     </span>
                   </td>
                   <td class="text-success fw-bold">${{ turno.precioFinal }}</td>
                   <td>
-                    <span [ngClass]="getPaymentStatusClass(turno.paymentStatus || '')">
-                      {{ getPaymentStatusLabel(turno.paymentStatus || '') }}
+                    <span [ngClass]="getPaymentStatusClass(turno.paymentStatus || turno.metodoPago || '')">
+                      {{ getPaymentStatusLabel(turno.paymentStatus || turno.metodoPago || '') }}
                     </span>
                   </td>
                   <td class="text-center">

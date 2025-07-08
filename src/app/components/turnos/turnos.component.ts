@@ -304,13 +304,31 @@ export class TurnosComponent implements OnInit {
 
   loadTurnosData(): void {
     this.isLoading = true;
+    console.log('🔄 Cargando turnos desde API...');
+    
     // Forzar recarga desde backend para obtener el estado actualizado
     this.turnoService.getTurnosFromAPI().subscribe({
       next: (turnos) => {
+        console.log('✅ Turnos recibidos del backend:', turnos);
+        
+        // Debug: mostrar información de pago de cada turno
+        turnos.forEach((turno, index) => {
+          console.log(`📋 Turno ${index + 1}:`, {
+            nroTurno: turno.nroTurno,
+            estado: turno.estado,
+            paymentStatus: turno.paymentStatus,
+            paymentId: turno.paymentId,
+            metodoPago: turno.metodoPago,
+            fechaPago: turno.fechaPago,
+            montoRecibido: turno.montoRecibido
+          });
+        });
+        
         this.turnos = turnos;
         this.isLoading = false;
       },
-      error: () => {
+      error: (error) => {
+        console.error('❌ Error cargando turnos:', error);
         this.turnos = [];
         this.isLoading = false;
       }
@@ -417,23 +435,51 @@ export class TurnosComponent implements OnInit {
     this.selectedTurnoParaCancelar = null;
   }
 
-  getPaymentStatusLabel(status: string): string {
-    switch (status) {
-      case 'approved': return 'Aprobado';
-      case 'refunded': return 'Reembolsado';
-      case 'cancelled': return 'Cancelado';
-      case 'pending': return 'Pendiente';
-      default: return status ? status : '—';
+  // Nuevas funciones para manejo de estado de pago
+  getPaymentStatusClass(paymentStatus: string): string {
+    switch (paymentStatus) {
+      case 'approved': 
+      case 'pagado': 
+        return 'badge bg-success text-white';
+      case 'pending': 
+      case 'pendiente_pago_online': 
+        return 'badge bg-warning text-dark';
+      case 'rejected': 
+      case 'cancelled': 
+        return 'badge bg-danger text-white';
+      case 'refunded': 
+        return 'badge bg-info text-white';
+      case 'efectivo': 
+        return 'badge bg-secondary text-white';
+      default: 
+        return 'badge bg-light text-dark';
     }
   }
 
-  getPaymentStatusClass(status: string): string {
-    switch (status) {
-      case 'approved': return 'badge bg-success';
-      case 'refunded': return 'badge bg-info';
-      case 'cancelled': return 'badge bg-danger';
-      case 'pending': return 'badge bg-warning text-dark';
-      default: return 'badge bg-secondary';
+  getPaymentStatusLabel(paymentStatus: string): string {
+    switch (paymentStatus) {
+      case 'approved': return '✅ Pagado Online';
+      case 'pending': return '⏳ Pago Pendiente';
+      case 'rejected': return '❌ Pago Rechazado';
+      case 'cancelled': return '🚫 Pago Cancelado';
+      case 'refunded': return '💰 Reembolsado';
+      case 'efectivo': return '💵 Pago en Efectivo';
+      case '': return '⏸️ Sin Procesar';
+      default: return '❓ ' + (paymentStatus || 'Sin Estado');
+    }
+  }
+
+  // Función para obtener etiqueta de estado más descriptiva
+  getStatusLabel(estado: string): string {
+    switch (estado) {
+      case 'reservado': return 'Reservado';
+      case 'reservado_pendiente_pago': return 'Reservado - Pago Pendiente';
+      case 'pendiente_pago_online': return 'Esperando Pago Online';
+      case 'pagado': return 'Pagado';
+      case 'completado': return 'Completado';
+      case 'cancelado': return 'Cancelado';
+      case 'pendiente': return 'Pendiente';
+      default: return estado || 'Sin Estado';
     }
   }
 
@@ -548,13 +594,17 @@ export class TurnosComponent implements OnInit {
     return filtered;
   }
 
+  // Mejorar la función getStatusClass para incluir los nuevos estados
   getStatusClass(estado: string): string {
-    // Mejorar visualización de estados con badges de colores
     switch (estado) {
-      case 'reservado': return 'badge bg-primary';
-      case 'completado': return 'badge bg-success';
-      case 'cancelado': return 'badge bg-danger';
-      default: return 'badge bg-secondary';
+      case 'reservado': return 'badge bg-primary text-white';
+      case 'reservado_pendiente_pago': return 'badge bg-info text-white';
+      case 'pendiente_pago_online': return 'badge bg-warning text-dark';
+      case 'pagado': return 'badge bg-success text-white';
+      case 'completado': return 'badge bg-dark text-white';
+      case 'cancelado': return 'badge bg-danger text-white';
+      case 'pendiente': return 'badge bg-secondary text-white';
+      default: return 'badge bg-light text-dark';
     }
   }
 
