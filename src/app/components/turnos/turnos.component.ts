@@ -311,29 +311,64 @@ export class TurnosComponent implements OnInit {
   loadTurnosData(): void {
     this.isLoading = true;
     console.log('🔄 Cargando turnos desde API...');
+    console.log('👤 Usuario actual:', this.user);
+    console.log('👤 Paciente actual:', this.pacienteActual);
     
     // Forzar recarga desde backend para obtener el estado actualizado
     this.turnoService.getTurnosFromAPI().subscribe({
       next: (turnos) => {
         console.log('✅ Turnos recibidos del backend:', turnos);
+        console.log('📊 Total de turnos recibidos:', turnos.length);
+        
+        // Debug específico para pacientes
+        if (this.user?.tipoUsuario === 'paciente' && this.pacienteActual) {
+          console.log('🔍 Buscando turnos para paciente:', this.pacienteActual);
+          
+          const turnosDelPaciente = turnos.filter(turno => {
+            const pacienteId = this.pacienteActual?._id || this.pacienteActual?.id;
+            
+            // Verificar por pacienteId
+            if (pacienteId && turno.pacienteId) {
+              const idMatch = turno.pacienteId.toString() === pacienteId.toString();
+              if (idMatch) return true;
+            }
+            
+            // Verificar por nombre y apellido como fallback
+            if (this.pacienteActual?.nombre && this.pacienteActual?.apellido && turno.nombre && turno.apellido) {
+              const nombreMatch = turno.nombre.toLowerCase().trim() === this.pacienteActual.nombre.toLowerCase().trim();
+              const apellidoMatch = turno.apellido.toLowerCase().trim() === this.pacienteActual.apellido.toLowerCase().trim();
+              return nombreMatch && apellidoMatch;
+            }
+            
+            return false;
+          });
+          
+          console.log(`🎯 Turnos encontrados para ${this.pacienteActual.nombre} ${this.pacienteActual.apellido}:`, turnosDelPaciente.length);
+          console.log('📋 Turnos del paciente:', turnosDelPaciente);
+        }
         
         // Debug: mostrar información de pago de cada turno
         turnos.forEach((turno, index) => {
-          console.log(`📋 Turno ${index + 1}:`, {
-            nroTurno: turno.nroTurno,
-            estado: turno.estado,
-            paymentStatus: turno.paymentStatus,
-            paymentId: turno.paymentId,
-            metodoPago: turno.metodoPago,
-            fechaPago: turno.fechaPago,
-            montoRecibido: turno.montoRecibido,
-            // Mostrar el valor que se usará en la template
-            finalPaymentValue: turno.paymentStatus || turno.metodoPago || ''
-          });
+          if (index < 5) { // Solo mostrar los primeros 5 para no saturar la consola
+            console.log(`📋 Turno ${index + 1}:`, {
+              nroTurno: turno.nroTurno,
+              paciente: `${turno.nombre} ${turno.apellido}`,
+              estado: turno.estado,
+              paymentStatus: turno.paymentStatus,
+              paymentId: turno.paymentId,
+              metodoPago: turno.metodoPago,
+              fechaPago: turno.fechaPago,
+              montoRecibido: turno.montoRecibido,
+              // Mostrar el valor que se usará en la template
+              finalPaymentValue: turno.paymentStatus || turno.metodoPago || ''
+            });
+          }
         });
         
         this.turnos = turnos;
         this.isLoading = false;
+        
+        console.log('✅ Turnos asignados al componente. Total:', this.turnos.length);
       },
       error: (error) => {
         console.error('❌ Error cargando turnos:', error);
@@ -358,23 +393,48 @@ export class TurnosComponent implements OnInit {
   }
 
   loadPacienteData(): void {
-    if (!this.user?.id) return;
+    if (!this.user?.id) {
+      console.warn('⚠️ No hay user.id disponible para cargar datos del paciente');
+      return;
+    }
+    
+    console.log('👤 Cargando datos del paciente para userId:', this.user.id);
     
     this.pacienteService.getPacientes().subscribe({
       next: (pacientes) => {
+        console.log('📋 Pacientes disponibles:', pacientes.length);
+        
         // Buscar el paciente que corresponde al usuario logueado
         this.pacienteActual = pacientes.find(p => p.userId === this.user?.id.toString()) || null;
         
         if (this.pacienteActual) {
-          console.log('Paciente encontrado:', this.pacienteActual);
+          console.log('✅ Paciente encontrado:', {
+            id: this.pacienteActual._id || this.pacienteActual.id,
+            nombre: this.pacienteActual.nombre,
+            apellido: this.pacienteActual.apellido,
+            userId: this.pacienteActual.userId
+          });
+          
           // Configurar el formulario con el pacienteId correcto
           this.turnoForm.pacienteId = this.pacienteActual._id || this.pacienteActual.id?.toString() || '';
+          
+          // Recargar turnos después de obtener los datos del paciente
+          if (this.currentView === 'mis-turnos') {
+            console.log('🔄 Recargando turnos después de obtener datos del paciente...');
+            this.loadTurnosData();
+          }
         } else {
-          console.warn('No se encontró información del paciente para el usuario:', this.user?.id);
+          console.warn('⚠️ No se encontró información del paciente para el usuario:', this.user?.id);
+          console.log('📋 Pacientes disponibles para debug:', pacientes.map(p => ({
+            id: p._id || p.id,
+            nombre: p.nombre,
+            apellido: p.apellido,
+            userId: p.userId
+          })));
         }
       },
       error: (error) => {
-        console.error('Error al cargar datos del paciente:', error);
+        console.error('❌ Error al cargar datos del paciente:', error);
       }
     });
   }
@@ -391,6 +451,12 @@ export class TurnosComponent implements OnInit {
 
   navigateTo(view: string): void {
     this.currentView = view;
+    
+    // Si navegamos a mis-turnos, recargar los datos para asegurar que estén actualizados
+    if (view === 'mis-turnos') {
+      console.log('🔄 Navegando a Mis Turnos - recargando datos...');
+      this.loadTurnosData();
+    }
   }
 
   getCurrentDate(): string {

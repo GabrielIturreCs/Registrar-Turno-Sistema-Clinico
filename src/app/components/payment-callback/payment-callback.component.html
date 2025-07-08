@@ -18,7 +18,16 @@
             <i class="fas fa-check-circle fa-3x mb-3"></i>
             <h3>¡Pago Exitoso!</h3>
             <p>Tu turno ha sido confirmado y el pago procesado correctamente.</p>
-            <div class="d-grid gap-2">
+            
+            <!-- Cuenta regresiva -->
+            <div *ngIf="showCountdown" class="mt-3 mb-3">
+              <div class="alert alert-success" role="alert">
+                <i class="fas fa-clock me-2"></i>
+                Redirigiendo a tu panel en <strong>{{ countdown }}</strong> segundos...
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2" *ngIf="!showCountdown">
               <button class="btn btn-success" (click)="goToVistaPaciente()">
                 <i class="fas fa-calendar-check me-2"></i>Ver Mis Turnos
               </button>
@@ -33,7 +42,16 @@
             <i class="fas fa-clock fa-3x mb-3"></i>
             <h3>Pago Pendiente</h3>
             <p>Tu pago está siendo procesado. Te notificaremos cuando se confirme.</p>
-            <div class="d-grid gap-2">
+            
+            <!-- Cuenta regresiva -->
+            <div *ngIf="showCountdown" class="mt-3 mb-3">
+              <div class="alert alert-warning" role="alert">
+                <i class="fas fa-clock me-2"></i>
+                Redirigiendo a tu panel en <strong>{{ countdown }}</strong> segundos...
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2" *ngIf="!showCountdown">
               <button class="btn btn-warning" (click)="goToVistaPaciente()">
                 <i class="fas fa-home me-2"></i>Ir a Mis Turnos
               </button>
@@ -46,7 +64,16 @@
             <h3>{{ status === 'error' ? 'Error de Sistema' : 'Pago Fallido' }}</h3>
             <p *ngIf="status === 'failure'">Hubo un problema con el pago. Por favor, intenta nuevamente.</p>
             <p *ngIf="status === 'error'">Error procesando el pago. Contacta al soporte si persiste.</p>
-            <div class="d-grid gap-2">
+            
+            <!-- Cuenta regresiva -->
+            <div *ngIf="showCountdown" class="mt-3 mb-3">
+              <div class="alert alert-danger" role="alert">
+                <i class="fas fa-clock me-2"></i>
+                Redirigiendo a tu panel en <strong>{{ countdown }}</strong> segundos...
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2" *ngIf="!showCountdown">
               <button class="btn btn-danger" (click)="goToReservar()">
                 <i class="fas fa-redo me-2"></i>Intentar Nuevamente
               </button>

@@ -15,6 +15,8 @@ export class PaymentCallbackComponent implements OnInit {
   status: string | null = null;
   isProcessing = true;
   message = 'Procesando tu pago...';
+  countdown = 0;
+  showCountdown = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -102,40 +104,22 @@ export class PaymentCallbackComponent implements OnInit {
         this.message = '¡Pago exitoso! Turno confirmado';
         this.status = 'success';
         
-        // Redirigir a la vista del paciente para ver sus turnos actualizados
-        setTimeout(() => {
-          console.log('🔄 Redirigiendo a vista del paciente...');
-          this.router.navigate(['/vistaPaciente'], { 
-            queryParams: { 
-              payment: 'success',
-              turnoUpdated: 'true'
-            } 
-          });
-        }, 2000);
+        // Iniciar cuenta regresiva de 3 segundos
+        this.startCountdown();
+        
       } else if (paymentStatus === 'pending') {
         console.log('⏳ Pago pendiente');
         sessionStorage.setItem('payment_pending', 'true');
         this.message = 'Pago pendiente de confirmación';
         this.status = 'pending';
-        setTimeout(() => {
-          this.router.navigate(['/vistaPaciente'], { 
-            queryParams: { 
-              payment: 'pending'
-            } 
-          });
-        }, 2000);
+        this.startCountdown();
+        
       } else if (paymentStatus === 'rejected' || paymentStatus === 'failure') {
         console.log('❌ Pago fallido');
         sessionStorage.setItem('payment_failed', 'true');
         this.message = 'Pago rechazado. Intenta nuevamente';
         this.status = 'failure';
-        setTimeout(() => {
-          this.router.navigate(['/vistaPaciente'], { 
-            queryParams: { 
-              payment: 'failure'
-            } 
-          });
-        }, 2000);
+        this.startCountdown();
       }
       
     } catch (error: any) {
@@ -172,6 +156,44 @@ export class PaymentCallbackComponent implements OnInit {
     }
   }
 
+  startCountdown() {
+    this.showCountdown = true;
+    this.countdown = 3;
+    this.isProcessing = false;
+    
+    console.log('⏰ Iniciando cuenta regresiva de 3 segundos...');
+    
+    const countdownInterval = setInterval(() => {
+      this.countdown--;
+      console.log(`⏰ Cuenta regresiva: ${this.countdown}`);
+      
+      if (this.countdown <= 0) {
+        clearInterval(countdownInterval);
+        console.log('🔄 Redirigiendo a vistaPaciente...');
+        
+        // Asegurar que la sesión se mantenga activa
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const userData = localStorage.getItem('user');
+          if (userData) {
+            console.log('✅ Sesión del usuario mantenida en localStorage');
+          } else {
+            console.warn('⚠️ No se encontró sesión en localStorage');
+          }
+        }
+        
+        // Redirigir a vistaPaciente manteniendo la sesión
+        this.router.navigate(['/vistaPaciente'], { 
+          queryParams: { 
+            payment: this.status,
+            turnoUpdated: 'true',
+            refresh: 'true',
+            timestamp: Date.now() // Para forzar refresh
+          } 
+        });
+      }
+    }, 1000);
+  }
+
   handleRedirect() {
     // Redirección simple sin parámetros de pago
     this.isProcessing = false;
@@ -184,9 +206,8 @@ export class PaymentCallbackComponent implements OnInit {
       this.message = 'El pago no pudo procesarse';
     }
     
-    setTimeout(() => {
-      this.router.navigate(['/vistaPaciente']);
-    }, 2000);
+    // Iniciar cuenta regresiva de 3 segundos para todos los casos
+    this.startCountdown();
   }
 
   goToReservar() {
@@ -194,6 +215,23 @@ export class PaymentCallbackComponent implements OnInit {
   }
 
   goToVistaPaciente() {
-    this.router.navigate(['/vistaPaciente']);
+    // Asegurar que la sesión se mantenga activa antes de navegar
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        console.warn('⚠️ No se encontró sesión en localStorage');
+      } else {
+        console.log('✅ Sesión del usuario confirmada antes de navegación');
+      }
+    }
+    
+    this.router.navigate(['/vistaPaciente'], {
+      queryParams: {
+        payment: this.status,
+        turnoUpdated: 'true',
+        refresh: 'true',
+        manual: 'true'
+      }
+    });
   }
 }

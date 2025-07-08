@@ -677,13 +677,15 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
       if (params['payment'] === 'success' && params['turnoUpdated'] === 'true') {
         console.log('🎉 Detectado retorno exitoso del pago');
         
-        // Mostrar mensaje de éxito
+        // Mostrar mensaje de éxito con delay
         setTimeout(() => {
           this.notificationService.showSuccess('¡Pago realizado exitosamente! Tu turno ha sido confirmado.');
         }, 500);
         
-        // Forzar recarga de datos
-        this.refreshData();
+        // Forzar recarga de datos con un delay adicional para asegurar que el backend tenga los datos actualizados
+        setTimeout(() => {
+          this.forceDataRefresh();
+        }, 1000);
         
         // Limpiar los parámetros de la URL
         this.router.navigate(['/vistaPaciente'], { replaceUrl: true });
@@ -691,15 +693,40 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
       } else if (params['payment'] === 'pending') {
         console.log('⏳ Detectado pago pendiente');
         this.notificationService.showWarning('Tu pago está siendo procesado. Te notificaremos cuando se confirme.');
-        this.refreshData();
+        setTimeout(() => {
+          this.forceDataRefresh();
+        }, 1000);
         this.router.navigate(['/vistaPaciente'], { replaceUrl: true });
         
       } else if (params['payment'] === 'failure') {
         console.log('❌ Detectado pago fallido');
         this.notificationService.showError('Hubo un problema con el pago. Puedes intentar nuevamente.');
-        this.refreshData();
+        setTimeout(() => {
+          this.forceDataRefresh();
+        }, 1000);
         this.router.navigate(['/vistaPaciente'], { replaceUrl: true });
       }
+      
+      // Si hay un parámetro refresh, forzar actualización independientemente del estado
+      if (params['refresh'] === 'true') {
+        console.log('🔄 Parámetro refresh detectado - actualizando datos');
+        setTimeout(() => {
+          this.forceDataRefresh();
+        }, 500);
+      }
     });
+  }
+
+  // Nuevo método para forzar actualización de datos
+  forceDataRefresh(): void {
+    console.log('🔄 Forzando actualización completa de datos...');
+    this.isLoading = true;
+    
+    // Recargar datos del paciente y turnos
+    this.loadPacienteData();
+    this.loadTratamientos();
+    
+    // También notificar al servicio de refresh por si otros componentes necesitan actualizarse
+    this.dataRefreshService.triggerRefresh('all');
   }
 }
