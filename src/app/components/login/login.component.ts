@@ -98,14 +98,8 @@ export class LoginComponent implements OnInit {
             if (res.status === 1) {
               // Verificar que tengamos el token y la información del usuario
               if (res.token && res.user) {
-                // Guardar token JWT
+                // Guardar token JWT y usuario usando el servicio
                 this.authService.setToken(res.token);
-                
-                // Guardar información del usuario
-                localStorage.setItem('rol', res.user.tipoUsuario);
-                localStorage.setItem('user', JSON.stringify(res.user));
-                
-                // Establecer usuario actual en el servicio
                 this.authService.setCurrentUser(res.user);
                 
                 console.log('✅ Token guardado:', res.token.substring(0, 20) + '...');
@@ -161,9 +155,8 @@ export class LoginComponent implements OnInit {
                 console.log('✅ Respuesta del backend:', res);
                 
                 if (res.success) {
-                  localStorage.setItem('token', res.token);
-                  localStorage.setItem('rol', res.user.tipoUsuario);
-                  localStorage.setItem('user', JSON.stringify(res.user));
+                  // Guardar token y usuario usando el servicio
+                  this.authService.setToken(res.token);
                   this.authService.setCurrentUser(res.user);
                   this.notificationService.showSuccess(`¡Bienvenido ${res.user.nombre || res.user.nombreUsuario || 'Usuario'}!`);
                   
