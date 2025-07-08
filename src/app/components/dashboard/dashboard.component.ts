@@ -576,6 +576,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  marcarComoPagado(turno: Turno): void {
+    const turnoId = turno._id || turno.id?.toString() || '';
+    this.turnoService.cambiarEstadoTurno(turnoId, 'pagado').subscribe({
+      next: () => {
+        this.loadTurnosData();
+        this.notificationService.showSuccess('Turno marcado como pagado');
+      },
+      error: () => this.notificationService.showError('Error al marcar el turno como pagado')
+    });
+  }
+
   // Método público para recargar todas las estadísticas
   refreshDashboard(): void {
     this.loadTurnosData();

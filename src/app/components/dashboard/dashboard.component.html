@@ -507,6 +507,9 @@
                   <button *ngIf="turno.estado === 'reservado'" class="btn btn-outline-danger btn-sm px-3" (click)="cancelarTurno(turno)">
                     <i class="fas fa-times"></i> Cancelar
                   </button>
+                  <button *ngIf="turno.estado === 'reservado' && user?.tipoUsuario === 'dentista'" class="btn btn-outline-success btn-sm px-3 ms-2" (click)="marcarComoPagado(turno)">
+                    <i class="fas fa-check"></i> Marcar como Pagado
+                  </button>
                 </div>
               </div>
             </div>
