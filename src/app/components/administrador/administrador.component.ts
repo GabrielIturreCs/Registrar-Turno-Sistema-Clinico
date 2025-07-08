@@ -1,86 +1,140 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { User } from '../../interfaces';
+import { PacienteService } from '../../services/paciente.service';
+import { DentistaService } from '../../services/dentista.service';
+import { RegisterService } from '../../services/register.service';
+
 @Component({
-  selector: 'app-administrador',
-  imports: [CommonModule, FormsModule],
+  selector: 'app-admin',
+  imports: [FormsModule, CommonModule],
   templateUrl: './administrador.component.html',
-  styleUrl: './administrador.component.css'
+  styleUrls: ['./administrador.component.css']
 })
-export class AdministradorComponent implements OnInit{
-  currentView: string = 'admin';
-  user: User | null = null;
-  searchTerm: string = '';
-  filterTipo: string = 'todos';
-
-  usuarios: User[] = [
-    { id: 1, nombreUsuario: 'admin', nombre: 'Administrador', apellido: 'Sistema', tipoUsuario: 'administrador', dni: '12345678', telefono: '111111111' },
-    { id: 2, nombreUsuario: 'dr.garcia', nombre: 'María', apellido: 'García', tipoUsuario: 'dentista', dni: '87654321', telefono: '222222222' },
-    { id: 3, nombreUsuario: 'juan.perez', nombre: 'Juan', apellido: 'Pérez', tipoUsuario: 'paciente', dni: '11223344', telefono: '333333333', obraSocial: 'OSDE' }
+export class AdminComponent implements OnInit {
+  currentView = 'admin';
+  user = { tipoUsuario: 'administrador' };
+  searchTerm = '';
+  filterTipo = 'todos';
+  usuarios = [
+    { nombre: 'Juan', apellido: 'Pérez', tipoUsuario: 'paciente', nombreUsuario: 'jperez', dni: '12345678', telefono: '123-456-7890' },
+    { nombre: 'María', apellido: 'González', tipoUsuario: 'dentista', nombreUsuario: 'mgonzalez', dni: '87654321', telefono: '987-654-3210' }
   ];
+  usuarioAEliminar: any;
+  showDeleteModal = false;
+  showEditModal = false;
+  toastMessage = '';
+  editingUser = { nombre: '', apellido: '', tipoUsuario: 'paciente', nombreUsuario: '', dni: '', telefono: '' };
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private pacienteService: PacienteService,
+    private dentistaService: DentistaService,
+    private registerService: RegisterService
+  ) {}
 
   ngOnInit(): void {
-    this.loadUserData();
-  }
-  // Cargar datos del usuario desde localStorage
-  loadUserData(): void {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      this.user = JSON.parse(userStr);
-      if (this.user?.tipoUsuario !== 'administrador') {
-        this.router.navigate(['/dashboard']);
-      }
-    } else {
-      this.router.navigate(['/login']);
-    }
+    this.cargarUsuarios();
   }
 
-  // Navegar a diferentes vistas
-  navigateTo(view: string): void {
-    this.router.navigate([`/${view}`]);
+  cargarUsuarios(): void {
+    this.usuarios = [];
+    
+    // Cargar pacientes
+    this.pacienteService.getPacientes().subscribe(pacientes => {
+      const pacientesMapped = pacientes.map((p: any) => ({
+        ...p,
+        tipoUsuario: 'paciente',
+        nombreUsuario: (p as any).nombreUsuario || (p as any).email || '',
+        telefono: p.telefono || ''
+      }));
+      this.usuarios = [...this.usuarios, ...pacientesMapped];
+    });
+    
+    // Cargar dentistas
+    this.dentistaService.getDentistas().subscribe((dentistas: any[]) => {
+      const dentistasMapped = dentistas.map((d: any) => ({
+        ...d,
+        tipoUsuario: 'dentista',
+        nombreUsuario: d.nombreUsuario || d.email || '',
+        telefono: d.telefono || ''
+      }));
+      this.usuarios = [...this.usuarios, ...dentistasMapped];
+    });
+    
+    // Cargar administradores
+    this.registerService.getUsuarios().subscribe((admins: any[]) => {
+      const adminsMapped = admins.map((a: any) => ({
+        ...a,
+        tipoUsuario: 'administrador',
+        nombreUsuario: a.nombreUsuario || a.email || '',
+        telefono: a.telefono || ''
+      }));
+      this.usuarios = [...this.usuarios, ...adminsMapped];
+    });
   }
 
-  // Eliminar usuario
-  eliminarUsuario(usuario: User): void {
-    if (confirm(`¿Estás seguro de que quieres eliminar al usuario ${usuario.nombre} ${usuario.apellido}?`)) {
-      this.usuarios = this.usuarios.filter(u => u.id !== usuario.id);
-      alert('Usuario eliminado exitosamente');
-    }
+  getUserCardClass(tipoUsuario: string) {
+    return `user-card ${tipoUsuario}`;
   }
 
-  // Filtrar usuarios según búsqueda y tipo
-  get filteredUsuarios(): User[] {
-    let filtered = this.usuarios;
-
-    // Filtrar por búsqueda
-    if (this.searchTerm.trim() !== '') {
-      const search = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(usuario => 
-        usuario.nombreUsuario.toLowerCase().includes(search) ||
-        usuario.nombre.toLowerCase().includes(search) ||
-        usuario.apellido.toLowerCase().includes(search) ||
-        usuario.dni?.includes(search)
-      );
-    }
-
-    // Filtrar por tipo
-    if (this.filterTipo !== 'todos') {
-      filtered = filtered.filter(usuario => usuario.tipoUsuario === this.filterTipo);
-    }
-
-    return filtered;
+  getUserBorderClass(tipoUsuario: string) {
+    return `border-${tipoUsuario === 'administrador' ? 'danger' : tipoUsuario === 'dentista' ? 'primary' : 'warning'}`;
   }
-  // Obtener clase CSS según el tipo de usuario
-  getTipoClass(tipo: string): string {
-    switch (tipo) {
-      case 'administrador': return 'badge bg-danger';
-      case 'dentista': return 'badge bg-primary';
-      case 'paciente': return 'badge bg-success';
-      default: return 'badge bg-secondary';
+
+  getTipoClass(tipoUsuario: string) {
+    return `badge-${tipoUsuario}`;
+  }
+
+  openDeleteModal(usuario: any) {
+    this.usuarioAEliminar = usuario;
+    this.showDeleteModal = true;
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.usuarioAEliminar = null;
+  }
+
+  confirmarEliminarUsuario() {
+    this.usuarios = this.usuarios.filter(u => u !== this.usuarioAEliminar);
+    this.toastMessage = 'Usuario eliminado con éxito';
+    this.closeDeleteModal();
+    setTimeout(() => this.toastMessage = '', 3000);
+    this.cargarUsuarios();
+  }
+
+  openEditModal(usuario: any) {
+    this.editingUser = { ...usuario };
+    this.showEditModal = true;
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editingUser = { nombre: '', apellido: '', tipoUsuario: 'paciente', nombreUsuario: '', dni: '', telefono: '' };
+  }
+
+  updateUser() {
+    const index = this.usuarios.findIndex(u => u.nombreUsuario === this.editingUser.nombreUsuario);
+    if (index !== -1) {
+      this.usuarios[index] = { ...this.editingUser };
     }
+    this.toastMessage = 'Usuario actualizado con éxito';
+    this.closeEditModal();
+    setTimeout(() => this.toastMessage = '', 3000);
+    this.cargarUsuarios();
+  }
+
+  navigateTo(view: string) {
+    this.router.navigate([view]);
+  }
+
+  get filteredUsuarios() {
+    return this.usuarios.filter(usuario =>
+      (usuario.nombre.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+       usuario.apellido.toLowerCase().includes(this.searchTerm.toLowerCase())) &&
+      (this.filterTipo === 'todos' || usuario.tipoUsuario === this.filterTipo)
+    );
   }
 }

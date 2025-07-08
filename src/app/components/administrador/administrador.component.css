@@ -1,0 +1,465 @@
+/* Panel de Administración Mejorado */
+.admin-panel {
+  padding: 30px;
+  background: linear-gradient(to bottom, #046d94, #000000);
+  min-height: 100vh;
+}
+
+.admin-bg {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid #4fd1ff;
+}
+
+/* Dashboard de estadísticas */
+.stats-card {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  border: 1px solid #4fd1ff;
+}
+
+.stats-card .card-title {
+  color: white;
+  font-weight: 600;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  backdrop-filter: blur(5px);
+  transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-5px);
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Cards de usuario mejoradas */
+.user-card {
+  border-radius: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: none;
+  overflow: hidden;
+  position: relative;
+}
+
+.user-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.user-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.user-card.admin {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+  border: 1px solid #4fd1ff;
+}
+
+.user-card.dentista {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+  border: 1px solid #4fd1ff;
+}
+
+.user-card.paciente {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+  border: 1px solid #4fd1ff;
+}
+
+/* Avatar mejorado */
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  border: 3px solid #4fd1ff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.user-card:hover .user-avatar {
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.user-card.paciente .user-avatar {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+}
+
+.user-card.dentista .user-avatar {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+}
+
+.user-card.admin .user-avatar {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+}
+
+/* Información del usuario */
+.user-info {
+  font-size: 0.9rem;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.info-item i {
+  width: 20px;
+  text-align: center;
+}
+
+/* Badges mejorados */
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-administrador {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+}
+
+.badge-dentista {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+}
+
+.badge-paciente {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+}
+
+.badge-success {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+}
+
+.badge-secondary {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+}
+
+/* Botones mejorados */
+.btn {
+  border-radius: 25px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  border: none;
+  padding: 8px 16px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(4, 109, 148, 0.4);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #4fd1ff 0%, #046d94 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(79, 209, 255, 0.6);
+}
+
+.btn-outline-primary {
+  border: 2px solid #4fd1ff;
+  color: #4fd1ff;
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+  border-color: #4fd1ff;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(4, 109, 148, 0.4);
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #4fd1ff 0%, #046d94 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(79, 209, 255, 0.6);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(225, 112, 85, 0.4);
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #d63031 0%, #e17055 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(225, 112, 85, 0.6);
+}
+
+.btn-outline-secondary {
+  border: 2px solid #4fd1ff;
+  color: #4fd1ff;
+  background: transparent;
+}
+
+.btn-outline-secondary:hover {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+  border-color: #4fd1ff;
+}
+
+/* Filtros y búsqueda */
+.filter-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  border: 1px solid #4fd1ff;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.form-control, .form-select {
+  border-radius: 10px;
+  border: 2px solid #4fd1ff;
+  padding: 12px 15px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #4fd1ff;
+  box-shadow: 0 0 0 0.2rem rgba(79, 209, 255, 0.25);
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Modales mejorados */
+.modal-content {
+  border-radius: 20px;
+  border: 1px solid #4fd1ff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  color: white;
+  border-bottom: none;
+  padding: 20px 25px;
+}
+
+.modal-title {
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.modal-body {
+  padding: 25px;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+}
+
+.modal-footer {
+  border-top: none;
+  background: rgba(0, 0, 0, 0.9);
+  padding: 20px 25px;
+}
+
+/* Toast mejorado */
+.toast {
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.toast-body {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Spinner personalizado */
+.spinner-border {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Estados de carga */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  z-index: 10;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-panel {
+    padding: 15px;
+  }
+  
+  .user-card {
+    margin-bottom: 20px;
+  }
+  
+  .stat-item {
+    margin-bottom: 15px;
+  }
+  
+  .modal-dialog {
+    margin: 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-bg {
+    border-radius: 10px;
+  }
+  
+  .user-card {
+    border-radius: 10px;
+  }
+  
+  .btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.stat-item {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #4fd1ff 0%, #046d94 100%);
+}
+
+/* Efectos hover adicionales */
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  border-radius: 20px;
+}
+
+/* Contador de resultados */
+.badge.bg-primary {
+  background: linear-gradient(135deg, #046d94 0%, #4fd1ff 100%) !important;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+/* Estados vacíos mejorados */
+.text-muted {
+  color: #4fd1ff !important;
+}
+
+.fa-user-slash {
+  color: #4fd1ff;
+}
+
+/* Tooltips personalizados */
+[data-bs-toggle="tooltip"] {
+  position: relative;
+}
+
+/* Mejoras para accesibilidad */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}

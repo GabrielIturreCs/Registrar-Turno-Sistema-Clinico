@@ -1,145 +1,594 @@
 <!-- Dashboard Principal -->
-<div class="container-fluid">
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-      <div class="container-fluid">
-        <span class="navbar-brand">
-          <i class="fas fa-tooth"></i> DentalTurnos
-        </span>
-        <div class="navbar-nav ms-auto">
-          <span class="navbar-text me-3">
-            Bienvenido, {{ user?.nombre }} {{ user?.apellido }}
-            <span [class]="getTipoClass(user?.tipoUsuario || '')">{{ user?.tipoUsuario }}</span>
-          </span>
-          <button class="btn btn-outline-light btn-sm" (click)="logout()">
-            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-          </button>
+<div class="container-fluid dashboard-container py-4" 
+     [ngClass]="{
+       'admin-dashboard': user?.tipoUsuario === 'administrador' && !isPacienteView,
+       'dentist-dashboard': user?.tipoUsuario === 'dentista',
+       'paciente-dashboard': user?.tipoUsuario === 'paciente'
+     }">
+  <div *ngIf="user?.tipoUsuario === 'paciente'" class="dashboard-bg-blur"></div>
+  
+  <!-- Header para vista de paciente específico -->
+  <div *ngIf="isPacienteView && selectedPaciente" class="alert alert-info mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-3">
+        <i class="bi bi-person-circle fs-1 text-primary"></i>
+        <div>
+          <h5 class="mb-1">Dashboard de {{ selectedPaciente.nombre }} {{ selectedPaciente.apellido }}</h5>
+          <p class="mb-0 text-muted">
+            DNI: {{ selectedPaciente.dni }} | 
+            Obra Social: <span [class]="getObraSocialClass(selectedPaciente.obraSocial)">{{ selectedPaciente.obraSocial }}</span>
+          </p>
         </div>
       </div>
-    </nav>
-    <!-- Menú de navegación -->
+      <button class="btn btn-outline-secondary" (click)="volverAPacientes()">
+        <i class="bi bi-arrow-left me-1"></i>
+        Volver a Pacientes
+      </button>
+    </div>
+  </div>
+
+  <!-- Header (navbar) siempre visible -->
+  <nav class="navbar navbar-expand-lg mb-4 rounded-4 shadow-sm px-4"
+       [ngClass]="{'admin-navbar': user?.tipoUsuario === 'administrador', 'navbar-dark bg-primary': user?.tipoUsuario !== 'administrador'}">
+    <div class="container-fluid">
+      <span class="navbar-brand d-flex align-items-center gap-2">
+        <i class="fas fa-tooth"></i>
+        <span class="fw-bold">DentalTurnos</span>
+      </span>
+      <div class="navbar-nav ms-auto align-items-center">
+        <span class="navbar-text me-3">
+          Bienvenido, <span class="fw-semibold">{{ getUserGreeting() }}</span>
+          <span [class]="getTipoClass(user?.tipoUsuario || '')" style="margin-left: 8px;">{{ user?.tipoUsuario }}</span>
+        </span>
+        <button class="btn btn-outline-danger btn-sm ms-2" (click)="logout()">
+          <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Menú de navegación siempre visible -->
   <div class="row mb-4">
     <div class="col-12">
-      <div class="btn-group w-100" role="group">
-        <button 
-          type="button" 
-          class="btn btn-outline-primary"
-          [class.active]="true"
-          (click)="navigateToDashboard()">
-          <i class="fas fa-home"></i> Dashboard
-        </button>
-        <button 
-          type="button" 
-          class="btn btn-outline-primary"
-          (click)="navigateToReservar()">
-          <i class="fas fa-plus"></i> Registrar Turno
-        </button>
-        <button 
-          type="button" 
-          class="btn btn-outline-primary"
-          (click)="navigateToTurnos()">
-          <i class="fas fa-calendar"></i> Mis Turnos
-        </button>
-        <button 
-          *ngIf="user?.tipoUsuario === 'administrador' || user?.tipoUsuario === 'dentista'" 
-          type="button" 
-          class="btn btn-outline-info"
-          (click)="navigateToEstadisticas()">
-          <i class="fas fa-chart-bar"></i> Estadísticas
-        </button>
-        <button 
-          *ngIf="user?.tipoUsuario === 'administrador'" 
-          type="button" 
-          class="btn btn-outline-danger"
-          (click)="navigateToAdmin()">
-          <i class="fas fa-cog"></i> Administración
-        </button>
+      <div class="btn-group w-100 shadow-sm rounded-3 overflow-hidden" role="group">
+        <ng-container *ngIf="user?.tipoUsuario === 'administrador'; else noAdminMenu">
+          <button 
+            type="button" 
+            class="btn nav-btn-dashboard py-3"
+            [class.active]="true"
+            (click)="navigateToDashboard()">
+            <i class="bi bi-house-door-fill"></i> Dashboard
+          </button>
+          <button 
+            type="button" 
+            class="btn nav-btn-pacientes py-3"
+            (click)="goToPacientes()">
+            <i class="bi bi-people"></i> Pacientes
+          </button>
+          <button 
+            type="button" 
+            class="btn nav-btn-dentistas py-3"
+            (click)="navigateToDentistas()">
+            <i class="bi bi-person-badge-fill"></i> Dentistas
+          </button>
+          <button 
+            type="button" 
+            class="btn nav-btn-admin py-3"
+            (click)="navigateToAdmin()">
+            <i class="bi bi-gear-fill"></i> Administración
+          </button>
+            <button type="button"  class="btn nav-btn-estadisticas py-3" (click)="navigateToEstadisticas()">
+            <i class="bi bi-bar-chart-fill"></i> Estadísticas
+            </button>
+          <button 
+            type="button" 
+            class="btn nav-btn-tratamiento py-3"
+            (click)="navigateToTratamiento()">
+            <i class="bi bi-gear-fill"></i> Tratamientos
+          </button>
+        </ng-container>
+        <ng-template #noAdminMenu>
+          <button 
+            type="button" 
+            class="btn btn-outline-primary py-3"
+            [class.active]="true"
+            (click)="navigateToDashboard()">
+            <i class="fas fa-home"></i> Dashboard
+          </button>
+          <button 
+            *ngIf="user?.tipoUsuario === 'dentista' || user?.tipoUsuario === 'paciente'"
+            type="button" 
+            class="btn btn-outline-primary py-3"
+            (click)="navigateToReservar()">
+            <i class="fas fa-plus"></i> {{ user?.tipoUsuario === 'paciente' ? 'Reservar Turno' : 'Registrar Turno' }}
+          </button>
+          <button 
+            *ngIf="user?.tipoUsuario === 'dentista'"
+            type="button" 
+            class="btn btn-outline-info py-3"
+            (click)="navigateToAgenda()">
+            <i class="fas fa-calendar-alt"></i> Agenda
+          </button>
+          <button 
+            *ngIf="user?.tipoUsuario !== 'dentista'" 
+            type="button" 
+            class="btn btn-outline-primary py-3"
+            (click)="navigateToTurnos()">
+            <i class="fas fa-calendar"></i> Mis Turnos
+          </button>
+          <button 
+            *ngIf="user?.tipoUsuario === 'dentista'" 
+            type="button" 
+            class="btn btn-outline-primary py-3"
+            (click)="navigateToPacientes()">
+            <i class="bi bi-people"></i> Pacientes
+          </button>
+          <button 
+            *ngIf="user?.tipoUsuario === 'administrador'" 
+            type="button" 
+            class="btn btn-outline-danger py-3"
+            (click)="navigateToAdmin()">
+            <i class="fas fa-cog"></i> Administración
+          </button>
+        </ng-template>
       </div>
     </div>
   </div>
-  <!-- Estadísticas -->
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="card text-center bg-primary text-white">
-        <div class="card-body">
-          <h5 class="card-title">{{ totalTurnos }}</h5>
-          <p class="card-text">Total Turnos</p>
+
+  <!-- Dashboard del Administrador -->
+  <div *ngIf="user?.tipoUsuario === 'administrador' && !isPacienteView" class="admin-dashboard">
+    <!-- Estadísticas Administrativas -->
+    <div class="row mb-4 g-4">
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-primary text-white shadow-sm admin-stat-card">
+          <div class="card-body py-4">
+            <div class="stat-icon mb-2">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <h5 class="card-title display-6 mb-1">{{ adminStats.totalUsuarios }}</h5>
+            <p class="card-text mb-0">Total Usuarios</p>
+            <div class="stat-trend positive">
+              <i class="fas fa-arrow-up"></i> +12% este mes
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-success text-white shadow-sm admin-stat-card">
+          <div class="card-body py-4">
+            <div class="stat-icon mb-2">
+              <i class="bi bi-calendar-check-fill"></i>
+            </div>
+            <h5 class="card-title display-6 mb-1">{{ adminStats.turnosEsteMes }}</h5>
+            <p class="card-text mb-0">Turnos Este Mes</p>
+            <div class="stat-trend positive">
+              <i class="fas fa-arrow-up"></i> +8% vs mes anterior
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-info text-white shadow-sm admin-stat-card">
+          <div class="card-body py-4">
+            <div class="stat-icon mb-2">
+              <i class="bi bi-cash-coin"></i>
+            </div>
+            <h5 class="card-title display-6 mb-1">${{ adminStats.ingresosEsteMes | number:'1.0-0' }}</h5>
+            <p class="card-text mb-0">Ingresos Este Mes</p>
+            <div class="stat-trend positive">
+              <i class="fas fa-arrow-up"></i> +15% vs mes anterior
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-warning text-white shadow-sm admin-stat-card">
+          <div class="card-body py-4">
+            <div class="stat-icon mb-2">
+              <i class="bi bi-person-badge-fill"></i>
+            </div>
+            <h5 class="card-title display-6 mb-1">{{ adminStats.dentistasActivos }}</h5>
+            <p class="card-text mb-0">Dentistas Activos</p>
+            <div class="stat-trend neutral">
+              <i class="fas fa-minus"></i> Sin cambios
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card text-center bg-success text-white">
-        <div class="card-body">
-          <h5 class="card-title">{{ turnosHoy }}</h5>
-          <p class="card-text">Turnos Hoy</p>
+
+    <!-- Métricas de Rendimiento -->
+    <div class="row mb-4 g-4">
+      <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="bi bi-graph-up"></i> Rendimiento del Sistema
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="performance-metrics">
+              <div class="metric-item">
+                <div class="metric-label">Ocupación de Turnos (Completados)</div>
+                <div class="metric-bar">
+                  <div class="metric-fill" [style.width.%]="rendimiento.ocupacion"></div>
+                </div>
+                <div class="metric-value">{{ rendimiento.ocupacion }}%</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Usuarios Registrados</div>
+                <div class="metric-bar">
+                  <div class="metric-fill satisfaction" [style.width.%]="rendimiento.usuarios > 100 ? 100 : rendimiento.usuarios"></div>
+                </div>
+                <div class="metric-value">{{ rendimiento.usuarios }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="bi bi-exclamation-triangle-fill"></i> Alertas del Sistema
+            </h5>
+            <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2"
+                    (click)="generarAlertasSistema()" [disabled]="cargandoAlertas">
+              <span *ngIf="cargandoAlertas" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <i class="bi bi-arrow-clockwise" *ngIf="!cargandoAlertas"></i>
+              <span>Refrescar</span>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="alerts-list">
+              <div *ngFor="let alerta of adminStats.alertas" class="alert-item" [ngClass]="alerta.tipo">
+                <div class="alert-title">{{ alerta.titulo }}</div>
+                <div class="alert-description">{{ alerta.descripcion }}</div>
+                <div class="alert-time">{{ alerta.tiempo }}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card text-center bg-info text-white">
-        <div class="card-body">
-          <h5 class="card-title">{{ proximoTurno?.fecha || 'Sin turnos' }}</h5>
-          <p class="card-text">Próximo Turno</p>
+
+    
+    <!-- Resumen de Actividad Reciente -->
+    <div class="row mb-4 g-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-history"></i> Actividad Reciente del Sistema
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="activity-timeline">
+              <div *ngFor="let actividad of adminStats.actividadReciente" class="activity-item">
+                <div class="activity-icon" [class]="'activity-' + actividad.tipo">
+                  <i [class]="getActivityIcon(actividad.tipo)"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">{{ actividad.titulo }}</div>
+                  <div class="activity-description">{{ actividad.descripcion }}</div>
+                  <div class="activity-time">{{ actividad.tiempo }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card text-center bg-warning text-white">
-        <div class="card-body">
-          <h5 class="card-title">{{ filteredTurnos.length }}</h5>
-          <p class="card-text">Turnos Activos</p>
+
+    <!-- Gestión de Reseñas -->
+    <div class="row mb-4 g-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="bi bi-star-fill"></i> Gestión de Reseñas
+            </h5>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-primary btn-sm" (click)="refreshReviews()">
+                <i class="bi bi-arrow-clockwise"></i> Actualizar
+              </button>
+              <button class="btn btn-outline-success btn-sm" (click)="exportReviews()" title="Exportar reseñas a PDF">
+                <i class="bi bi-file-pdf"></i> Exportar PDF
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Estadísticas de reseñas -->
+            <div class="row mb-4">
+              <div class="col-md-2 col-6 mb-3">
+                <div class="text-center">
+                  <div class="h4 text-primary">{{ reviewStats.total }}</div>
+                  <small class="text-muted">Total</small>
+                </div>
+              </div>
+              <div class="col-md-2 col-6 mb-3">
+                <div class="text-center">
+                  <div class="h4 text-warning">{{ reviewStats.pendientes }}</div>
+                  <small class="text-muted">Pendientes</small>
+                </div>
+              </div>
+              <div class="col-md-2 col-6 mb-3">
+                <div class="text-center">
+                  <div class="h4 text-success">{{ reviewStats.aprobadas }}</div>
+                  <small class="text-muted">Aprobadas</small>
+                </div>
+              </div>
+              <div class="col-md-2 col-6 mb-3">
+                <div class="text-center">
+                  <div class="h4 text-danger">{{ reviewStats.rechazadas }}</div>
+                  <small class="text-muted">Rechazadas</small>
+                </div>
+              </div>
+              <div class="col-md-4 col-12 mb-3">
+                <div class="text-center">
+                  <div class="h4 text-info">{{ reviewStats.promedio }}/5</div>
+                  <small class="text-muted">Calificación Promedio</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <select class="form-select" [(ngModel)]="reviewFilter" (change)="filterReviews()">
+                  <option value="">Todas las reseñas</option>
+                  <option value="pendiente">Pendientes</option>
+                  <option value="aprobado">Aprobadas</option>
+                  <option value="rechazado">Rechazadas</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Buscar por nombre o email..." [(ngModel)]="reviewSearch" (input)="filterReviews()">
+              </div>
+            </div>
+
+            <!-- Lista de reseñas -->
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Calificación</th>
+                    <th>Comentario</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let review of filteredReviews">
+                    <td>{{ review.fecha | date:'dd/MM/yyyy' }}</td>
+                    <td>
+                      <div><strong>{{ review.nombre }}</strong></div>
+                      <small class="text-muted">{{ review.email }}</small>
+                    </td>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <span class="me-2">{{ review.rating }}/5</span>
+                        <div class="stars-display">
+                          <i *ngFor="let star of [1,2,3,4,5]" 
+                             class="bi star-display" 
+                             [class.bi-star-fill]="star <= review.rating"
+                             [class.bi-star]="star > review.rating">
+                          </i>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="review-comment">{{ review.comentario }}</div>
+                      <div *ngIf="review.respuesta" class="review-response mt-2">
+                        <small class="text-muted"><strong>Respuesta:</strong> {{ review.respuesta }}</small>
+                      </div>
+                    </td>
+                    <td>
+                      <span [class]="getReviewStatusClass(review.estado)" class="badge">
+                        {{ getReviewStatusText(review.estado) }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <button *ngIf="review.estado === 'pendiente'" 
+                                class="btn btn-success" 
+                                (click)="approveReview(review.id)"
+                                title="Aprobar">
+                          <i class="bi bi-check"></i>
+                        </button>
+                        <button *ngIf="review.estado === 'pendiente'" 
+                                class="btn btn-danger" 
+                                (click)="rejectReview(review.id)"
+                                title="Rechazar">
+                          <i class="bi bi-x"></i>
+                        </button>
+                        <button class="btn btn-outline-primary" 
+                                (click)="respondToReview(review)"
+                                title="Responder">
+                          <i class="bi bi-chat"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" 
+                                (click)="deleteReview(review.id)"
+                                title="Eliminar">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mensaje cuando no hay reseñas -->
+            <div *ngIf="filteredReviews.length === 0" class="text-center text-muted py-4">
+              <i class="bi bi-star fa-3x mb-3"></i>
+              <h6>No hay reseñas para mostrar</h6>
+              <p>Las reseñas enviadas por los clientes aparecerán aquí.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-   <!-- Turnos recientes -->
-   <div class="card">
-    <div class="card-header">
-      <h5><i class="fas fa-calendar-alt"></i> Turnos Recientes</h5>
-    </div>
-    <div class="card-body">
-      <div *ngIf="filteredTurnos.length === 0" class="text-center text-muted">
-        No hay turnos registrados
+
+  <!-- Dashboard para Pacientes y Dentistas (mantiene la funcionalidad original) -->
+  <div *ngIf="user?.tipoUsuario !== 'administrador' || isPacienteView">
+    <!-- Estadísticas -->
+    <div class="row mb-4 g-4">
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-primary text-white shadow-sm">
+          <div class="card-body py-4">
+            <h5 class="card-title display-6 mb-1">{{ totalTurnos }}</h5>
+            <p class="card-text mb-0">
+              {{ isPacienteView ? 'Total Turnos del Paciente' : 'Total Turnos' }}
+            </p>
+          </div>
+        </div>
       </div>
-      <div *ngIf="filteredTurnos.length > 0" class="table-responsive">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Número</th>
-              <th>Fecha</th>
-              <th>Hora</th>
-              <th *ngIf="user?.tipoUsuario !== 'paciente'">Paciente</th>
-              <th>Tratamiento</th>
-              <th>Estado</th>
-              <th>Precio</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let turno of filteredTurnos.slice(0, 5)">
-              <td>{{ turno.nroTurno }}</td>
-              <td>{{ turno.fecha }}</td>
-              <td>{{ turno.hora }}</td>
-              <td *ngIf="user?.tipoUsuario !== 'paciente'">{{ turno.nombre }} {{ turno.apellido }}</td>
-              <td>{{ turno.tratamiento }}</td>
-              <td>
-                <span [class]="getStatusClass(turno.estado)">
-                  {{ turno.estado }}
-                </span>
-              </td>
-              <td>${{ turno.precioFinal }}</td>
-              <td>
-                <button 
-                  *ngIf="turno.estado === 'reservado'" 
-                  class="btn btn-sm btn-danger"
-                  (click)="cancelarTurno(turno)">
-                  <i class="fas fa-times"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-success text-white shadow-sm">
+          <div class="card-body py-4">
+            <h5 class="card-title display-6 mb-1">{{ turnosHoy }}</h5>
+            <p class="card-text mb-0">
+              {{ isPacienteView ? 'Turnos Hoy del Paciente' : 'Turnos Hoy' }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-info text-white shadow-sm">
+          <div class="card-body py-4">
+            <h5 class="card-title display-6 mb-1">{{ proximoTurno?.fecha || 'Sin turnos' }}</h5>
+            <p class="card-text mb-0">
+              {{ isPacienteView ? 'Próximo Turno del Paciente' : 'Próximo Turno' }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card text-center bg-warning text-white shadow-sm">
+          <div class="card-body py-4">
+            <h5 class="card-title display-6 mb-1">{{ filteredTurnos.length }}</h5>
+            <p class="card-text mb-0">
+              {{ isPacienteView ? 'Turnos Activos del Paciente' : 'Turnos Activos' }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- Turnos recientes -->
+    <div class="card shadow-sm mt-4">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="fas fa-calendar-alt"></i> 
+          {{ isPacienteView ? 'Turnos del Paciente' : 'Turnos Recientes' }}
+        </h5>
+      </div>
+      <div class="card-body p-0">
+        <div *ngIf="filteredTurnos.length === 0" class="text-center text-muted py-4">
+          {{ isPacienteView ? 'Este paciente no tiene turnos registrados' : 'No hay turnos registrados' }}
+        </div>
+        <div *ngIf="filteredTurnos.length > 0" class="row g-3 px-3 py-3">
+          <div class="col-12 col-md-6 col-lg-4" *ngFor="let turno of filteredTurnos.slice(0, 5)">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(120deg, #f8fcff 60%, #e3f0ff 100%);">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold text-primary">Turno #{{ turno.nroTurno }}</span>
+                  <span [class]="getStatusClass(turno.estado)" style="font-size:0.95rem;">{{ getStatusText(turno.estado) }}</span>
+                </div>
+                <div class="mb-1"><i class="fas fa-calendar-alt text-info me-2"></i><strong>Fecha:</strong> {{ turno.fecha }}</div>
+                <div class="mb-1"><i class="fas fa-clock text-info me-2"></i><strong>Hora:</strong> {{ turno.hora }}</div>
+                <div class="mb-1"><i class="fas fa-tooth text-info me-2"></i><strong>Tratamiento:</strong> {{ turno.tratamiento }}</div>
+                <div class="mb-1"><i class="fas fa-dollar-sign text-info me-2"></i><strong>Precio:</strong> ${{ turno.precioFinal }}</div>
+                <div class="mt-3 text-end">
+                  <button *ngIf="turno.estado === 'reservado'" class="btn btn-outline-danger btn-sm px-3" (click)="cancelarTurno(turno)">
+                    <i class="fas fa-times"></i> Cancelar
+                  </button>
+                  <button *ngIf="turno.estado === 'reservado' && user?.tipoUsuario === 'dentista'" class="btn btn-outline-success btn-sm px-3 ms-2" (click)="marcarComoPagado(turno)">
+                    <i class="fas fa-check"></i> Marcar como Pagado
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Fin Dashboard Principal -->
+
+<!-- Chatbot - Solo para dentistas -->
+<div *ngIf="user?.tipoUsuario === 'dentista'" class="chatbot-container">
+  <!-- Botón de toggle del chat -->
+  <div class="chat-toggle-btn" (click)="toggleChat()" [class.open]="chatOpen">
+    <img src="/assets/images/logo.png" alt="Chat" class="chat-toggle-img" *ngIf="!chatOpen">
+    <i class="fas fa-times" *ngIf="chatOpen"></i>
+  </div>
+
+  <!-- Ventana del chat -->
+  <div class="chat-window" [class.open]="chatOpen">
+    <div class="chat-header">
+      <h5 class="mb-0">
+        <i class="fas fa-robot"></i> DentalBot - Asistente Virtual
+      </h5>
+      <button class="btn-close" (click)="toggleChat()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="chat-messages" #chatMessages>
+      <div *ngFor="let message of messages" 
+           class="message" 
+           [class.user-message]="message.isUser"
+           [class.bot-message]="!message.isUser">
+        <div class="message-content">
+          <div class="message-text" [innerHTML]="message.text"></div>
+          <div class="message-time">{{ message.timestamp | date:'shortTime' }}</div>
+        </div>
+      </div>
+      
+      <!-- Indicador de escritura -->
+      <div *ngIf="isTyping" class="message bot-message">
+        <div class="message-content">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preguntas rápidas -->
+    <div class="quick-questions" *ngIf="messages.length <= 1">
+      <div class="quick-questions-title">Preguntas frecuentes:</div>
+      <div class="quick-questions-list">
+        <button *ngFor="let question of quickQuestions" 
+                class="quick-question-btn"
+                (click)="handleQuickQuestion(question)">
+          {{ question.text }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulario de entrada -->
+    <form class="chat-input-form" [formGroup]="chatForm" (ngSubmit)="onSubmit()">
+      <div class="input-group">
+        <input type="text" 
+               class="form-control" 
+               formControlName="message"
+               placeholder="Escribe tu mensaje..."
+               [disabled]="isTyping">
+        <button type="submit" 
+                class="btn btn-primary"
+                [disabled]="!chatForm.valid || isTyping">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </form>
   </div>
 </div>

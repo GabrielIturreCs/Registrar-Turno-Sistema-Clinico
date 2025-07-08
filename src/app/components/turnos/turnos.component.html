@@ -1,222 +1,413 @@
-<!-- Botón para registrar un nuevo turno -->
-<div class="mb-3">
-  <button class="btn btn-primary" (click)="navigateTo('registrar-turno')">
-    <i class="fas fa-plus"></i> Registrar Nuevo Turno
-  </button>
-</div>
-
-<!-- Turnos recientes -->
-<div class="card" *ngIf="currentView === 'turnos'">
-  <div class="card-header">
-    <h5><i class="fas fa-calendar-alt"></i> Turnos Recientes</h5>
-  </div>
-  <div class="card-body">
-    <div *ngIf="filteredTurnos.length === 0" class="text-center text-muted">
-      No hay turnos registrados
+<!-- Contenedor centrado para la gestión de turnos -->
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+  <div class="w-100" style="max-width: 950px;">
+    <div class="mb-4 text-center">
+      <h2 class="fw-bold text-primary mb-3 text-white">
+        <i class="fas fa-calendar-check me-2 text  text-white"></i>Gestión de Turnos
+      </h2>
+      <!-- Ocultar botón para pacientes -->
+      <button *ngIf="user?.tipoUsuario !== 'paciente'" class="btn btn-success shadow-sm px-4 py-2" (click)="navigateTo('registrar-turno')">
+        <i class="fas fa-plus me-2"></i> Nuevo Turno
+      </button>
+      
+      <!-- Botón temporal para debugging - recargar turnos -->
+      <button class="btn btn-info shadow-sm px-3 py-2 ms-2" (click)="forceReloadTurnos()" title="Recargar turnos desde backend">
+        <i class="fas fa-sync-alt me-2"></i> Recargar
+      </button>
     </div>
-    <div *ngIf="filteredTurnos.length > 0" class="table-responsive">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Número</th>
-            <th>Fecha</th>
-            <th>Hora</th>
-            <th *ngIf="user?.tipoUsuario !== 'paciente'">Paciente</th>
-            <th>Tratamiento</th>
-            <th>Estado</th>
-            <th>Precio</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let turno of filteredTurnos.slice(0, 5)">
-            <td>{{ turno.nroTurno }}</td>
-            <td>{{ turno.fecha }}</td>
-            <td>{{ turno.hora }}</td>
-            <td *ngIf="user?.tipoUsuario !== 'paciente'">{{ turno.nombre }} {{ turno.apellido }}</td>
-            <td>{{ turno.tratamiento }}</td>
-            <td>
-              <span [class]="getStatusClass(turno.estado)">
-                {{ turno.estado }}
-              </span>
-            </td>
-            <td>${{ turno.precioFinal }}</td>
-            <td>
-              <button 
-                *ngIf="turno.estado === 'reservado'" 
-                class="btn btn-sm btn-danger"
-                (click)="cancelarTurno(turno)">
-                <i class="fas fa-times"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
 
-<!-- Vista Registrar Turno -->
-<div *ngIf="currentView === 'registrar-turno'" class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-plus"></i> Registrar Nuevo Turno</h5>
+    <!-- Vista de Turnos Recientes -->
+    <div *ngIf="currentView === 'turnos'" class="mb-5">
+      <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="fas fa-clock me-2"></i>
+          <span class="fw-semibold">Turnos Recientes</span>
         </div>
-        <div class="card-body">
-          <form #turnoFormRef="ngForm" (ngSubmit)="registrarTurno()">
-            <!-- Selección de paciente (solo para dentista/admin) -->
-            <div *ngIf="user?.tipoUsuario !== 'paciente'" class="mb-3">
-              <label for="turnoSelectPaciente" class="form-label">Paciente</label>
-              <select 
-                class="form-select" 
-                id="turnoSelectPaciente"
-                [(ngModel)]="turnoForm.pacienteId" 
-                name="pacienteId"
-                required>
-                <option value="">Selecciona un paciente</option>
-                <option *ngFor="let paciente of pacientes" [value]="paciente.id">
-                  {{ paciente.nombre }} {{ paciente.apellido }} - {{ paciente.dni }}
-                </option>
+        <div class="card-body p-4">
+          <div *ngIf="isLoading" class="text-center py-4">
+            <span class="spinner-border text-primary" role="status"></span>
+            <div class="mt-2">Cargando turnos...</div>
+          </div>
+          <div *ngIf="!isLoading && filteredTurnos.length === 0" class="text-center text-muted py-4">
+            <i class="fas fa-info-circle fa-2x mb-2"></i><br>
+            No hay turnos registrados
+          </div>
+          <div *ngIf="!isLoading && filteredTurnos.length > 0" class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th *ngIf="user?.tipoUsuario !== 'paciente'">Paciente</th>
+                  <th>Tratamiento</th>
+                  <th>Estado</th>
+                  <th>Precio</th>
+                  <th>Pago</th>
+                  <th class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let turno of filteredTurnos.slice(0, 5)">
+                  <td class="fw-semibold">{{ turno.nroTurno }}</td>
+                  <td>{{ turno.fecha }}</td>
+                  <td>{{ turno.hora }}</td>
+                  <td *ngIf="user?.tipoUsuario !== 'paciente'">{{ turno.nombre }} {{ turno.apellido }}</td>
+                  <td>{{ turno.tratamiento }}</td>
+                  <td>
+                    <span [class]="getStatusClass(turno.estado)">
+                      {{ getStatusLabel(turno.estado) }}
+                    </span>
+                  </td>
+                  <td class="text-success fw-bold">${{ turno.precioFinal }}</td>
+                  <td>
+                    <span [ngClass]="getPaymentStatusClass(turno.paymentStatus || turno.metodoPago || '')">
+                      {{ getPaymentStatusLabel(turno.paymentStatus || turno.metodoPago || '') }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <button *ngIf="turno.estado === 'reservado' && user?.tipoUsuario !== 'paciente'" class="btn btn-outline-success btn-sm rounded-circle me-1" (click)="completarTurno(turno)" title="Completar turno">
+                      <i class="fas fa-check"></i>
+                    </button>
+                    <button *ngIf="turno.estado === 'reservado'" class="btn btn-outline-danger btn-sm rounded-circle" (click)="cancelarTurno(turno)" title="Cancelar turno">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista Registrar Turno -->
+    <div *ngIf="currentView === 'registrar-turno'" class="row justify-content-center mb-5">
+      <div class="col-lg-12">
+        <div class="card shadow border-0">
+          <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Registrar Nuevo Turno</h5>
+          </div>
+          <div class="card-body p-4">
+            <form #turnoFormRef="ngForm" (ngSubmit)="registrarTurno()">
+              <div *ngIf="user?.tipoUsuario !== 'paciente'" class="mb-3">
+                <label for="turnoSelectPaciente" class="form-label fw-semibold">Paciente</label>
+                <select 
+                  class="form-select shadow-sm" 
+                  id="turnoSelectPaciente"
+                  [(ngModel)]="turnoForm.pacienteId" 
+                  name="pacienteId"
+                  required>
+                  <option value="">Selecciona un paciente</option>
+                  <option *ngFor="let paciente of pacientes" [value]="paciente.id">
+                    {{ paciente.nombre }} {{ paciente.apellido }} - {{ paciente.dni }}
+                  </option>
+                </select>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="turnoFecha" class="form-label fw-semibold">Fecha</label>
+                  <input 
+                    type="date" 
+                    class="form-control shadow-sm" 
+                    id="turnoFecha"
+                    [(ngModel)]="turnoForm.fecha" 
+                    name="fecha"
+                    [min]="getCurrentDate()"
+                    required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="turnoHora" class="form-label fw-semibold">Hora</label>
+                  <input 
+                    type="time" 
+                    class="form-control shadow-sm" 
+                    id="turnoHora"
+                    [(ngModel)]="turnoForm.hora" 
+                    name="hora"
+                    required>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="turnoTratamiento" class="form-label fw-semibold">Tratamiento</label>
+                <select 
+                  class="form-select shadow-sm" 
+                  id="turnoTratamiento"
+                  [(ngModel)]="turnoForm.tratamientoId" 
+                  name="tratamientoId"
+                  required>
+                  <option value="">Selecciona un tratamiento</option>
+                  <option *ngFor="let tratamiento of tratamientos" [value]="tratamiento._id">
+                    {{ tratamiento.descripcion }} - ${{ tratamiento.precio }} ({{ tratamiento.duracion }} min)
+                  </option>
+                </select>
+              </div>
+              <div class="d-flex justify-content-end gap-2 mt-4">
+                <button type="button" class="btn btn-outline-secondary px-4" (click)="navigateTo('turnos')">
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  class="btn btn-success px-4"
+                  [disabled]="!canRegisterTurno || isLoading">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                  {{ isLoading ? 'Registrando...' : 'Registrar Turno' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista Mis Turnos -->
+    <div *ngIf="currentView === 'mis-turnos'" class="mb-5">
+      <div class="card shadow border-0">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+          <div>
+            <i class="fas fa-calendar me-2"></i> <span class="fw-semibold">Mis Turnos</span>
+          </div>
+          <button class="btn btn-outline-light btn-sm px-3" (click)="navigateToDashboard()">
+            <i class="fas fa-arrow-left me-1"></i> Volver
+          </button>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-2 mb-4 align-items-center">
+            <div class="col-md-6">
+              <input 
+                type="text" 
+                class="form-control shadow-sm" 
+                placeholder="Buscar turnos..."
+                [(ngModel)]="searchTerm">
+            </div>
+            <div class="col-md-6">
+              <select class="form-select shadow-sm" [(ngModel)]="filterEstado">
+                <option value="todos">Todos los estados</option>
+                <option value="reservado">Reservados</option>
+                <option value="cancelado">Cancelados</option>
+                <option value="completado">Completados</option>
               </select>
             </div>
+          </div>
+          <div *ngIf="filteredTurnos.length === 0" class="text-center text-muted py-4">
+            <i class="fas fa-info-circle fa-2x mb-2"></i><br>
+            No se encontraron turnos
+          </div>
+          <div *ngIf="filteredTurnos.length > 0" class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <!-- Ocultar columna Paciente para pacientes -->
+                  <th *ngIf="user?.tipoUsuario !== 'paciente'">Paciente</th>
+                  <th>Tratamiento</th>
+                  <th>Estado</th>
+                  <th>Precio</th>
+                  <th>Pago</th>
+                  <th class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let turno of filteredTurnos">
+                  <td class="fw-semibold">{{ turno.nroTurno }}</td>
+                  <td>{{ turno.fecha }}</td>
+                  <td>{{ turno.hora }}</td>
+                  <td *ngIf="user?.tipoUsuario !== 'paciente'">{{ turno.nombre }} {{ turno.apellido }}</td>
+                  <td>{{ turno.tratamiento }}</td>
+                  <td>
+                    <!-- Badge de estado -->
+                    <span [class]="getStatusClass(turno.estado)">
+                      {{ getStatusLabel(turno.estado) }}
+                    </span>
+                  </td>
+                  <td class="text-success fw-bold">${{ turno.precioFinal }}</td>
+                  <td>
+                    <span [ngClass]="getPaymentStatusClass(turno.paymentStatus || turno.metodoPago || '')">
+                      {{ getPaymentStatusLabel(turno.paymentStatus || turno.metodoPago || '') }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <!-- Mostrar botón cancelar para pacientes si el turno está reservado, pendiente o pendiente_pago -->
+                    <button 
+                      *ngIf="user?.tipoUsuario === 'paciente' && (turno.estado === 'reservado' || turno.estado === 'pendiente' || turno.estado === 'pendiente_pago')" 
+                      class="btn btn-outline-danger btn-sm rounded-circle"
+                      (click)="cancelarTurno(turno)"
+                      title="Cancelar turno">
+                      <i class="fas fa-times"></i>
+                    </button>
+                    <!-- Mostrar botón completar solo para no pacientes -->
+                    <button 
+                      *ngIf="turno.estado === 'reservado' && user?.tipoUsuario !== 'paciente'" 
+                      class="btn btn-outline-success btn-sm rounded-circle ms-2"
+                      (click)="completarTurno(turno)"
+                      title="Completar turno">
+                      <i class="fas fa-check"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="turnoFecha" class="form-label">Fecha</label>
-                <input 
-                  type="date" 
-                  class="form-control" 
-                  id="turnoFecha"
-                  [(ngModel)]="turnoForm.fecha" 
-                  name="fecha"
-                  [min]="getCurrentDate()"
-                  required>
+    <!-- Chatbot Widget - Disponible en todas las vistas -->
+    <div class="chatbot-widget">
+      <!-- Floating Button -->
+      <div class="chat-toggle-btn" (click)="toggleChat()" [class.open]="chatOpen">
+        <img src="assets/images/logo.png" alt="Chat" class="chat-toggle-img" *ngIf="!chatOpen">
+        <i class="fas fa-times" *ngIf="chatOpen"></i>
+        
+        <!-- Burbuja de presentación amigable que sale del ícono -->
+        <div class="welcome-bubble" [class.show]="showWelcomeBubble && !chatOpen" (click)="openChatFromBubble($event)">
+          <div class="bubble-content">
+            <div class="bubble-avatar">
+              <img src="assets/images/logo.png" alt="Asistente" class="bubble-avatar-img">
+            </div>
+            <div class="bubble-text">
+              <div class="bubble-message">
+                👋 ¡Hola! Soy tu <strong>asistente virtual inteligente</strong>
               </div>
-              <div class="col-md-6 mb-3">
-                <label for="turnoHora" class="form-label">Hora</label>
-                <input 
-                  type="time" 
-                  class="form-control" 
-                  id="turnoHora"
-                  [(ngModel)]="turnoForm.hora" 
-                  name="hora"
-                  required>
+              <div class="bubble-submessage">
+                Estoy aquí para ayudarte con tus turnos y consultas 😊
               </div>
             </div>
+            <button class="bubble-close" (click)="closeWelcomeBubble($event)">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="bubble-pointer"></div>
+        </div>
+      </div>
 
-            <div class="mb-3">
-              <label for="turnoTratamiento" class="form-label">Tratamiento</label>
-              <select 
-                class="form-select" 
-                id="turnoTratamiento"
-                [(ngModel)]="turnoForm.tratamientoId" 
-                name="tratamientoId"
-                required>
-                <option value="">Selecciona un tratamiento</option>
-                <option *ngFor="let tratamiento of tratamientos" [value]="tratamiento.id">
-                  {{ tratamiento.descripcion }} - ${{ tratamiento.precio }} ({{ tratamiento.duracion }} min)
-                </option>
-              </select>
+      <!-- Chat Window -->
+      <div class="chat-window" [class.open]="chatOpen">
+        <div class="chat-header">
+          <div class="d-flex align-items-center">
+            <div class="chat-avatar">
+              <img src="/assets/images/logo.png" alt="Logo" class="chat-avatar-img">
             </div>
+            <div class="ms-2">
+              <div class="fw-bold">Asistente Virtual</div>
+              <div class="text-muted small">En línea</div>
+            </div>
+          </div>
+          <button class="btn-close-chat" (click)="toggleChat()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
 
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-              <button type="button" class="btn btn-secondary me-md-2" (click)="navigateTo('turnos')">
-                Cancelar
-              </button>
-              <button 
-                type="submit" 
-                class="btn btn-primary"
-                [disabled]="!canRegisterTurno || isLoading">
-                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ isLoading ? 'Registrando...' : 'Registrar Turno' }}
-              </button>
+        <div class="chat-body">
+          <div class="chat-messages" #chatMessages>
+            <div *ngFor="let message of messages" class="message" [class.user]="message.isUser" [class.bot]="!message.isUser">
+              <div class="message-content">
+                <div class="message-text" [innerHTML]="formatMessageText(message.text)"></div>
+                
+                <!-- Botones de acción -->
+                <div class="message-actions" *ngIf="message.actions && message.actions.length > 0">
+                  <button 
+                    *ngFor="let action of message.actions" 
+                    class="btn btn-action"
+                    [class]="'btn-' + (action.variant || 'primary')"
+                    (click)="handleChatAction(action)"
+                    [title]="action.text">
+                    <i class="fas fa-{{action.icon}}" *ngIf="action.icon"></i>
+                    {{action.text}}
+                  </button>
+                </div>
+                
+                <div class="message-time">{{ message.timestamp | date:'HH:mm' }}</div>
+              </div>
             </div>
+            
+            <div *ngIf="isTyping" class="message bot">
+              <div class="message-content">
+                <div class="typing-indicator">
+                  <div class="typing-dot"></div>
+                  <div class="typing-dot"></div>
+                  <div class="typing-dot"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Questions - Removidas porque los botones de acción son más útiles -->
+          <!-- <div class="quick-questions" *ngIf="messages.length <= 1">
+            <div class="mb-2 small text-muted">Preguntas frecuentes:</div>
+            <div class="quick-question-item" *ngFor="let question of quickQuestions" (click)="handleQuickQuestion(question)">
+              <i class="fas fa-question-circle me-2"></i>
+              {{ question.text }}
+            </div>
+          </div> -->
+        </div>
+
+        <div class="chat-footer">
+          <form [formGroup]="chatForm" (ngSubmit)="onSubmit()" class="d-flex">
+            <input 
+              type="text" 
+              formControlName="message"
+              class="form-control chat-input" 
+              placeholder="Escribe tu mensaje..."
+              [disabled]="isTyping">
+            <button 
+              type="submit" 
+              class="btn btn-primary chat-send-btn"
+              [disabled]="chatForm.invalid || isTyping">
+              <i class="fas fa-paper-plane"></i>
+            </button>
           </form>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Vista Mis Turnos -->
-<div *ngIf="currentView === 'mis-turnos'" class="container-fluid">
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h5><i class="fas fa-calendar"></i> Mis Turnos</h5>
-      <button class="btn btn-primary btn-sm" (click)="navigateToDashboard()">
-        <i class="fas fa-arrow-left"></i> Volver
-      </button>
+    <!-- Modal de confirmación para cancelar turno -->
+    <div class="modal-overlay" [class.show]="showCancelModal">
+      <div class="modal-container">
+        <div class="modal-header">
+          <span class="modal-title">¿Cancelar turno?</span>
+          <button class="btn-close-modal" (click)="closeCancelModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body modal-confirmacion">
+          <div class="icono-confirmacion confirmar">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <p>¿Estás seguro de que quieres cancelar este turno?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal btn-cancelar-modal" (click)="closeCancelModal()">No</button>
+          <button class="btn-modal btn-confirmar" (click)="confirmCancelTurno()">Sí, cancelar</button>
+        </div>
+      </div>
     </div>
-    <div class="card-body">
-      <!-- Filtros -->
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <input 
-            type="text" 
-            class="form-control" 
-            placeholder="Buscar turnos..."
-            [(ngModel)]="searchTerm">
-        </div>
-        <div class="col-md-6">
-          <select class="form-select" [(ngModel)]="filterEstado">
-            <option value="todos">Todos los estados</option>
-            <option value="reservado">Reservados</option>
-            <option value="cancelado">Cancelados</option>
-            <option value="completado">Completados</option>
-          </select>
-        </div>
-      </div>
 
-      <!-- Lista de turnos -->
-      <div *ngIf="filteredTurnos.length === 0" class="text-center text-muted">
-        No se encontraron turnos
-      </div>
-      <div *ngIf="filteredTurnos.length > 0" class="table-responsive">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Número</th>
-              <th>Fecha</th>
-              <th>Hora</th>
-              <th *ngIf="user?.tipoUsuario !== 'paciente'">Paciente</th>
-              <th>Tratamiento</th>
-              <th>Estado</th>
-              <th>Precio</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let turno of filteredTurnos">
-              <td>{{ turno.nroTurno }}</td>
-              <td>{{ turno.fecha }}</td>
-              <td>{{ turno.hora }}</td>
-              <td *ngIf="user?.tipoUsuario !== 'paciente'">{{ turno.nombre }} {{ turno.apellido }}</td>
-              <td>{{ turno.tratamiento }}</td>
-              <td>
-                <span [class]="getStatusClass(turno.estado)">
-                  {{ turno.estado }}
-                </span>
-              </td>
-              <td>${{ turno.precioFinal }}</td>
-              <td>
-                <button 
-                  *ngIf="turno.estado === 'reservado'" 
-                  class="btn btn-sm btn-danger"
-                  (click)="cancelarTurno(turno)">
-                  <i class="fas fa-times"></i> Cancelar
-                </button>
-                <button 
-                  *ngIf="turno.estado === 'reservado' && user?.tipoUsuario !== 'paciente'" 
-                  class="btn btn-sm btn-success ms-1"
-                  (click)="completarTurno(turno)">
-                  <i class="fas fa-check"></i> Completar
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Modal de éxito para turno eliminado -->
+    <div class="modal-overlay" [class.show]="showSuccessModal">
+      <div class="modal-container">
+        <div class="modal-header" style="background: linear-gradient(135deg, #28a745, #20c997);">
+          <span class="modal-title">¡Turno cancelado!</span>
+          <button class="btn-close-modal" (click)="closeSuccessModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body modal-confirmacion">
+          <div class="icono-confirmacion completar">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <p>Turno cancelado exitosamente.</p>
+          <p *ngIf="reembolsoStatus === 'reembolsado'" class="text-info">
+            El pago fue <b>reembolsado</b> al paciente.
+          </p>
+          <p *ngIf="reembolsoStatus === 'cancelado'" class="text-warning">
+            El pago fue <b>cancelado</b> antes de acreditarse.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal btn-confirmar" (click)="closeSuccessModal()">Aceptar</button>
+        </div>
       </div>
     </div>
   </div>

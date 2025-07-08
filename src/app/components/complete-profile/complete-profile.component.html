@@ -1,0 +1,88 @@
+<div class="complete-profile-container">
+  <div class="profile-card">
+    <div class="profile-header">
+      <img [src]="currentUser?.picture || '/assets/images/default-avatar.svg'" 
+           alt="Perfil" 
+           class="profile-avatar"
+           onerror="this.src='/assets/images/default-avatar.svg'">
+      <h2>Completar Perfil</h2>
+      <p>Hola <strong>{{ currentUser?.nombre }}</strong>, para reservar turnos necesitamos que completes tu información:</p>
+    </div>
+    
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="telefono">Teléfono *</label>
+          <input 
+            type="tel" 
+            id="telefono" 
+            formControlName="telefono" 
+            placeholder="Ej: 3881234567"
+            [class.error]="telefono?.invalid && telefono?.touched">
+          <div *ngIf="telefono?.errors?.['required'] && telefono?.touched" class="error-message">
+            El teléfono es obligatorio
+          </div>
+          <div *ngIf="telefono?.errors?.['pattern'] && telefono?.touched" class="error-message">
+            El teléfono debe tener entre 8 y 15 dígitos
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="dni">DNI *</label>
+          <input 
+            type="text" 
+            id="dni" 
+            formControlName="dni" 
+            placeholder="Ej: 12345678"
+            [class.error]="dni?.invalid && dni?.touched">
+          <div *ngIf="dni?.errors?.['required'] && dni?.touched" class="error-message">
+            El DNI es obligatorio
+          </div>
+          <div *ngIf="dni?.errors?.['pattern'] && dni?.touched" class="error-message">
+            El DNI debe tener 7 u 8 dígitos
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="direccion">Dirección *</label>
+        <input 
+          type="text" 
+          id="direccion" 
+          formControlName="direccion" 
+          placeholder="Ej: Av. Italo Palanca N°10"
+          [class.error]="direccion?.invalid && direccion?.touched">
+        <div *ngIf="direccion?.errors?.['required'] && direccion?.touched" class="error-message">
+          La dirección es obligatoria
+        </div>
+        <div *ngIf="direccion?.errors?.['minlength'] && direccion?.touched" class="error-message">
+          La dirección debe tener al menos 5 caracteres
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="obraSocial">Obra Social *</label>
+        <select 
+          id="obraSocial" 
+          formControlName="obraSocial" 
+          [class.error]="obraSocial?.invalid && obraSocial?.touched">
+          <option value="">Selecciona tu obra social</option>
+          <option *ngFor="let obra of obrasSociales" [value]="obra">{{ obra }}</option>
+        </select>
+        <div *ngIf="obraSocial?.errors?.['required'] && obraSocial?.touched" class="error-message">
+          La obra social es obligatoria
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          [disabled]="!profileForm.valid || loading" 
+          class="btn-primary">
+          <span *ngIf="loading" class="spinner"></span>
+          {{ loading ? 'Guardando...' : 'Completar Perfil' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

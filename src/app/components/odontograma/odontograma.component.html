@@ -1,0 +1,25 @@
+<div class="odontograma-modal">
+  <div class="odontograma-header">
+    <h4>Odontograma de {{ paciente?.nombre }} {{ paciente?.apellido }}</h4>
+    <button class="btn btn-sm btn-danger float-end" (click)="cerrarModal()">Cerrar</button>
+  </div>
+  <div *ngIf="odontograma; else errorOdontograma">
+    <div class="odontograma-grid">
+      <div *ngFor="let diente of dientesFDI" class="diente" [ngStyle]="{'background': odontograma[diente]?.color}" (click)="seleccionarDiente(diente)">
+        <span>{{ diente }}</span>
+        <div *ngIf="dienteSeleccionado === diente" class="menu-contextual">
+          <button *ngFor="let est of estados" class="btn btn-sm me-1" [ngStyle]="{'background': est.color, 'color': est.estado === 'sano' ? '#000' : '#fff'}" (click)="cambiarEstadoDiente(diente, est)">
+            {{ est.label }}
+          </button>
+          <button class="btn btn-sm btn-secondary" (click)="$event.stopPropagation(); dienteSeleccionado = null">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template #errorOdontograma>
+    <div class="alert alert-danger mt-3">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      No se pudo cargar el odontograma. Verifique su sesión o intente nuevamente.
+    </div>
+  </ng-template>
+</div>

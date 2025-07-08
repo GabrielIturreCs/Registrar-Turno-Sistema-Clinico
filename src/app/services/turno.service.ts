@@ -1,182 +1,182 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Turno, Tratamiento, Paciente } from '../interfaces';
+import { tap } from 'rxjs/operators';
+import { environment } from '../environments/environment';
+import { NotificationService } from './notification.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TurnoService {
+  private apiUrl = `${environment.apiUrl}/turno`;
   private turnosSubject = new BehaviorSubject<Turno[]>([]);
   public turnos$ = this.turnosSubject.asObservable();
 
-  // Datos de prueba
-  private testData = {
-    turnos: [
-      { 
-        id: 1, 
-        nroTurno: 'T001', 
-        fecha: '2024-01-20', 
-        hora: '09:00', 
-        estado: 'reservado', 
-        tratamiento: 'Consulta General', 
-        precioFinal: 5000, 
-        nombre: 'Juan', 
-        apellido: 'Pérez', 
-        dni: '87654321',
-        telefono: '123456789',
-        duracion: 30,
-        pacienteId: 1, 
-        tratamientoId: 1 
-      } as Turno,
-      { 
-        id: 2, 
-        nroTurno: 'T002', 
-        fecha: '2024-01-20', 
-        hora: '10:30', 
-        estado: 'reservado', 
-        tratamiento: 'Limpieza Dental', 
-        precioFinal: 8000, 
-        nombre: 'María', 
-        apellido: 'García', 
-        dni: '20123456',
-        telefono: '987654321',
-        duracion: 45,
-        pacienteId: 2, 
-        tratamientoId: 2 
-      } as Turno,
-      { 
-        id: 3, 
-        nroTurno: 'T003', 
-        fecha: '2024-01-21', 
-        hora: '14:00', 
-        estado: 'completado', 
-        tratamiento: 'Empaste', 
-        precioFinal: 12000, 
-        nombre: 'Carlos', 
-        apellido: 'López', 
-        dni: '25789123',
-        telefono: '555666777',
-        duracion: 60,
-        pacienteId: 3, 
-        tratamientoId: 3 
-      } as Turno
-    ] as Turno[],
-    tratamientos: [
-      { id: 1, descripcion: 'Consulta General', precio: 5000, duracion: 30 },
-      { id: 2, descripcion: 'Limpieza Dental', precio: 8000, duracion: 45 },
-      { id: 3, descripcion: 'Empaste', precio: 12000, duracion: 60 },
-      { id: 4, descripcion: 'Extracción', precio: 15000, duracion: 30 },
-      { id: 5, descripcion: 'Ortodoncia - Consulta', precio: 10000, duracion: 45 }
-    ],
-    pacientes: [
-      { id: 1, nombre: 'Juan', apellido: 'Pérez', dni: '87654321', obraSocial: 'OSDE', telefono: '123456789' },
-      { id: 2, nombre: 'María', apellido: 'García', dni: '20123456', obraSocial: 'Swiss Medical', telefono: '987654321' },
-      { id: 3, nombre: 'Carlos', apellido: 'López', dni: '25789123', obraSocial: 'OSDE', telefono: '555666777' }
-    ]
-  };
-
-  constructor() {
+  constructor(
+    private http: HttpClient,
+    private notificationService: NotificationService,
+    private authService: AuthService
+  ) {
     this.loadTurnos();
   }
 
-  private loadTurnos(): void {
-    this.turnosSubject.next(this.testData.turnos);
+  private getHeaders(): HttpHeaders {
+    // Usar headers de autenticación del AuthService
+    return this.authService.getAuthHeaders();
   }
 
+  private loadTurnos(): void {
+    this.getTurnosFromAPI().subscribe({
+      next: (turnos) => {
+        this.turnosSubject.next(turnos);
+      },
+      error: (error) => {
+        console.error('Error cargando turnos:', error);
+        this.turnosSubject.next([]);
+      }
+    });
+  }
+
+  // Obtener todos los turnos desde el backend
+  getTurnosFromAPI(): Observable<Turno[]> {
+    return this.http.get<Turno[]>(this.apiUrl, { headers: this.getHeaders() });
+  }
+
+  // Obtener turnos (para compatibilidad con el componente)
   getTurnos(): Observable<Turno[]> {
     return this.turnos$;
   }
 
-  getTurnosByDate(fecha: string): Turno[] {
-    return this.testData.turnos.filter(turno => turno.fecha === fecha);
+  // Obtener turno por ID
+  getTurnoById(id: string): Observable<Turno> {
+    return this.http.get<Turno>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 
-  getTurnosByUser(userId: number): Turno[] {
-    return this.testData.turnos.filter(turno => turno.pacienteId === userId);
+  // Obtener turnos por fecha
+  getTurnosByDate(fecha: string): Observable<Turno[]> {
+    return this.http.get<Turno[]>(`${this.apiUrl}/fecha/${fecha}`, { headers: this.getHeaders() });
   }
 
-  getTurnosByDentista(dentistaId: number): Turno[] {
-    // En un sistema real, los turnos estarían asociados a un dentista específico
-    return this.testData.turnos;
+  // Obtener turnos por paciente
+  getTurnosByPaciente(pacienteId: string): Observable<Turno[]> {
+    return this.http.get<Turno[]>(`${this.apiUrl}/paciente/${pacienteId}`, { headers: this.getHeaders() });
   }
 
-  createTurno(turnoData: Partial<Turno>): Promise<Turno> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const newId = Math.max(...this.testData.turnos.map(t => t.id)) + 1;
-        const newTurno: Turno = {
-          id: newId,
-          nroTurno: 'T' + String(newId).padStart(3, '0'),
-          fecha: turnoData.fecha || '',
-          hora: turnoData.hora || '',
-          estado: 'reservado',
-          tratamiento: turnoData.tratamiento || '',
-          precioFinal: turnoData.precioFinal || 0,
-          nombre: turnoData.nombre || '',
-          apellido: turnoData.apellido || '',
-          dni: turnoData.dni || '',
-          telefono: turnoData.telefono || '',
-          duracion: turnoData.duracion || 0,
-          pacienteId: turnoData.pacienteId || 0,
-          tratamientoId: turnoData.tratamientoId || 0
-        };
-
-        this.testData.turnos.push(newTurno);
-        this.turnosSubject.next([...this.testData.turnos]);
-        resolve(newTurno);
-      }, 500);
-    });
+  // Obtener turnos por dentista
+  getTurnosByDentista(dentistaId: string): Observable<Turno[]> {
+    return this.http.get<Turno[]>(`${this.apiUrl}/dentista/${dentistaId}`, { headers: this.getHeaders() });
   }
 
-  updateTurno(id: number, updates: Partial<Turno>): Promise<Turno | null> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const index = this.testData.turnos.findIndex(t => t.id === id);
-        if (index !== -1) {
-          this.testData.turnos[index] = { ...this.testData.turnos[index], ...updates };
-          this.turnosSubject.next([...this.testData.turnos]);
-          resolve(this.testData.turnos[index]);
-        } else {
-          resolve(null);
-        }
-      }, 500);
-    });
+  // Crear nuevo turno
+  createTurno(turnoData: Partial<Turno>): Observable<Turno> {
+    return this.http.post<Turno>(this.apiUrl, turnoData, { headers: this.getHeaders() })
+      .pipe(
+        // Actualizar la lista local después de crear
+        tap((newTurno) => {
+          const currentTurnos = this.turnosSubject.value;
+          this.turnosSubject.next([...currentTurnos, newTurno]);
+        })
+      );
   }
 
-  deleteTurno(id: number): Promise<boolean> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const index = this.testData.turnos.findIndex(t => t.id === id);
-        if (index !== -1) {
-          this.testData.turnos.splice(index, 1);
-          this.turnosSubject.next([...this.testData.turnos]);
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      }, 500);
-    });
+  // Actualizar turno
+  updateTurno(id: string, updates: Partial<Turno>): Observable<Turno> {
+    return this.http.put<Turno>(`${this.apiUrl}/${id}`, updates, { headers: this.getHeaders() })
+      .pipe(
+        // Actualizar la lista local después de actualizar
+        tap((updatedTurno) => {
+          const currentTurnos = this.turnosSubject.value;
+          const updatedTurnos = currentTurnos.map(turno => 
+            String(turno.id) === String(updatedTurno.id) ? updatedTurno : turno
+          );
+          this.turnosSubject.next(updatedTurnos);
+        })
+      );
   }
 
-  getTratamientos(): Tratamiento[] {
-    return this.testData.tratamientos;
+  // Eliminar turno
+  deleteTurno(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getHeaders() })
+      .pipe(
+        // Actualizar la lista local después de eliminar
+        tap(() => {
+          const currentTurnos = this.turnosSubject.value;
+          const filteredTurnos = currentTurnos.filter(turno => String(turno.id) !== id);
+          this.turnosSubject.next(filteredTurnos);
+        })
+      );
   }
 
-  getPacientes(): Paciente[] {
-    return this.testData.pacientes;
+  /**
+   * Cambia el estado de un turno existente
+   * @param id ID del turno
+   * @param nuevoEstado Estado a establecer (ej: 'pendiente', 'reservado', 'cancelado')
+   */
+  cambiarEstadoTurno(id: string, nuevoEstado: string): Observable<Turno> {
+    return this.updateTurno(id, { estado: nuevoEstado });
   }
 
-  getEstadisticas(fecha?: string): any {
-    const turnos = fecha ? this.getTurnosByDate(fecha) : this.testData.turnos;
+  /**
+   * Cancela un turno y gestiona el reembolso/cancelación del pago en MercadoPago
+   */
+  cancelarTurnoYReembolso(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}/cancelar`, { headers: this.getHeaders() });
+  }
+
+  // Obtener estadísticas
+  getEstadisticas(fechaDesde?: string, fechaHasta?: string): Observable<any> {
+    let url = `${this.apiUrl}/estadisticas`;
+    const params: any = {};
     
-    return {
-      total: turnos.length,
-      reservados: turnos.filter(t => t.estado === 'reservado').length,
-      completados: turnos.filter(t => t.estado === 'completado').length,
-      cancelados: turnos.filter(t => t.estado === 'cancelado').length,
-      ingresos: turnos
-        .filter(t => t.estado === 'completado')
-        .reduce((total, t) => total + t.precioFinal, 0)
-    };
+    if (fechaDesde) params.fechaDesde = fechaDesde;
+    if (fechaHasta) params.fechaHasta = fechaHasta;
+    
+    return this.http.get(url, { 
+      headers: this.getHeaders(),
+      params 
+    });
+  }
+
+  // Obtener tratamientos disponibles
+  getTratamientos(): Observable<Tratamiento[]> {
+    // Sin headers de autenticación para simplificar
+    return this.http.get<Tratamiento[]>(`${environment.apiUrl}/tratamiento`);
+  }
+
+  // Obtener pacientes
+  getPacientes(): Observable<Paciente[]> {
+    return this.http.get<Paciente[]>(`${environment.apiUrl}/paciente`, { 
+      headers: this.getHeaders() 
+    });
+  }
+
+  // Verificar disponibilidad de horario
+  verificarDisponibilidad(fecha: string, hora: string, dentistaId?: string): Observable<boolean> {
+    const params: any = { fecha, hora };
+    if (dentistaId) params.dentistaId = dentistaId;
+    
+    return this.http.get<boolean>(`${this.apiUrl}/disponibilidad`, {
+      headers: this.getHeaders(),
+      params
+    });
+  }
+
+  // Obtener horarios disponibles para una fecha
+  getHorariosDisponibles(fecha: string, dentistaId?: string): Observable<string[]> {
+    const params: any = { fecha };
+    if (dentistaId) params.dentistaId = dentistaId;
+    
+    return this.http.get<string[]>(`${this.apiUrl}/horarios-disponibles`, {
+      headers: this.getHeaders(),
+      params
+    });
+  }
+
+  // Refrescar datos desde el backend
+  refreshTurnos(): void {
+    this.loadTurnos();
   }
 } 

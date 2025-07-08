@@ -1,1 +1,101 @@
-/* You can add global styles to this file, and also import other style files */
+body {
+    background: linear-gradient(to bottom, #76f1ff, #046d94, #000);
+    color: #fff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+}
+
+a {
+    color: #4fd1ff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+button {
+    background: #4fd1ff;
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5em 1.2em;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+button:hover {
+    background: #fff;
+    color: #046d94;
+}
+
+input, select, textarea {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 1px solid #4fd1ff;
+    border-radius: 4px;
+    padding: 0.5em;
+    margin-bottom: 1em;
+    font-size: 1em;
+}
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #fff;
+    background: rgba(255,255,255,0.2);
+}
+
+::selection {
+    background: #4fd1ff;
+    color: #000;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 10px;
+    background: #000;
+}
+::-webkit-scrollbar-thumb {
+    background: #046d94;
+    border-radius: 5px;
+}
+
+/* Angular Material Snackbar Styles */
+.snackbar-success {
+    background: #4caf50 !important;
+    color: white !important;
+}
+
+.snackbar-error {
+    background: #f44336 !important;
+    color: white !important;
+}
+
+.snackbar-warning {
+    background: #ff9800 !important;
+    color: white !important;
+}
+
+.snackbar-info {
+    background: #2196f3 !important;
+    color: white !important;
+}
+
+.mat-mdc-snack-bar-container {
+    --mdc-snackbar-container-shape: 8px;
+    --mdc-snackbar-supporting-text-color: white;
+    --mdc-snackbar-supporting-text-font-family: 'Segoe UI', Arial, sans-serif;
+    --mdc-snackbar-supporting-text-font-size: 14px;
+    --mdc-snackbar-supporting-text-font-weight: 400;
+    --mdc-snackbar-supporting-text-line-height: 20px;
+}
+
+.mat-mdc-snack-bar-action {
+    --mdc-text-button-label-text-color: white;
+    --mdc-text-button-label-text-font-weight: 600;
+}
+
+.mat-mdc-snack-bar-action:hover {
+    --mdc-text-button-label-text-color: #e0e0e0;
+}

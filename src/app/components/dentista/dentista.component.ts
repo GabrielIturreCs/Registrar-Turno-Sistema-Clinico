@@ -1,8 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { User, Turno, Tratamiento, Paciente, Estadisticas, TipoAlerta } from '../../interfaces';
+import { User, Turno, Tratamiento, Paciente, Estadisticas, TipoAlerta, Dentista } from '../../interfaces';
+import { Router } from '@angular/router';
+import { TurnoService } from '../../services/turno.service';
+import { PacienteService } from '../../services/paciente.service';
+import { DentistaService } from '../../services/dentista.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-dentista',
@@ -10,12 +15,13 @@ import { User, Turno, Tratamiento, Paciente, Estadisticas, TipoAlerta } from '..
   templateUrl: './dentista.component.html',
   styleUrl: './dentista.component.css'
 })
-export class DentistaComponent implements OnInit {
+export class DentistaComponent implements OnInit, OnDestroy {
 
   // Estado de la aplicación
   currentView: string = 'dashboard';
   user: User | null = null;
   isLoading: boolean = false;
+  isSubmitting: boolean = false;
 
   // Alertas
   alertVisible: boolean = false;
@@ -35,52 +41,69 @@ export class DentistaComponent implements OnInit {
   tratamientos: Tratamiento[] = [];
   pacientes: Paciente[] = [];
   usuarios: User[] = [];
+  dentistas: Dentista[] = [];
+  dentistaForm: Dentista = {
+    legajo: '',
+    email: '',
+    nombre: '',
+    apellido: '',
+    telefono: '',
+    direccion: '',
+    dni: '',
+    userId: ''
+  };
+  isEditMode: boolean = false;
 
   // Filtros
   searchTerm: string = '';
   filterEstado: string = 'todos';
   filterTipo: string = 'todos';
 
-  // Datos de prueba para dentistas
-  testData = {
-    usuarios: [
-      { id: 1, nombreUsuario: 'admin', password: 'password', nombre: 'Admin', apellido: 'Sistema', tipoUsuario: 'administrador', dni: '00000000', telefono: '1100000000' },
-      { id: 2, nombreUsuario: 'dentista1', password: 'password', nombre: 'Dr. María', apellido: 'González', tipoUsuario: 'dentista', dni: '12345678', telefono: '123456789' },
-      { id: 3, nombreUsuario: 'dentista2', password: 'password', nombre: 'Dr. Carlos', apellido: 'López', tipoUsuario: 'dentista', dni: '23456789', telefono: '234567890' },
-      { id: 4, nombreUsuario: 'dentista3', password: 'password', nombre: 'Dra. Ana', apellido: 'Martínez', tipoUsuario: 'dentista', dni: '34567890', telefono: '345678901' },
-      { id: 5, nombreUsuario: 'paciente1', password: 'password', nombre: 'Juan', apellido: 'Pérez', tipoUsuario: 'paciente', dni: '87654321', telefono: '987654321', obraSocial: 'OSDE' }
-    ],
-    tratamientos: [
-      { id: 1, descripcion: 'Consulta General', precio: 5000, duracion: 30 },
-      { id: 2, descripcion: 'Limpieza Dental', precio: 8000, duracion: 45 },
-      { id: 3, descripcion: 'Empaste', precio: 12000, duracion: 60 },
-      { id: 4, descripcion: 'Extracción', precio: 15000, duracion: 30 },
-      { id: 5, descripcion: 'Ortodoncia - Consulta', precio: 10000, duracion: 45 },
-      { id: 6, descripcion: 'Blanqueamiento', precio: 20000, duracion: 90 },
-      { id: 7, descripcion: 'Endodoncia', precio: 25000, duracion: 120 }
-    ],
-    pacientes: [
-      { id: 1, nombre: 'Juan', apellido: 'Pérez', dni: '87654321', obraSocial: 'OSDE', telefono: '987654321' },
-      { id: 2, nombre: 'María', apellido: 'García', dni: '20123456', obraSocial: 'Swiss Medical', telefono: '123456789' },
-      { id: 3, nombre: 'Carlos', apellido: 'López', dni: '25789123', obraSocial: 'OSDE', telefono: '234567890' },
-      { id: 4, nombre: 'Ana', apellido: 'Rodríguez', dni: '34567890', obraSocial: 'Galeno', telefono: '345678901' },
-      { id: 5, nombre: 'Luis', apellido: 'Fernández', dni: '45678901', obraSocial: 'Medicus', telefono: '456789012' }
-    ],
-    turnos: [
-      { id: 1, nroTurno: 'T001', fecha: '2024-01-20', hora: '09:00', estado: 'reservado', tratamiento: 'Consulta General', precioFinal: 5000, nombre: 'Juan', apellido: 'Pérez', pacienteId: 1, tratamientoId: 1 },
-      { id: 2, nroTurno: 'T002', fecha: '2024-01-21', hora: '10:30', estado: 'reservado', tratamiento: 'Limpieza Dental', precioFinal: 8000, nombre: 'María', apellido: 'García', pacienteId: 2, tratamientoId: 2 },
-      { id: 3, nroTurno: 'T003', fecha: '2024-01-22', hora: '14:00', estado: 'completado', tratamiento: 'Empaste', precioFinal: 12000, nombre: 'Carlos', apellido: 'López', pacienteId: 3, tratamientoId: 3 },
-      { id: 4, nroTurno: 'T004', fecha: '2024-01-23', hora: '16:30', estado: 'cancelado', tratamiento: 'Extracción', precioFinal: 15000, nombre: 'Ana', apellido: 'Rodríguez', pacienteId: 4, tratamientoId: 4 }
-    ] as Turno[]
-  };
+  // Validación de formulario
+  formErrors: { [key: string]: string } = {};
 
-  constructor(private http: HttpClient) {}
+  // Para limpiar observables
+  private destroy$ = new Subject<void>();
+
+  // --- MODALES ---
+  dentistaAEliminar: Dentista | null = null;
+  feedbackType: 'success' | 'danger' | 'warning' = 'success';
+  feedbackTitle: string = '';
+  feedbackMessage: string = '';
+
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private turnoService: TurnoService,
+    private pacienteService: PacienteService,
+    private dentistaService: DentistaService
+  ) {}
 
   ngOnInit(): void {
-    this.loadTestData();
-    // Simular usuario dentista logueado
+    this.loadInitialData();
+    this.setupUser();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadInitialData(): void {
+    this.isLoading = true;
+    Promise.all([
+      this.loadDentistas(),
+      this.loadTurnos(),
+      this.loadPacientes(),
+      this.loadTratamientos()
+    ]).finally(() => {
+      this.isLoading = false;
+    });
+  }
+
+  private setupUser(): void {
     this.user = {
-      id: 2,
+      id: '2',
       nombreUsuario: 'dentista1',
       nombre: 'Dr. María',
       apellido: 'González',
@@ -96,78 +119,83 @@ export class DentistaComponent implements OnInit {
     this.clearForms();
   }
 
+  navigateToTratamientos(): void {
+    this.currentView = 'tratamientos';
+  }
+
   // Métodos de turnos
   registrarTurno(): void {
     if (!this.canRegisterTurno) return;
+    
+    this.isSubmitting = true;
+    const turnoData = {
+      pacienteId: parseInt(this.turnoForm.pacienteId),
+      fecha: this.turnoForm.fecha,
+      hora: this.turnoForm.hora,
+      tratamientoId: parseInt(this.turnoForm.tratamientoId)
+    };
 
-    this.isLoading = true;
-
-    setTimeout(() => {
-      const newId = Math.max(...this.testData.turnos.map(t => t.id)) + 1;
-      const tratamiento = this.tratamientos.find(t => t.id === Number(this.turnoForm.tratamientoId));
-      const paciente = this.pacientes.find(p => p.id === Number(this.turnoForm.pacienteId));
-
-      if (!tratamiento) {
-        this.showAlert('Error: Tratamiento no encontrado.', 'danger');
-        this.isLoading = false;
-        return;
-      }
-
-      if (!paciente) {
-        this.showAlert('Error: Paciente no encontrado.', 'danger');
-        this.isLoading = false;
-        return;
-      }
-
-      const newTurno: Turno = {
-        id: newId,
-        nroTurno: `T${newId.toString().padStart(3, '0')}`,
-        fecha: this.turnoForm.fecha,
-        hora: this.turnoForm.hora,
-        estado: 'reservado',
-        tratamiento: tratamiento.descripcion,
-        precioFinal: tratamiento.precio,
-        nombre: paciente.nombre,
-        apellido: paciente.apellido,
-        dni: paciente.dni,
-        telefono: paciente.telefono || undefined,
-        duracion: tratamiento.duracion,
-        pacienteId: paciente.id,
-        tratamientoId: tratamiento.id
-      };
-
-      this.testData.turnos.push(newTurno);
-      this.turnos = [...this.testData.turnos];
-      this.showAlert('¡Turno registrado exitosamente!', 'success');
-      this.navigateTo('dashboard');
-      this.isLoading = false;
-    }, 1000);
+    this.turnoService.createTurno(turnoData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.loadTurnos();
+          this.clearForms();
+          this.navigateTo('dashboard');
+          this.showAlert('¡Turno registrado exitosamente!', 'success');
+        },
+        error: (error) => {
+          console.error('Error al registrar turno:', error);
+          this.showAlert('Error al registrar el turno. Intente nuevamente.', 'danger');
+        },
+        complete: () => {
+          this.isSubmitting = false;
+        }
+      });
   }
 
   cancelarTurno(turno: Turno): void {
-    turno.estado = 'cancelado';
-    this.showAlert('Turno cancelado exitosamente.', 'warning');
-  }
+    const turnoId = turno._id || turno.id?.toString() || '';
+    if (!turnoId) {
+      this.showAlert('ID de turno no válido', 'danger');
+      return;
+    }
 
-  completarTurno(turno: Turno): void {
-    turno.estado = 'completado';
-    this.showAlert('Turno completado exitosamente.', 'success');
-  }
-
-  eliminarUsuario(usuario: User): void {
-    const index = this.testData.usuarios.findIndex(u => u.id === usuario.id);
-    if (index > -1) {
-      this.testData.usuarios.splice(index, 1);
-      this.usuarios = [...this.testData.usuarios];
-      this.showAlert('Usuario eliminado exitosamente.', 'success');
+    if (confirm('¿Está seguro de cancelar este turno?')) {
+      this.turnoService.cambiarEstadoTurno(turnoId, 'cancelado')
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.loadTurnos();
+            this.showAlert('Turno cancelado exitosamente.', 'warning');
+          },
+          error: (error) => {
+            console.error('Error al cancelar turno:', error);
+            this.showAlert('Error al cancelar el turno', 'danger');
+          }
+        });
     }
   }
 
-  loadTestData(): void {
-    this.turnos = [...this.testData.turnos];
-    this.tratamientos = [...this.testData.tratamientos];
-    this.pacientes = [...this.testData.pacientes];
-    this.usuarios = [...this.testData.usuarios];
+  completarTurno(turno: Turno): void {
+    const turnoId = turno._id || turno.id?.toString() || '';
+    if (!turnoId) {
+      this.showAlert('ID de turno no válido', 'danger');
+      return;
+    }
+
+    this.turnoService.cambiarEstadoTurno(turnoId, 'completado')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.loadTurnos();
+          this.showAlert('Turno completado exitosamente.', 'success');
+        },
+        error: (error) => {
+          console.error('Error al completar turno:', error);
+          this.showAlert('Error al completar el turno', 'danger');
+        }
+      });
   }
 
   clearForms(): void {
@@ -177,6 +205,7 @@ export class DentistaComponent implements OnInit {
       hora: '',
       tratamientoId: ''
     };
+    this.clearFormErrors();
   }
 
   showAlert(message: string, type: TipoAlerta): void {
@@ -192,6 +221,68 @@ export class DentistaComponent implements OnInit {
 
   getCurrentDate(): string {
     return new Date().toISOString().split('T')[0];
+  }
+
+  // Validación de formulario de dentista
+  validateDentistaForm(): boolean {
+    this.clearFormErrors();
+    let isValid = true;
+
+    if (!this.dentistaForm.legajo?.trim()) {
+      this.formErrors['legajo'] = 'El legajo es requerido';
+      isValid = false;
+    }
+
+    if (!this.dentistaForm.email?.trim()) {
+      this.formErrors['email'] = 'El email es requerido';
+      isValid = false;
+    } else if (!this.isValidEmail(this.dentistaForm.email)) {
+      this.formErrors['email'] = 'El email no tiene un formato válido';
+      isValid = false;
+    }
+
+    if (!this.dentistaForm.nombre?.trim()) {
+      this.formErrors['nombre'] = 'El nombre es requerido';
+      isValid = false;
+    }
+
+    if (!this.dentistaForm.apellido?.trim()) {
+      this.formErrors['apellido'] = 'El apellido es requerido';
+      isValid = false;
+    }
+
+    if (!this.dentistaForm.dni?.trim()) {
+      this.formErrors['dni'] = 'El DNI es requerido';
+      isValid = false;
+    } else if (!this.isValidDNI(this.dentistaForm.dni)) {
+      this.formErrors['dni'] = 'El DNI debe tener 8 dígitos';
+      isValid = false;
+    }
+
+    if (!this.dentistaForm.telefono?.trim()) {
+      this.formErrors['telefono'] = 'El teléfono es requerido';
+      isValid = false;
+    }
+
+    if (!this.dentistaForm.direccion?.trim()) {
+      this.formErrors['direccion'] = 'La dirección es requerida';
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  private isValidDNI(dni: string): boolean {
+    return /^\d{8}$/.test(dni);
+  }
+
+  private clearFormErrors(): void {
+    this.formErrors = {};
   }
 
   // Getters para validaciones
@@ -210,11 +301,12 @@ export class DentistaComponent implements OnInit {
 
     // Filtrar por búsqueda
     if (this.searchTerm) {
+      const searchLower = this.searchTerm.toLowerCase();
       filtered = filtered.filter(turno =>
-        turno.nroTurno.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        turno.nombre?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        turno.apellido?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        turno.tratamiento.toLowerCase().includes(this.searchTerm.toLowerCase())
+        String(turno.nroTurno).toLowerCase().includes(searchLower) ||
+        turno.nombre?.toLowerCase().includes(searchLower) ||
+        turno.apellido?.toLowerCase().includes(searchLower) ||
+        turno.tratamiento.toLowerCase().includes(searchLower)
       );
     }
 
@@ -226,19 +318,18 @@ export class DentistaComponent implements OnInit {
     return filtered;
   }
 
-  get filteredUsuarios(): User[] {
-    let filtered = this.usuarios.filter(u => u.tipoUsuario === 'dentista');
-
-    // Filtrar por búsqueda
+  get filteredDentistas(): Dentista[] {
+    let filtered = this.dentistas;
     if (this.searchTerm) {
-      filtered = filtered.filter(usuario =>
-        usuario.nombreUsuario.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        usuario.nombre.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        usuario.apellido.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        usuario.dni?.toLowerCase().includes(this.searchTerm.toLowerCase())
+      const searchLower = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(dentista =>
+        dentista.nombre.toLowerCase().includes(searchLower) ||
+        dentista.apellido.toLowerCase().includes(searchLower) ||
+        dentista.legajo.toLowerCase().includes(searchLower) ||
+        dentista.dni.toLowerCase().includes(searchLower) ||
+        dentista.email.toLowerCase().includes(searchLower)
       );
     }
-
     return filtered;
   }
 
@@ -265,7 +356,7 @@ export class DentistaComponent implements OnInit {
     const cancelados = this.turnos.filter(t => t.estado === 'cancelado').length;
     const ingresos = this.turnos
       .filter(t => t.estado === 'completado')
-      .reduce((sum, t) => sum + t.precioFinal, 0);
+      .reduce((sum, t) => sum + Number(t.precioFinal || 0), 0);
 
     return { total, reservados, completados, cancelados, ingresos };
   }
@@ -287,5 +378,220 @@ export class DentistaComponent implements OnInit {
       case 'paciente': return 'badge bg-success';
       default: return 'badge bg-secondary';
     }
+  }
+
+  volverAlDashboardAdmin(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+  // Métodos de carga de datos
+  private loadTurnos(): Promise<void> {
+    return new Promise((resolve) => {
+      this.turnoService.getTurnosFromAPI()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (turnos) => this.turnos = turnos,
+          error: (error) => {
+            console.error('Error al cargar turnos:', error);
+            this.turnos = [];
+          },
+          complete: () => resolve()
+        });
+    });
+  }
+
+  private loadPacientes(): Promise<void> {
+    return new Promise((resolve) => {
+      this.pacienteService.getPacientes()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (pacientes) => this.pacientes = pacientes,
+          error: (error) => {
+            console.error('Error al cargar pacientes:', error);
+            this.pacientes = [];
+          },
+          complete: () => resolve()
+        });
+    });
+  }
+
+  private loadTratamientos(): Promise<void> {
+    return new Promise((resolve) => {
+      this.turnoService.getTratamientos()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (tratamientos) => this.tratamientos = tratamientos,
+          error: (error) => {
+            console.error('Error al cargar tratamientos:', error);
+            this.tratamientos = [];
+          },
+          complete: () => resolve()
+        });
+    });
+  }
+
+  // CRUD Dentistas
+  private loadDentistas(): Promise<void> {
+    return new Promise((resolve) => {
+      this.dentistaService.getDentistas()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (dentistas) => this.dentistas = dentistas,
+          error: (error) => {
+            console.error('Error al cargar dentistas:', error);
+            this.dentistas = [];
+          },
+          complete: () => resolve()
+        });
+    });
+  }
+
+  saveDentista(): void {
+    if (!this.validateDentistaForm()) {
+      this.showAlert('Por favor, corrija los errores en el formulario', 'warning');
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    if (this.isEditMode) {
+      this.dentistaService.updateDentista(this.dentistaForm._id!, this.dentistaForm)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.loadDentistas();
+            this.showAlert('Dentista actualizado correctamente', 'success');
+            this.clearDentistaForm();
+          },
+          error: (error) => {
+            console.error('Error al actualizar dentista:', error);
+            this.showAlert('Error al actualizar el dentista', 'danger');
+          },
+          complete: () => {
+            this.isSubmitting = false;
+          }
+        });
+    } else {
+      this.dentistaService.createDentista(this.dentistaForm)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.loadDentistas();
+            this.showAlert('Dentista creado correctamente', 'success');
+            this.clearDentistaForm();
+          },
+          error: (error) => {
+            console.error('Error al crear dentista:', error);
+            this.showAlert('Error al crear el dentista', 'danger');
+          },
+          complete: () => {
+            this.isSubmitting = false;
+          }
+        });
+    }
+  }
+
+  editDentista(dentista: Dentista): void {
+    this.dentistaForm = { ...dentista };
+    this.isEditMode = true;
+    this.clearFormErrors();
+  }
+
+  deleteDentista(dentista: Dentista): void {
+    this.openDeleteDentistaModal(dentista);
+  }
+
+  clearDentistaForm(): void {
+    this.dentistaForm = {
+      legajo: '',
+      email: '',
+      nombre: '',
+      apellido: '',
+      telefono: '',
+      direccion: '',
+      dni: '',
+      userId: ''
+    };
+    this.isEditMode = false;
+    this.clearFormErrors();
+  }
+
+  // --- MODAL: Confirmar eliminación ---
+  openDeleteDentistaModal(dentista: Dentista): void {
+    this.dentistaAEliminar = dentista;
+    const modal = document.getElementById('deleteDentistaModal');
+    if (modal) {
+      // @ts-ignore
+      const bsModal = new window.bootstrap.Modal(modal);
+      bsModal.show();
+    }
+  }
+
+  confirmDeleteDentista(): void {
+    if (!this.dentistaAEliminar || !this.dentistaAEliminar._id) return;
+    this.dentistaService.deleteDentista(this.dentistaAEliminar._id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.loadDentistas();
+          this.showFeedbackModal('success', 'Dentista eliminado', 'Dentista eliminado correctamente.');
+        },
+        error: (error) => {
+          console.error('Error al eliminar dentista:', error);
+          this.showFeedbackModal('danger', 'Error', 'Error al eliminar el dentista.');
+        }
+      });
+    this.dentistaAEliminar = null;
+    // Cerrar modal
+    const modal = document.getElementById('deleteDentistaModal');
+    if (modal) {
+      // @ts-ignore
+      window.bootstrap.Modal.getInstance(modal)?.hide();
+    }
+  }
+
+  // --- MODAL: Feedback (éxito/error) ---
+  showFeedbackModal(type: 'success' | 'danger' | 'warning', title: string, message: string): void {
+    this.feedbackType = type;
+    this.feedbackTitle = title;
+    this.feedbackMessage = message;
+    const modal = document.getElementById('feedbackModal');
+    if (modal) {
+      // @ts-ignore
+      const bsModal = new window.bootstrap.Modal(modal);
+      bsModal.show();
+    }
+  }
+
+  // Método para obtener el nombre completo del paciente
+  getPacienteNombre(pacienteId: number): string {
+    const paciente = this.pacientes.find(p => p.id === pacienteId);
+    return paciente ? `${paciente.nombre} ${paciente.apellido}` : 'N/A';
+  }
+
+  // Método para obtener el nombre del tratamiento
+  getTratamientoNombre(tratamientoId: number): string {
+    const tratamiento = this.tratamientos.find(t => t.id === tratamientoId);
+    return tratamiento ? tratamiento.descripcion : 'N/A';
+  }
+
+  getUserGreeting(): string {
+    if (!this.user) return 'Usuario';
+    let nombre = '';
+    if (this.user.nombre && this.user.apellido) {
+      nombre = `${this.user.nombre} ${this.user.apellido}`;
+    } else if (this.user.nombre) {
+      nombre = this.user.nombre;
+    } else {
+      // Si no hay nombre, mostrar solo el tipo de usuario capitalizado
+      nombre = this.capitalizeFirstLetter(this.user.tipoUsuario || 'Usuario');
+    }
+    // Mostrar el rol entre paréntesis
+    return `${nombre} (${this.user.tipoUsuario})`;
+  }
+
+  capitalizeFirstLetter(str: string): string {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 } 

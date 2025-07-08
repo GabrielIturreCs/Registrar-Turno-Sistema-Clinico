@@ -1,82 +1,504 @@
-<!-- Vista Registrar Turno -->
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-plus"></i> Registrar Nuevo Turno</h5>
+<!-- Vista Reservar Turno con Wizard -->
+<div class="main-reservar-container">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Wizard Progress -->
+      <div class="col-12 mb-4">
+        <div class="wizard-progress">
+          <!-- Para dentistas/administradores: Paso 1 - Seleccionar Paciente -->
+          <div *ngIf="shouldSelectPaciente" class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+            <div class="step-number">1</div>
+            <div class="step-title">Seleccionar Paciente</div>
+          </div>
+          <div *ngIf="shouldSelectPaciente" class="progress-line" [class.completed]="currentStep > 1"></div>
+          
+          <!-- Paso para Elegir Fecha -->
+          <div class="step" [class.active]="currentStep >= (shouldSelectPaciente ? 2 : 1)" [class.completed]="currentStep > (shouldSelectPaciente ? 2 : 1)">
+            <div class="step-number">{{ shouldSelectPaciente ? 2 : 1 }}</div>
+            <div class="step-title">Elegir Fecha</div>
+          </div>
+          <div class="progress-line" [class.completed]="currentStep > (shouldSelectPaciente ? 2 : 1)"></div>
+          
+          <!-- Paso para Elegir Hora -->
+          <div class="step" [class.active]="currentStep >= (shouldSelectPaciente ? 3 : 2)" [class.completed]="currentStep > (shouldSelectPaciente ? 3 : 2)">
+            <div class="step-number">{{ shouldSelectPaciente ? 3 : 2 }}</div>
+            <div class="step-title">Elegir Hora</div>
+          </div>
+          <div class="progress-line" [class.completed]="currentStep > (shouldSelectPaciente ? 3 : 2)"></div>
+          
+          <!-- Paso para Elegir Tratamiento -->
+          <div class="step" [class.active]="currentStep >= (shouldSelectPaciente ? 4 : 3)" [class.completed]="currentStep > (shouldSelectPaciente ? 4 : 3)">
+            <div class="step-number">{{ shouldSelectPaciente ? 4 : 3 }}</div>
+            <div class="step-title">Elegir Tratamiento</div>
+          </div>
+          <div class="progress-line" [class.completed]="currentStep > (shouldSelectPaciente ? 4 : 3)"></div>
+          
+          <!-- Paso para Confirmar -->
+          <div class="step" [class.active]="currentStep >= (shouldSelectPaciente ? 5 : 4)" [class.completed]="currentStep > (shouldSelectPaciente ? 5 : 4)">
+            <div class="step-number">{{ shouldSelectPaciente ? 5 : 4 }}</div>
+            <div class="step-title">Confirmar</div>
+          </div>
+          <div class="progress-line" [class.completed]="currentStep > (shouldSelectPaciente ? 5 : 4)"></div>
+          
+          <!-- Paso final -->
+          <div class="step" [class.active]="currentStep >= (shouldSelectPaciente ? 6 : 5)">
+            <div class="step-number">{{ shouldSelectPaciente ? 6 : 5 }}</div>
+            <div class="step-title">¡Listo!</div>
+          </div>
         </div>
-        <div class="card-body">
-          <form #turnoFormRef="ngForm" (ngSubmit)="registrarTurno()">
-            <!-- Selección de paciente (solo para dentista/admin) -->
-            <div *ngIf="user?.tipoUsuario !== 'paciente'" class="mb-3">
-              <label for="turnoSelectPaciente" class="form-label">Paciente</label>
-              <select 
-                class="form-select" 
-                id="turnoSelectPaciente"
-                [(ngModel)]="turnoForm.pacienteId" 
-                name="pacienteId"
-                required>
-                <option value="">Selecciona un paciente</option>
-                <option *ngFor="let paciente of pacientes" [value]="paciente.id">
-                  {{ paciente.nombre }} {{ paciente.apellido }} - {{ paciente.dni }}
-                </option>
-              </select>
-            </div>
+      </div>
 
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="turnoFecha" class="form-label">Fecha</label>
-                <input 
-                  type="date" 
-                  class="form-control" 
-                  id="turnoFecha"
-                  [(ngModel)]="turnoForm.fecha" 
-                  name="fecha"
-                  [min]="getCurrentDate()"
-                  required>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="turnoHora" class="form-label">Hora</label>
-                <input 
-                  type="time" 
-                  class="form-control" 
-                  id="turnoHora"
-                  [(ngModel)]="turnoForm.hora" 
-                  name="hora"
-                  required>
+      <!-- Step 1: Patient Selection (Solo para dentistas/administradores) -->
+      <div *ngIf="currentStep === 1 && shouldSelectPaciente" class="col-12">
+        <div class="card shadow">
+          <div class="card-header">
+            <h5><i class="fas fa-user"></i> Paso 1: Selecciona el paciente</h5>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-info mb-4">
+              <i class="fas fa-info-circle"></i> Como dentista, debes seleccionar para qué paciente registrarás el turno.
+            </div>
+            
+            <!-- Lista de pacientes -->
+            <div class="patients-grid">
+              <div 
+                *ngFor="let paciente of pacientes" 
+                class="patient-card"
+                [class.selected]="selectedPaciente?.id === paciente.id || selectedPaciente?._id === paciente._id"
+                (click)="selectPaciente(paciente)">
+                <div class="patient-info">
+                  <div class="patient-avatar">
+                    {{ paciente.nombre.charAt(0) }}{{ paciente.apellido.charAt(0) }}
+                  </div>
+                  <div class="patient-details">
+                    <h6>{{ paciente.nombre }} {{ paciente.apellido }}</h6>
+                    <div class="patient-meta">
+                      <small class="text-muted">
+                        <i class="fas fa-id-card"></i> DNI: {{ paciente.dni }}
+                      </small>
+                      <br>
+                      <small class="text-muted">
+                        <i class="fas fa-heartbeat"></i> {{ paciente.obraSocial }}
+                      </small>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <div class="mb-3">
-              <label for="turnoTratamiento" class="form-label">Tratamiento</label>
-              <select 
-                class="form-select" 
-                id="turnoTratamiento"
-                [(ngModel)]="turnoForm.tratamientoId" 
-                name="tratamientoId"
-                required>
-                <option value="">Selecciona un tratamiento</option>
-                <option *ngFor="let tratamiento of tratamientos" [value]="tratamiento.id">
-                  {{ tratamiento.descripcion }} - ${{ tratamiento.precio }} ({{ tratamiento.duracion }} min)
-                </option>
-              </select>
-            </div>
-
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-              <button type="button" class="btn btn-secondary me-md-2" (click)="navigateToDashboard()">
-                Cancelar
+            
+            <!-- Mensaje si no hay pacientes -->
+            <div class="text-center py-4" *ngIf="pacientes.length === 0">
+              <div class="spinner-border text-primary mb-3" role="status"></div>
+              <p>Cargando pacientes disponibles...</p>
+              <button type="button" class="btn btn-outline-primary" (click)="loadPacientes()">
+                <i class="fas fa-refresh"></i> Reintentar
               </button>
+            </div>
+            
+            <!-- Botón cancelar para el paso de selección de paciente -->
+            <div class="wizard-navigation mt-4">
+              <button class="btn btn-outline-danger" (click)="cancelarReserva()">
+                <i class="fas fa-times"></i> Cancelar Reserva
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 1/2: Date Selection -->
+      <div *ngIf="currentStep === (shouldSelectPaciente ? 2 : 1)" class="col-12">
+        <div class="card shadow">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="fas fa-calendar-alt"></i> Paso {{ shouldSelectPaciente ? 2 : 1 }}: Selecciona la fecha para tu turno</h5>
+            <div class="selected-info" *ngIf="shouldSelectPaciente && selectedPaciente">
+              <i class="fas fa-user"></i> {{ selectedPaciente.nombre }} {{ selectedPaciente.apellido }}
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="calendar-container">
+              <!-- Calendar Header -->
+              <div class="calendar-header">
+                <button type="button" class="btn btn-outline-primary" (click)="prevMonth()">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <h4>{{ getMonthName() }} {{ getYear() }}</h4>
+                <button type="button" class="btn btn-outline-primary" (click)="nextMonth()">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+
+              <!-- Calendar Grid -->
+              <div class="calendar-grid">
+                <!-- Week Days Header -->
+                <div class="calendar-weekdays">
+                  <div class="weekday">Lun</div>
+                  <div class="weekday">Mar</div>
+                  <div class="weekday">Mié</div>
+                  <div class="weekday">Jue</div>
+                  <div class="weekday">Vie</div>
+                  <div class="weekday">Sáb</div>
+                  <div class="weekday">Dom</div>
+                </div>
+
+                <!-- Calendar Days -->
+                <div class="calendar-days">
+                  <div 
+                    *ngFor="let day of calendarDays" 
+                    class="calendar-day"
+                    [class.available]="day.available"
+                    [class.unavailable]="!day.available"
+                    [class.today]="day.isToday"
+                    [class.selected]="day.isSelected"
+                    [class.other-month]="day.date.getMonth() !== currentMonth.getMonth()"
+                    (click)="selectDate(day)">
+                    {{ day.date.getDate() }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="calendar-legend mt-3">
+                <div class="legend-item">
+                  <div class="legend-color available"></div>
+                  <span>Disponible</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-color unavailable"></div>
+                  <span>No disponible</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-color today"></div>
+                  <span>Hoy</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Botón cancelar para el primer paso -->
+            <div class="wizard-navigation mt-4">
+              <button class="btn btn-outline-danger" (click)="cancelarReserva()">
+                <i class="fas fa-times"></i> Cancelar Reserva
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2/3: Time Selection -->
+      <div *ngIf="currentStep === (shouldSelectPaciente ? 3 : 2)" class="col-12">
+        <div class="card shadow">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="fas fa-clock"></i> Paso {{ shouldSelectPaciente ? 3 : 2 }}: Selecciona la hora</h5>
+            <div class="selected-info">
+              <i class="fas fa-calendar"></i> {{ formatSelectedDate() }}
+              <span *ngIf="shouldSelectPaciente && selectedPaciente" class="ms-3">
+                <i class="fas fa-user"></i> {{ selectedPaciente.nombre }} {{ selectedPaciente.apellido }}
+              </span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="time-slots-container">
+              <div class="time-slots-grid">
+                <div 
+                  *ngFor="let slot of availableTimeSlots" 
+                  class="time-slot"
+                  [class.available]="slot.available"
+                  [class.occupied]="!slot.available"
+                  [class.selected]="selectedTime === slot.time"
+                  (click)="selectTime(slot)">
+                  {{ slot.time }}
+                </div>
+              </div>
+            </div>
+            <div class="time-legend mt-3">
+              <div class="legend-item">
+                <div class="legend-color time-available"></div>
+                <span>Disponible</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color time-occupied"></div>
+                <span>Ocupado</span>
+              </div>
+            </div>
+            <div class="wizard-navigation mt-4">
+              <button class="btn btn-secondary" (click)="prevStep()">
+                <i class="fas fa-arrow-left"></i> Anterior
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3/4: Treatment Selection -->
+      <div *ngIf="currentStep === (shouldSelectPaciente ? 4 : 3)" class="col-12">
+        <div class="card shadow">
+          <div class="card-header">
+            <h5><i class="fas fa-tooth"></i> Paso {{ shouldSelectPaciente ? 4 : 3 }}: Selecciona el tratamiento</h5>
+            <div class="selected-info">
+              <i class="fas fa-calendar"></i> {{ formatSelectedDate() }} 
+              <i class="fas fa-clock ms-3"></i> {{ selectedTime }}
+              <span *ngIf="shouldSelectPaciente && selectedPaciente" class="ms-3">
+                <i class="fas fa-user"></i> {{ selectedPaciente.nombre }} {{ selectedPaciente.apellido }}
+              </span>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Debug info -->
+            <div class="alert alert-info" *ngIf="tratamientos.length === 0">
+              <i class="fas fa-info-circle"></i> Cargando tratamientos... Si no aparecen, verifique la conexión con el backend.
+            </div>
+            
+            <div class="treatments-grid" *ngIf="tratamientos.length > 0">
+              <div 
+                *ngFor="let treatment of tratamientos" 
+                class="treatment-card"
+                [class.selected]="selectedTreatment?.id === treatment.id"
+                (click)="selectTreatment(treatment)">
+                <div class="treatment-icon">
+                  <i class="fas fa-tooth"></i>
+                </div>
+                <h6>{{ treatment.descripcion }}</h6>
+                <div class="treatment-duration">
+                  <i class="fas fa-clock"></i> {{ treatment.duracion }} min
+                </div>
+                <div class="treatment-price">
+                  ${{ treatment.precio }}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Mensaje si no hay tratamientos -->
+            <div class="text-center py-4" *ngIf="tratamientos.length === 0">
+              <div class="spinner-border text-primary mb-3" role="status"></div>
+              <p>Cargando tratamientos disponibles...</p>
+              <button class="btn btn-outline-primary" (click)="loadTratamientos()">
+                <i class="fas fa-refresh"></i> Reintentar
+              </button>
+            </div>
+            <div class="wizard-navigation mt-4">
+              <button class="btn btn-secondary" (click)="prevStep()">
+                <i class="fas fa-arrow-left"></i> Anterior
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4/5: Final Confirmation -->
+      <div *ngIf="currentStep === (shouldSelectPaciente ? 5 : 4)" class="col-12">
+        <div class="card shadow">
+          <div class="card-header">
+            <h5><i class="fas fa-check-circle"></i> Paso {{ shouldSelectPaciente ? 5 : 4 }}: Confirma {{ shouldSelectPaciente ? 'el' : 'tu' }} turno</h5>
+          </div>
+          <div class="card-body text-center">
+            <h4 class="mb-4">Revisa los detalles {{ shouldSelectPaciente ? 'del' : 'de tu' }} turno</h4>
+            
+            <div class="booking-summary">
+              <!-- Información del paciente para dentistas -->
+              <div class="summary-item" *ngIf="shouldSelectPaciente && selectedPaciente">
+                <i class="fas fa-user text-primary"></i>
+                <strong>Paciente:</strong> {{ selectedPaciente.nombre }} {{ selectedPaciente.apellido }}
+              </div>
+              <div class="summary-item">
+                <i class="fas fa-calendar text-primary"></i>
+                <strong>Fecha:</strong> {{ formatSelectedDate() }}
+              </div>
+              <div class="summary-item">
+                <i class="fas fa-clock text-primary"></i>
+                <strong>Hora:</strong> {{ selectedTime }}
+              </div>
+              <div class="summary-item" *ngIf="selectedTreatment">
+                <i class="fas fa-tooth text-primary"></i>
+                <strong>Tratamiento:</strong> {{ selectedTreatment.descripcion }}
+              </div>
+              <div class="summary-item" *ngIf="selectedTreatment">
+                <i class="fas fa-money-bill text-primary"></i>
+                <strong>Precio:</strong> ${{ selectedTreatment.precio }}
+              </div>
+            </div>
+
+            <div class="confirmation-actions mt-4">
               <button 
-                type="submit" 
-                class="btn btn-primary"
-                [disabled]="!canRegisterTurno || isLoading">
+                type="button"
+                class="btn btn-success btn-lg me-3" 
+                (click)="confirmBooking()"
+                [disabled]="isLoading">
                 <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ isLoading ? 'Registrando...' : 'Registrar Turno' }}
+                <i class="fas fa-check" *ngIf="!isLoading"></i>
+                {{ isLoading ? 'Registrando...' : 'Confirmar Turno' }}
+              </button>
+              
+              <button type="button" class="btn btn-secondary" (click)="prevStep()" [disabled]="isLoading">
+                <i class="fas fa-arrow-left"></i> Anterior
               </button>
             </div>
-          </form>
+          </div>
         </div>
+      </div>
+
+      <!-- Step 5/6: Success Confirmation -->
+      <div *ngIf="currentStep === (shouldSelectPaciente ? 6 : 5)" class="col-12">
+        <div class="card shadow">
+          <div class="card-header text-center">
+            <h5><i class="fas fa-check-circle text-success"></i> ¡Turno Registrado Exitosamente!</h5>
+          </div>
+          <div class="card-body text-center">
+            <div class="success-celebration mb-4">
+              <i class="fas fa-check-circle text-success display-1"></i>
+            </div>
+            
+            <h3 class="text-success mb-4">¡{{ shouldSelectPaciente ? 'El' : 'Tu' }} turno ha sido confirmado!</h3>
+            
+            <!-- Mensaje especial para pago exitoso -->
+            <div *ngIf="paymentSuccess" class="alert alert-success border-success mb-4" role="alert">
+              <i class="fas fa-credit-card me-2"></i>
+              <strong>¡Pago procesado exitosamente!</strong> Tu reserva está completamente confirmada.
+              <br>
+              <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Tu turno está listo. Puedes volver a tu dashboard cuando gustes.
+              </small>
+            </div>
+            
+            <div class="success-message mb-4">
+              <p class="lead">{{ shouldSelectPaciente ? 'La cita médica ha sido registrada' : 'Tu cita médica ha sido registrada' }} correctamente en nuestro sistema.</p>
+              <p class="text-muted">{{ shouldSelectPaciente ? 'El paciente recibirá' : 'Recibirás' }} un recordatorio antes de la cita.</p>
+            </div>
+            
+            <div class="booking-summary">
+              <h5 class="mb-3">Detalles {{ shouldSelectPaciente ? 'del' : 'de tu' }} turno:</h5>
+              <!-- Información del paciente para dentistas -->
+              <div class="summary-item" *ngIf="shouldSelectPaciente && selectedPaciente">
+                <i class="fas fa-user text-primary"></i>
+                <strong>Paciente:</strong> {{ selectedPaciente.nombre }} {{ selectedPaciente.apellido }}
+              </div>
+              <div class="summary-item">
+                <i class="fas fa-calendar text-primary"></i>
+                <strong>Fecha:</strong> {{ formatSelectedDate() }}
+              </div>
+              <div class="summary-item">
+                <i class="fas fa-clock text-primary"></i>
+                <strong>Hora:</strong> {{ selectedTime }}
+              </div>
+              <div class="summary-item" *ngIf="selectedTreatment">
+                <i class="fas fa-tooth text-primary"></i>
+                <strong>Tratamiento:</strong> {{ selectedTreatment.descripcion }}
+              </div>
+              <div class="summary-item" *ngIf="selectedTreatment">
+                <i class="fas fa-money-bill text-primary"></i>
+                <strong>Precio:</strong> ${{ selectedTreatment.precio }}
+              </div>
+            </div>
+
+            <div class="success-actions mt-5">
+              <button 
+                class="btn btn-primary btn-lg px-5" 
+                (click)="volverAlInicio()">
+                <i class="fas fa-arrow-left me-2"></i>
+                {{ user?.tipoUsuario === 'paciente' ? 'Volver a Mi Panel' : 'Volver al Dashboard' }}
+              </button>
+              
+              <button 
+                class="btn btn-outline-secondary btn-lg ms-3 px-4" 
+                (click)="nuevaReserva()">
+                <i class="fas fa-plus"></i> Nueva Reserva
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chatbot Widget - Disponible en reservar -->
+  <div class="chatbot-widget">
+    <!-- Floating Button -->
+    <div class="chat-toggle-btn" (click)="toggleChat()" [class.open]="chatOpen">
+      <img src="/assets/images/logo.png" alt="Chat" class="chat-toggle-img" *ngIf="!chatOpen">
+      <i class="fas fa-times" *ngIf="chatOpen"></i>
+    </div>
+
+    <!-- Chat Window -->
+    <div class="chat-window" [class.open]="chatOpen">
+      <div class="chat-header">
+        <div class="d-flex align-items-center">
+          <div class="chat-avatar">
+            <img src="/assets/images/logo.png" alt="Logo" class="chat-avatar-img">
+          </div>
+          <div class="ms-2">
+            <div class="fw-bold">Asistente Virtual</div>
+            <div class="text-muted small">En línea</div>
+          </div>
+        </div>
+        <button class="btn-close-chat" (click)="toggleChat()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="chat-body">
+        <div class="chat-messages" #chatMessages>
+          <div *ngFor="let message of messages" class="message" [class.user]="message.isUser" [class.bot]="!message.isUser">
+            <div class="message-content">
+              <div class="message-text">{{ message.text }}</div>
+              <div class="message-time">{{ message.timestamp | date:'HH:mm' }}</div>
+            </div>
+          </div>
+          
+          <div *ngIf="isTyping" class="message bot">
+            <div class="message-content">
+              <div class="typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Questions -->
+        <div class="quick-questions" *ngIf="messages.length <= 1">
+          <div class="mb-2 small text-muted">Preguntas frecuentes:</div>
+          <div class="quick-question-item" *ngFor="let question of quickQuestions" (click)="handleQuickQuestion(question)">
+            {{ question.text }}
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-footer">
+        <form [formGroup]="chatForm" (ngSubmit)="onSubmit()" class="d-flex">
+          <input 
+            type="text" 
+            formControlName="message"
+            class="form-control chat-input" 
+            placeholder="Escribe tu mensaje..."
+            [disabled]="isTyping">
+          <button 
+            type="submit" 
+            class="btn btn-primary chat-send-btn"
+            [disabled]="chatForm.invalid || isTyping">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación para cancelar reserva -->
+  <div class="modal-overlay" [class.show]="showCancelReservaModal">
+    <div class="modal-container">
+      <div class="modal-header" style="background: linear-gradient(135deg, #dc3545, #ff6b6b);">
+        <span class="modal-title">Cancelar reserva</span>
+        <button class="btn-close-modal" (click)="closeCancelReservaModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body modal-confirmacion">
+        <div class="icono-confirmacion confirmar">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <p>¿Estás seguro de que quieres cancelar la reserva? Se perderán todos los datos ingresados.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal btn-cancelar-modal" (click)="closeCancelReservaModal()">Cancelar</button>
+        <button class="btn-modal btn-confirmar" (click)="confirmCancelReserva()">Aceptar</button>
       </div>
     </div>
   </div>

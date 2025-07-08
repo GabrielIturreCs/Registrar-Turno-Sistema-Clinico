@@ -1,38 +1,222 @@
-<footer class="footer mt-auto">
+<footer class="footer">
+  <div class="footer-wave">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+      <path fill="currentColor" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+    </svg>
+  </div>
+  
   <div class="container">
-    <div class="row align-items-center">
-      <div class="col-md-4 mb-3 mb-md-0 text-center text-md-start">
-        <div class="footer-logo">
-          <i class="bi bi-emoji-smile"></i>
-          Clínica Dental Sonrisa
+    <!-- Main Footer Content -->
+    <div class="row footer-main">
+      <!-- Brand Section -->
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="footer-brand">
+          <div class="brand-logo">
+            <i class="bi bi-tooth"></i>
+            <span>DentalTurnos</span>
+          </div>
+          <p class="brand-description">
+            Tu clínica dental de confianza. Cuidamos tu sonrisa con tecnología de vanguardia y profesionales expertos desde 1998.
+          </p>
+          <div class="brand-stats">
+            <div class="stat-item">
+              <i class="bi bi-people-fill"></i>
+              <span>+5000 Pacientes</span>
+            </div>
+            <div class="stat-item">
+              <i class="bi bi-award-fill"></i>
+              <span>25+ Años</span>
+            </div>
+            <div class="stat-item">
+              <i class="bi bi-star-fill"></i>
+              <span>4.9/5 Rating</span>
+            </div>
+          </div>
         </div>
-        <div style="font-size: 1rem; color: #6c757d;">Cuidando tu sonrisa desde 1998</div>
       </div>
-      <div class="col-md-4 mb-3 mb-md-0">
+
+      <!-- Services Section -->
+      <div class="col-lg-2 col-md-6 mb-4">
+        <h5 class="footer-title">Servicios</h5>
         <ul class="footer-links">
-          <li><a href="#">Inicio</a></li>
-          <li><a href="#">Servicios</a></li>
-          <li><a href="#">Profesionales</a></li>
-          <li><a href="#">Contacto</a></li>
+          <li><a href="#"><i class="bi bi-check-circle"></i> Limpieza Dental</a></li>
+          <li><a href="#"><i class="bi bi-check-circle"></i> Ortodoncia</a></li>
+          <li><a href="#"><i class="bi bi-check-circle"></i> Implantes</a></li>
+          <li><a href="#"><i class="bi bi-check-circle"></i> Endodoncia</a></li>
+          <li><a href="#"><i class="bi bi-check-circle"></i> Cirugía Oral</a></li>
+          <li><a href="#"><i class="bi bi-check-circle"></i> Estética Dental</a></li>
         </ul>
       </div>
-      <div class="col-md-4 text-center text-md-end">
-        <div class="footer-social">
-          <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-          <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-          <a href="#" aria-label="Whatsapp"><i class="bi bi-whatsapp"></i></a>
-        </div>
-        <div style="font-size: 0.95rem; color: #6c757d; margin-top: 0.5rem;">
-          Av. Salud 1234, Ciudad Dental
+
+      
+
+      <!-- Contact Section -->
+      <div class="col-lg-4 col-md-6 mb-4">
+        <h5 class="footer-title">Contacto</h5>
+        <div class="contact-info">
+          <div class="contact-item">
+            <i class="bi bi-geo-alt-fill"></i>
+            <div>
+              <strong>Dirección</strong>
+              <p>Av. Libertador 1234, San Salvador<br>Jujuy, Argentina</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <i class="bi bi-telephone-fill"></i>
+            <div>
+              <strong>Teléfono</strong>
+              <p>+54 388 123-4567</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <i class="bi bi-envelope-fill"></i>
+            <div>
+              <strong>Email</strong>
+              <p>info&#64;dentalturnos.com</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <i class="bi bi-clock-fill"></i>
+            <div>
+              <strong>Horarios</strong>
+              <p>Lun-Vie: 8:00 - 20:00<br>Sáb: 8:00 - 14:00</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="row">
+
+    <!-- Reseñas Section -->
+    <div class="row reviews-section">
       <div class="col-12">
-        <div class="footer-copy text-center">
-          &copy; 2025 Clínica Dental Sonrisa. Todos los derechos reservados.
+        <div class="reviews-container">
+          <div class="reviews-content">
+            <h5><i class="bi bi-star-fill"></i> Deja tu Reseña</h5>
+            <p>Comparte tu experiencia con nosotros y ayúdanos a mejorar nuestro servicio.</p>
+          </div>
+          <div class="reviews-form">
+            <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <input type="text" class="form-control" formControlName="nombre" placeholder="Tu nombre" aria-label="Nombre para reseña">
+                </div>
+                <div class="col-md-6">
+                  <input type="email" class="form-control" formControlName="email" placeholder="Tu email" aria-label="Email para reseña">
+                </div>
+                <div class="col-12">
+                  <div class="rating-stars">
+                    <span class="star-label">Calificación:</span>
+                    <div class="stars">
+                      <i *ngFor="let star of [1,2,3,4,5]" 
+                         class="bi star-icon" 
+                         [class.bi-star-fill]="star <= reviewForm.get('rating')?.value"
+                         [class.bi-star]="star > reviewForm.get('rating')?.value"
+                         (click)="setRating(star)"
+                         [class.active]="star <= reviewForm.get('rating')?.value">
+                      </i>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <textarea class="form-control" formControlName="comentario" rows="3" placeholder="Cuéntanos tu experiencia..." aria-label="Comentario de reseña"></textarea>
+                </div>
+                <div class="col-12 text-end">
+                  <button type="submit" class="btn btn-primary" [disabled]="reviewForm.invalid || isSubmitting">
+                    <i class="bi bi-send"></i> 
+                    <span *ngIf="!isSubmitting">Enviar Reseña</span>
+                    <span *ngIf="isSubmitting">Enviando...</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social Media & Bottom Section -->
+    <div class="row footer-bottom">
+      <div class="col-md-6">
+        <div class="social-media">
+          <span class="social-label">Síguenos:</span>
+          <a href="#" class="social-link" aria-label="Facebook">
+            <i class="bi bi-facebook"></i>
+          </a>
+          <a href="#" class="social-link" aria-label="Instagram">
+            <i class="bi bi-instagram"></i>
+          </a>
+          <a href="#" class="social-link" aria-label="WhatsApp">
+            <i class="bi bi-whatsapp"></i>
+          </a>
+          <a href="#" class="social-link" aria-label="YouTube">
+            <i class="bi bi-youtube"></i>
+          </a>
+          <a href="#" class="social-link" aria-label="LinkedIn">
+            <i class="bi bi-linkedin"></i>
+          </a>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="footer-copyright">
+          <p>&copy; 2025 <strong>DentalTurnos</strong>. Todos los derechos reservados.</p>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Modal de Éxito -->
+  <div id="successModal" class="modal fade show" [class.d-block]="showSuccessModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title" id="successModalLabel">
+            <i class="bi bi-check-circle-fill me-2"></i>¡Éxito!
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeSuccessModal()" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+          <h6 class="mt-3">¡Gracias por tu reseña!</h6>
+          <p class="text-muted">Será revisada por nuestro equipo y publicada pronto.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" (click)="closeSuccessModal()">
+            <i class="bi bi-check"></i> Aceptar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Error -->
+  <div id="errorModal" class="modal fade show" [class.d-block]="showErrorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="errorModalLabel">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>Error
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeErrorModal()" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+          <h6 class="mt-3">Error al enviar reseña</h6>
+          <p class="text-muted">{{ errorMessage }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" (click)="closeErrorModal()">
+            <i class="bi bi-x-circle"></i> Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backdrop para los modales -->
+  <div class="modal-backdrop fade show" *ngIf="showSuccessModal || showErrorModal"></div>
+
+  <!-- Back to Top Button -->
+  <button class="back-to-top" [class.show]="showBackToTop" (click)="scrollToTop()" aria-label="Volver arriba">
+    <i class="bi bi-arrow-up"></i>
+  </button>
 </footer>

@@ -1,7 +1,7 @@
 // Interfaces compartidas para toda la aplicación
 
 export interface User {
-  id: number;
+  id: string;
   nombreUsuario: string;
   nombre: string;
   apellido: string;
@@ -10,44 +10,64 @@ export interface User {
   telefono?: string;
   direccion?: string;
   obraSocial?: string;
+  email?: string;
+  hasCompleteProfile?: boolean;
+  needsProfileCompletion?: boolean;
+  patientId?: string;
+  picture?: string;
 }
 
 export interface Turno {
-  id: number;
-  nroTurno: string;
+  id?: number | string;
+  _id?: string;
+  nroTurno: string | number;
   fecha: string;
   hora: string;
   estado: string;
   tratamiento: string;
-  precioFinal: number;
+  precioFinal: number | string;
   nombre?: string;
   apellido?: string;
   dni?: string;
   telefono?: string;
-  duracion?: number;
-  pacienteId?: number;
-  tratamientoId?: number;
+  duracion?: number | string;
+  pacienteId?: number | string;
+  tratamientoId?: number | string;
+  tipoUsuario?: string;
+  // Campos de pago mejorados
+  paymentStatus?: string; // Estado del pago (approved, pending, rejected, refunded, cancelled)
+  paymentId?: string; // ID de pago de MercadoPago
+  metodoPago?: string; // Método de pago seleccionado (efectivo, online)
+  fechaPago?: string | Date; // Fecha cuando se procesó el pago
+  montoRecibido?: number; // Monto realmente recibido
+  paymentNotificationDate?: string | Date; // Fecha de notificación del webhook
+  paymentDetails?: any; // Detalles adicionales del pago
 }
 
 export interface Tratamiento {
-  id: number;
+  _id?: string;
+  id?: number;
+  nroTratamiento: number;
   descripcion: string;
+  duracion: string;
   precio: number;
-  duracion: number;
 }
 
 export interface Paciente {
   id: number;
+  _id?: string;
   nombre: string;
   apellido: string;
   dni: string;
   obraSocial: string;
   telefono?: string;
+  userId?: string;
 }
 
 export interface LoginForm {
   nombreUsuario: string;
   password: string;
+  email: string;
 }
 
 export interface RegisterForm {
@@ -61,6 +81,8 @@ export interface RegisterForm {
   dni: string;
   tipoUsuario: string;
   obraSocial: string;
+  email: string;
+  legajo?: string;
 }
 
 export interface TurnoForm {
@@ -85,4 +107,16 @@ export type EstadoTurno = 'reservado' | 'completado' | 'cancelado';
 export type TipoUsuario = 'administrador' | 'dentista' | 'paciente';
 
 // Tipos de alerta
-export type TipoAlerta = 'success' | 'danger' | 'warning' | 'info'; 
+export type TipoAlerta = 'success' | 'danger' | 'warning' | 'info';
+
+export interface Dentista {
+  _id?: string;
+  legajo: string;
+  email: string;
+  nombre: string;
+  apellido: string;
+  telefono: string;
+  direccion: string;
+  dni: string;
+  userId: string;
+} 

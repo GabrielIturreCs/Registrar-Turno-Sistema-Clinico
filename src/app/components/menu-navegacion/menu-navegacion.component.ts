@@ -19,7 +19,15 @@ export class MenuNavegacionComponent {
     
     switch (view) {
       case 'dashboard':
-        this.router.navigate(['/dashboard']);
+        // Redirigir según el tipo de usuario
+        if (this.user?.tipoUsuario === 'paciente') {
+          this.router.navigate(['/vistaPaciente']);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
+        break;
+      case 'vistaPaciente':
+        this.router.navigate(['/vistaPaciente']);
         break;
       case 'registrar-turno':
         this.router.navigate(['/reservarTurno']);
@@ -29,6 +37,21 @@ export class MenuNavegacionComponent {
         break;
       case 'admin':
         this.router.navigate(['/admin']);
+        break;
+      case 'agenda':
+        this.router.navigate(['/agenda']);
+        break;
+      case 'estadistica':
+        this.router.navigate(['/estadistica']);
+        break;
+      case 'pacientes':
+        this.router.navigate(['/pacientes']);
+        break;
+      case 'dentista':
+        this.router.navigate(['/dentista']);
+        break;
+      case 'tratamiento':
+        this.router.navigate(['/tratamiento']);
         break;
       default:
         this.router.navigate([`/${view}`]);

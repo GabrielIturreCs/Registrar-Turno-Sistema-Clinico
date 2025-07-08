@@ -1,0 +1,14 @@
+.pago-estado-container {
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  text-align: center;
+}
+.estado-mensaje {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #333;
+} 

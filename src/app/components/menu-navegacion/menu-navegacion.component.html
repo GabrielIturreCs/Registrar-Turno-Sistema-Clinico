@@ -2,25 +2,61 @@
  <div class="row mb-4">
     <div class="col-12">
       <div class="btn-group w-100" role="group">
+        <!-- Dashboard - diferente según el rol -->
         <button 
           type="button" 
           class="btn btn-outline-primary"
-          [class.active]="currentView === 'dashboard'"
+          [class.active]="currentView === 'dashboard' || (user?.tipoUsuario === 'paciente' && currentView === 'vistaPaciente')"
           (click)="navigateTo('dashboard')">
-          <i class="fas fa-home"></i> Dashboard
+          <i class="fas fa-home"></i> 
+          {{ user?.tipoUsuario === 'paciente' ? 'Mi Panel' : 'Dashboard' }}
         </button>
+
+        <!-- Registrar Turno - Para todos los roles -->
         <button 
           type="button" 
           class="btn btn-outline-primary"
           (click)="navigateTo('registrar-turno')">
           <i class="fas fa-plus"></i> Registrar Turno
         </button>
+
+        <!-- Mis Turnos - Solo para pacientes -->
         <button 
+          *ngIf="user?.tipoUsuario === 'paciente'"
           type="button" 
           class="btn btn-outline-primary"
           (click)="navigateTo('mis-turnos')">
           <i class="fas fa-calendar"></i> Mis Turnos
         </button>
+
+        <!-- Agenda - Solo para dentistas -->
+        <button 
+          *ngIf="user?.tipoUsuario === 'dentista'"
+          type="button" 
+          class="btn btn-outline-primary"
+          (click)="navigateTo('agenda')">
+          <i class="fas fa-calendar-alt"></i> Agenda
+        </button>
+
+        <!-- Estadísticas - Solo para administradores -->
+        <button 
+          *ngIf="user?.tipoUsuario === 'administrador'" 
+          type="button" 
+          class="btn btn-outline-primary"
+          (click)="navigateTo('estadistica')">
+          <i class="fas fa-chart-bar"></i> Estadísticas
+        </button>
+
+        <!-- Pacientes - Para dentistas y administradores -->
+        <button 
+          *ngIf="user?.tipoUsuario === 'dentista' || user?.tipoUsuario === 'administrador'"
+          type="button" 
+          class="btn btn-outline-primary"
+          (click)="navigateTo('pacientes')">
+          <i class="fas fa-users"></i> Pacientes
+        </button>
+
+        <!-- Administración - Solo para administradores -->
         <button 
           *ngIf="user?.tipoUsuario === 'administrador'" 
           type="button" 
