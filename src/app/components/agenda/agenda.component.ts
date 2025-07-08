@@ -8,6 +8,7 @@ import { PacienteService } from '../../services/paciente.service';
 import { PdfExportService } from '../../services/pdf-export.service';
 import { NotificationService } from '../../services/notification.service';
 import { Tratamiento } from '../../interfaces';
+import { DataRefreshService } from '../../services/data-refresh.service';
 
 @Component({
   selector: 'app-agenda',
@@ -24,19 +25,33 @@ export class AgendaComponent implements OnInit {
   modalTitle: string = '';
   modalMessage: string = '';
   isLoading: boolean = false;
+  private refreshSubscription: any;
 
   constructor(
     private router: Router, 
     private turnoService: TurnoService, 
     private pacienteService: PacienteService,
     private pdfExportService: PdfExportService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private dataRefreshService: DataRefreshService
   ) {}
 
   ngOnInit(): void {
     this.loadUserData();
     this.selectedDate = new Date().toISOString().split('T')[0];
     this.loadTurnosData();
+    // Suscribirse a refresh global de turnos
+    this.refreshSubscription = this.dataRefreshService.refresh$.subscribe((component) => {
+      if (component === 'all' || component === 'agenda') {
+        this.loadTurnosData();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+    }
   }
 
   loadUserData(): void {
