@@ -624,6 +624,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       case 'reservado': return 'badge bg-primary';
       case 'completado': return 'badge bg-success';
       case 'cancelado': return 'badge bg-danger';
+      case 'pagado': return 'badge bg-primary';
       default: return 'badge bg-secondary';
     }
   }
@@ -633,6 +634,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       case 'reservado': return 'Reservado';
       case 'completado': return 'Completado';
       case 'cancelado': return 'Cancelado';
+      case 'pagado': return 'Pagado';
       case 'pendiente': return 'Pendiente';
       case 'pendiente_pago': return 'Pendiente de Pago';
       default: return 'Sin estado';

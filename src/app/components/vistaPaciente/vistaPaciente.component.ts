@@ -317,6 +317,7 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
       case 'cancelado': return 'badge bg-danger';
       case 'pendiente': return 'badge bg-secondary';
       case 'pendiente_pago': return 'badge bg-secondary text-white';
+      case 'pagado': return 'badge bg-primary text-white';
       default: return 'badge bg-secondary';
     }
   }
@@ -328,6 +329,7 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
       case 'cancelado': return 'Cancelado';
       case 'pendiente': return 'Pendiente';
       case 'pendiente_pago': return 'Pendiente de Pago';
+      case 'pagado': return 'Pagado';
       default: return 'Sin estado';
     }
   }

@@ -729,23 +729,44 @@ export class ReservarComponent implements OnInit {
     const monto = this.selectedTreatment.precio || 5000; // Precio por defecto si no está definido
     const descripcion = this.selectedTreatment.descripcion || 'Turno médico';
     const userType = this.user?.tipoUsuario || 'paciente';
-    
-    // SOLO crear preferencia de pago, NO registrar turno aún
-    this.mercadoPagoService.createTurnoPayment(
-      'temp', // id temporal, el backend no lo usará
-      `${paciente.nombre.toLowerCase()}.${paciente.apellido.toLowerCase()}@example.com`,
-      monto,
-      descripcion,
-      userType
-    ).subscribe({
-      next: (response: any) => {
-        this.isLoading = false;
-        console.log('✅ Preferencia de pago creada, redirigiendo a MercadoPago');
-        this.mercadoPagoService.redirectToPayment(response.init_point);
+
+    // 1. Crear el turno en el backend primero
+    const turnoData: any = {
+      pacienteId: pacienteId,
+      fecha: this.selectedDate,
+      hora: this.selectedTime,
+      tratamientoId: this.selectedTreatment._id || this.selectedTreatment.id,
+      estado: 'reservado',
+      metodoPago: 'online',
+      // Puedes agregar más campos si es necesario
+    };
+
+    this.turnoService.createTurno(turnoData).subscribe({
+      next: (turnoCreado: any) => {
+        // 2. Usar el _id real del turno para la preferencia de pago
+        const turnoId = turnoCreado._id || turnoCreado.id;
+        this.mercadoPagoService.createTurnoPayment(
+          turnoId,
+          `${paciente.nombre.toLowerCase()}.${paciente.apellido.toLowerCase()}@example.com`,
+          monto,
+          descripcion,
+          userType
+        ).subscribe({
+          next: (response: any) => {
+            this.isLoading = false;
+            console.log('✅ Preferencia de pago creada, redirigiendo a MercadoPago');
+            this.mercadoPagoService.redirectToPayment(response.init_point);
+          },
+          error: (error: any) => {
+            this.isLoading = false;
+            const errorMessage = error.error?.msg || 'Error al procesar el pago. Por favor, intenta nuevamente.';
+            this.notificationService.showError(errorMessage);
+          }
+        });
       },
       error: (error: any) => {
         this.isLoading = false;
-        const errorMessage = error.error?.msg || 'Error al procesar el pago. Por favor, intenta nuevamente.';
+        const errorMessage = error.error?.msg || 'Error al registrar el turno antes del pago.';
         this.notificationService.showError(errorMessage);
       }
     });
