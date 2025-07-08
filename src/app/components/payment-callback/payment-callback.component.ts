@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-payment-callback',
@@ -21,13 +22,28 @@ export class PaymentCallbackComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
     // Debug logging
     console.log('💳 PaymentCallbackComponent initialized');
     console.log('🌐 API URL:', environment.apiUrl);
+    
+    // Verificar autenticación del usuario
+    const isAuthenticated = this.authService.isAuthenticated();
+    const currentUser = this.authService.getCurrentUser();
+    
+    console.log('🔐 Usuario autenticado:', isAuthenticated);
+    console.log('👤 Usuario actual:', currentUser);
+    
+    // Si no está autenticado, redirigir al login
+    if (!isAuthenticated) {
+      console.warn('⚠️ Usuario no autenticado, redirigiendo al login...');
+      this.router.navigate(['/login']);
+      return;
+    }
     
     // Obtener el status desde la URL
     this.route.url.subscribe(segments => {
@@ -83,8 +99,9 @@ export class PaymentCallbackComponent implements OnInit {
       };
       console.log('📦 Request body:', requestBody);
       
-      // Llamar al backend para actualizar el estado del pago
-      const response = await this.http.post(updateUrl, requestBody).toPromise();
+      // Llamar al backend para actualizar el estado del pago usando headers autenticadas
+      const headers = this.authService.getAuthHeaders();
+      const response = await this.http.post(updateUrl, requestBody, { headers }).toPromise();
       
       console.log('✅ Respuesta del servidor:', response);
       
@@ -172,13 +189,13 @@ export class PaymentCallbackComponent implements OnInit {
         console.log('🔄 Redirigiendo a vistaPaciente...');
         
         // Asegurar que la sesión se mantenga activa
-        if (typeof window !== 'undefined' && window.localStorage) {
-          const userData = localStorage.getItem('user');
-          if (userData) {
-            console.log('✅ Sesión del usuario mantenida en localStorage');
-          } else {
-            console.warn('⚠️ No se encontró sesión en localStorage');
-          }
+        const isStillAuthenticated = this.authService.isAuthenticated();
+        console.log('🔐 Verificando autenticación antes de redirección:', isStillAuthenticated);
+        
+        if (!isStillAuthenticated) {
+          console.warn('⚠️ Sesión perdida, redirigiendo al login...');
+          this.router.navigate(['/login']);
+          return;
         }
         
         // Redirigir a vistaPaciente manteniendo la sesión
@@ -215,14 +232,14 @@ export class PaymentCallbackComponent implements OnInit {
   }
 
   goToVistaPaciente() {
-    // Asegurar que la sesión se mantenga activa antes de navegar
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const userData = localStorage.getItem('user');
-      if (!userData) {
-        console.warn('⚠️ No se encontró sesión en localStorage');
-      } else {
-        console.log('✅ Sesión del usuario confirmada antes de navegación');
-      }
+    // Verificar autenticación antes de navegar
+    const isAuthenticated = this.authService.isAuthenticated();
+    console.log('🔐 Verificando autenticación en navegación manual:', isAuthenticated);
+    
+    if (!isAuthenticated) {
+      console.warn('⚠️ Sesión perdida, redirigiendo al login...');
+      this.router.navigate(['/login']);
+      return;
     }
     
     this.router.navigate(['/vistaPaciente'], {

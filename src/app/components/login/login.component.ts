@@ -93,20 +93,35 @@ export class LoginComponent implements OnInit {
       this.authService.login(this.loginForm.nombreUsuario, this.loginForm.password)
         .subscribe(
           (res) => {
+            console.log('🔐 Respuesta del login:', res);
+            
             if (res.status === 1) {
-              // Guardar en localStorage
-              localStorage.setItem('token', 'fake-token'); // O el token real si tu backend lo envía
-              localStorage.setItem('rol', res.tipoUsuario);
-              localStorage.setItem('user', JSON.stringify(res));
-
-              this.authService.setCurrentUser(res);
-              
-              // Mostrar notificación de éxito
-              const nombreUsuario = res.nombre || res.nombreUsuario || 'Usuario';
-              this.notificationService.showSuccess(`¡Bienvenido ${nombreUsuario}!`);
-              
-              // Redirigir según el tipo de usuario
-              this.redirectByUserType(res.tipoUsuario);
+              // Verificar que tengamos el token y la información del usuario
+              if (res.token && res.user) {
+                // Guardar token JWT
+                this.authService.setToken(res.token);
+                
+                // Guardar información del usuario
+                localStorage.setItem('rol', res.user.tipoUsuario);
+                localStorage.setItem('user', JSON.stringify(res.user));
+                
+                // Establecer usuario actual en el servicio
+                this.authService.setCurrentUser(res.user);
+                
+                console.log('✅ Token guardado:', res.token.substring(0, 20) + '...');
+                console.log('✅ Usuario guardado:', res.user);
+                
+                // Mostrar notificación de éxito
+                const nombreUsuario = res.user.nombre || res.user.nombreUsuario || 'Usuario';
+                this.notificationService.showSuccess(`¡Bienvenido ${nombreUsuario}!`);
+                
+                // Redirigir según el tipo de usuario
+                this.redirectByUserType(res.user.tipoUsuario);
+              } else {
+                console.error('❌ Respuesta del backend sin token o usuario:', res);
+                this.msglogin = 'Error en la autenticación. Inténtelo de nuevo.';
+                this.notificationService.showError('Error en la autenticación. Inténtelo de nuevo.');
+              }
             } else {
               this.msglogin = res.msg || 'Usuario o contraseña incorrectos.';
               this.notificationService.showError(res.msg || 'Usuario o contraseña incorrectos.');
@@ -114,6 +129,7 @@ export class LoginComponent implements OnInit {
             this.isLoading = false;
           },
           (error) => {
+            console.error('❌ Error en login:', error);
             this.msglogin = 'Error de conexión con el servidor.';
             this.notificationService.showError('Error de conexión con el servidor. Por favor, inténtelo de nuevo.');
             this.isLoading = false;

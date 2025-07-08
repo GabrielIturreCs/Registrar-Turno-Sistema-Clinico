@@ -45,22 +45,22 @@ export function authGuard(role: string | string[] = ''): CanActivateFn {
       return false;
     }
     
-    // Verificar rol si se especificó
-    if (role && role.length > 0) {
-      const userRole = currentUser?.tipoUsuario;
+    // Verificar roles si es necesario
+    if (role && role.length > 0 && currentUser) {
+      const userRole = currentUser.tipoUsuario;
       
       // Si es un array de roles, verificar si el usuario tiene alguno de ellos
       if (Array.isArray(role)) {
         if (!role.includes(userRole || '')) {
           console.log('🛡️ AuthGuard: Usuario no tiene ninguno de los roles requeridos:', role);
-          router.navigate(['/unauthorized']);
+          router.navigate(['/login']);
           return false;
         }
       } else {
         // Si es un string, verificar si coincide exactamente
         if (userRole !== role) {
           console.log('🛡️ AuthGuard: Usuario no tiene el rol requerido. Tiene:', userRole, 'Requiere:', role);
-          router.navigate(['/unauthorized']);
+          router.navigate(['/login']);
           return false;
         }
       }

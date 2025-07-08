@@ -27,10 +27,18 @@ export class AuthService {
   }
 
   private loadUserFromStorage(): void {
+    const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      this.currentUserSubject.next(user);
+    
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        this.currentUserSubject.next(user);
+        console.log('👤 Usuario cargado desde localStorage:', user);
+      } catch (error) {
+        console.error('❌ Error al parsear usuario desde localStorage:', error);
+        this.logout();
+      }
     }
   }
 
@@ -113,9 +121,37 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.clear();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
+  }
+
+  // Métodos para manejar JWT token
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  setToken(token: string): void {
+    localStorage.setItem('token', token);
+  }
+
+  removeToken(): void {
+    localStorage.removeItem('token');
+  }
+
+  // Método para obtener headers con autorización
+  getAuthHeaders(): HttpHeaders {
+    const token = this.getToken();
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+    
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    
+    return headers;
   }
 
   getCurrentUser(): User | null {
@@ -128,7 +164,31 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return this.currentUserSubject.value !== null;
+    const token = this.getToken();
+    const user = this.currentUserSubject.value;
+    
+    // Si no hay token o usuario, no está autenticado
+    if (!token || !user) {
+      return false;
+    }
+    
+    // Verificar si el token no ha expirado (opcional - solo verificación básica)
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Date.now() / 1000;
+      
+      if (payload.exp && payload.exp < now) {
+        console.log('🔒 Token expirado, cerrando sesión');
+        this.logout();
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('❌ Error al verificar token:', error);
+      this.logout();
+      return false;
+    }
   }
 
   hasRole(role: string): boolean {

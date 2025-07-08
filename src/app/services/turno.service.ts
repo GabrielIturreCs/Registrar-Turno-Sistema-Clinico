@@ -5,6 +5,7 @@ import { Turno, Tratamiento, Paciente } from '../interfaces';
 import { tap } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { NotificationService } from './notification.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,16 +17,15 @@ export class TurnoService {
 
   constructor(
     private http: HttpClient,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private authService: AuthService
   ) {
     this.loadTurnos();
   }
 
   private getHeaders(): HttpHeaders {
-    // Simplificar headers por ahora para debugging
-    return new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
+    // Usar headers de autenticación del AuthService
+    return this.authService.getAuthHeaders();
   }
 
   private loadTurnos(): void {
