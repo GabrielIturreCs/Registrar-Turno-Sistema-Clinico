@@ -16,6 +16,7 @@ import { ChatService } from '../../services/chat.service';
 import { NotificationService } from '../../services/notification.service';
 import { ReviewService, Review } from '../../services/review.service';
 import { PdfExportService } from '../../services/pdf-export.service';
+import { AuthService } from '../../services/auth.service';
 
 interface AdminStats {
   totalUsuarios: number;
@@ -123,7 +124,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private chatService: ChatService,
     private notificationService: NotificationService,
     private reviewService: ReviewService,
-    private pdfExportService: PdfExportService
+    private pdfExportService: PdfExportService,
+    private authService: AuthService // <--- INYECTAR
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -526,17 +528,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   navigateToEstadisticas(): void {
     if (this.user?.tipoUsuario === 'administrador') {
-      localStorage.setItem('rol', this.user.tipoUsuario);
-      localStorage.setItem('token', 'fake-token');
-      const token = localStorage.getItem('token');
-      const rol = localStorage.getItem('rol');
-      const user = localStorage.getItem('user');
-      if (token && rol === 'administrador' && user) {
-        this.router.navigate(['/estadistica']);
-      } else {
-        this.notificationService.showError('Error en la autenticación. Por favor, inicie sesión nuevamente.');
-        this.router.navigate(['/login']);
-      }
+      this.router.navigate(['/estadistica']);
     } else {
       this.notificationService.showWarning('Solo los administradores pueden acceder a las estadísticas.');
     }
