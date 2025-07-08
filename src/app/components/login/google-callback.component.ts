@@ -51,9 +51,11 @@ export class GoogleCallbackComponent implements OnInit {
 
       if (token && userStr) {
         try {
+          // Limpiar storage solo para login con Google
+          localStorage.clear();
+          sessionStorage.clear();
           const user = JSON.parse(decodeURIComponent(userStr));
-          
-          // Guardar en localStorage
+          // Guardar en localStorage solo los datos del usuario actual
           localStorage.setItem('token', token);
           localStorage.setItem('rol', user.tipoUsuario);
           localStorage.setItem('user', JSON.stringify(user));
