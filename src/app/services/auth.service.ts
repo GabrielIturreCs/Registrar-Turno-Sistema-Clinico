@@ -18,12 +18,27 @@ export class AuthService {
   hostBase: string;
 
   constructor(
-    private router: Router,
     private _http: HttpClient,
-    private notificationService: NotificationService
+    private router: Router
   ) {
     this.hostBase = `${environment.apiUrl}/usuario/`;
     this.loadUserFromStorage();
+    // Restaurar sesión desde backup si es necesario
+    if (!localStorage.getItem('user') && sessionStorage.getItem('user_backup')) {
+      try {
+        const backupUser = JSON.parse(sessionStorage.getItem('user_backup')!);
+        localStorage.setItem('user', JSON.stringify(backupUser));
+        this.currentUserSubject.next(backupUser);
+        // Si hay token de backup, restaurar también
+        if (sessionStorage.getItem('token_backup')) {
+          localStorage.setItem('token', sessionStorage.getItem('token_backup')!);
+        }
+      } catch (e) {
+        // Si falla, limpiar backup
+        sessionStorage.removeItem('user_backup');
+        sessionStorage.removeItem('token_backup');
+      }
+    }
   }
 
   private loadUserFromStorage(): void {
@@ -34,6 +49,8 @@ export class AuthService {
       try {
         const user = JSON.parse(userStr);
         this.currentUserSubject.next(user);
+        // Refuerza la persistencia
+        localStorage.setItem('user', JSON.stringify(user));
         console.log('👤 Usuario cargado desde localStorage:', user);
       } catch (error) {
         console.error('❌ Error al parsear usuario desde localStorage:', error);
