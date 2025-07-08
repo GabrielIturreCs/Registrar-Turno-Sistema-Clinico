@@ -590,14 +590,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get filteredTurnos(): Turno[] {
-    // Normalizar la fecha para evitar problemas de formato
     return this.turnos
       .filter(turno => turno.estado !== 'cancelado')
       .sort((a, b) => {
-        // Ordenar por fecha (más recientes primero), normalizando a YYYY-MM-DD
-        const fechaA = (a.fecha || '').slice(0, 10);
-        const fechaB = (b.fecha || '').slice(0, 10);
-        return fechaB.localeCompare(fechaA);
+        // Ordenar por fecha y hora descendente
+        const dateA = new Date(`${a.fecha}T${a.hora || '00:00'}`);
+        const dateB = new Date(`${b.fecha}T${b.hora || '00:00'}`);
+        return dateB.getTime() - dateA.getTime();
       });
   }
 
