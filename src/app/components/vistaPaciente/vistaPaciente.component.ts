@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { User, Turno, Tratamiento, Paciente } from '../../interfaces';
 import { ChatbotService } from '../../services/ChatBot.service';
 import { ChatService } from '../../services/chat.service';
@@ -66,6 +66,7 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private fb: FormBuilder,
     private chatbotService: ChatbotService,
     private chatService: ChatService,
@@ -82,6 +83,9 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadUserData();
+    
+    // Verificar si viene del pago exitoso
+    this.checkPaymentCallback();
     
     // Suscribirse al servicio de refresh
     this.refreshSubscription = this.dataRefreshService.refresh$.subscribe((component) => {
@@ -666,4 +670,36 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
         default: return 'Usuario';
       }
     }
+
+    // Verificar si viene del callback de pago
+  checkPaymentCallback(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['payment'] === 'success' && params['turnoUpdated'] === 'true') {
+        console.log('🎉 Detectado retorno exitoso del pago');
+        
+        // Mostrar mensaje de éxito
+        setTimeout(() => {
+          this.notificationService.showSuccess('¡Pago realizado exitosamente! Tu turno ha sido confirmado.');
+        }, 500);
+        
+        // Forzar recarga de datos
+        this.refreshData();
+        
+        // Limpiar los parámetros de la URL
+        this.router.navigate(['/vistaPaciente'], { replaceUrl: true });
+        
+      } else if (params['payment'] === 'pending') {
+        console.log('⏳ Detectado pago pendiente');
+        this.notificationService.showWarning('Tu pago está siendo procesado. Te notificaremos cuando se confirme.');
+        this.refreshData();
+        this.router.navigate(['/vistaPaciente'], { replaceUrl: true });
+        
+      } else if (params['payment'] === 'failure') {
+        console.log('❌ Detectado pago fallido');
+        this.notificationService.showError('Hubo un problema con el pago. Puedes intentar nuevamente.');
+        this.refreshData();
+        this.router.navigate(['/vistaPaciente'], { replaceUrl: true });
+      }
+    });
+  }
 }

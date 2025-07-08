@@ -102,13 +102,13 @@ export class PaymentCallbackComponent implements OnInit {
         this.message = '¡Pago exitoso! Turno confirmado';
         this.status = 'success';
         
-        // Redirigir al paso 5 del wizard de reserva
+        // Redirigir a la vista del paciente para ver sus turnos actualizados
         setTimeout(() => {
-          this.router.navigate(['/reservarTurno'], { 
+          console.log('🔄 Redirigiendo a vista del paciente...');
+          this.router.navigate(['/vistaPaciente'], { 
             queryParams: { 
               payment: 'success',
-              step: '5',
-              returnFromPayment: 'true'
+              turnoUpdated: 'true'
             } 
           });
         }, 2000);
@@ -118,10 +118,9 @@ export class PaymentCallbackComponent implements OnInit {
         this.message = 'Pago pendiente de confirmación';
         this.status = 'pending';
         setTimeout(() => {
-          this.router.navigate(['/reservarTurno'], { 
+          this.router.navigate(['/vistaPaciente'], { 
             queryParams: { 
-              payment: 'pending',
-              step: '5'
+              payment: 'pending'
             } 
           });
         }, 2000);
@@ -131,10 +130,9 @@ export class PaymentCallbackComponent implements OnInit {
         this.message = 'Pago rechazado. Intenta nuevamente';
         this.status = 'failure';
         setTimeout(() => {
-          this.router.navigate(['/reservarTurno'], { 
+          this.router.navigate(['/vistaPaciente'], { 
             queryParams: { 
-              payment: 'failure',
-              step: '5'
+              payment: 'failure'
             } 
           });
         }, 2000);

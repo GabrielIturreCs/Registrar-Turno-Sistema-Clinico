@@ -471,17 +471,8 @@ export class TurnosComponent implements OnInit {
   }
 
   getPaymentStatusLabel(paymentStatus: string): string {
-    // Debug logging
-    console.log('🔍 getPaymentStatusLabel called with:', {
-      paymentStatus,
-      type: typeof paymentStatus,
-      length: paymentStatus?.length
-    });
-    
     // Normalizar el valor
     const status = (paymentStatus || '').toLowerCase().trim();
-    
-    console.log('🔍 Normalized status:', status);
     
     switch (status) {
       case 'approved': return '✅ Pagado Online';
@@ -499,7 +490,6 @@ export class TurnosComponent implements OnInit {
         return '⏸️ Sin Procesar';
       default: 
         // Mostrar el estado original si no reconocemos el valor
-        console.log('⚠️ Unknown payment status:', status);
         return '❓ ' + paymentStatus;
     }
   }
