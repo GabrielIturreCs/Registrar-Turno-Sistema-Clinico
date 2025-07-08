@@ -244,20 +244,24 @@ export class AgendaComponent implements OnInit {
   }
 
   get turnosHoy(): number {
-    return this.turnos.filter(t => t.fecha === this.selectedDate).length;
+    const selected = this.selectedDate.slice(0, 10);
+    return this.turnos.filter(t => (t.fecha || '').slice(0, 10) === selected).length;
   }
 
   get turnosCompletados(): number {
-    return this.turnos.filter(t => t.fecha === this.selectedDate && t.estado === 'completado').length;
+    const selected = this.selectedDate.slice(0, 10);
+    return this.turnos.filter(t => (t.fecha || '').slice(0, 10) === selected && t.estado === 'completado').length;
   }
 
   get turnosPendientes(): number {
-    return this.turnos.filter(t => t.fecha === this.selectedDate && t.estado === 'reservado').length;
+    const selected = this.selectedDate.slice(0, 10);
+    return this.turnos.filter(t => (t.fecha || '').slice(0, 10) === selected && t.estado === 'reservado').length;
   }
 
   get ingresosHoy(): number {
+    const selected = this.selectedDate.slice(0, 10);
     return this.turnos
-      .filter(t => t.fecha === this.selectedDate && t.estado === 'completado')
+      .filter(t => (t.fecha || '').slice(0, 10) === selected && t.estado === 'completado')
       .reduce((total, t) => total + Number(t.precioFinal || 0), 0);
   }
 
