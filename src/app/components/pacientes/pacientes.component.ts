@@ -6,10 +6,11 @@ import { Paciente, RegisterForm } from '../../interfaces';
 import { PacienteService } from '../../services/paciente.service';
 import { RegisterService } from '../../services/register.service';
 import { NotificationService } from '../../services/notification.service';
+import { OdontogramaComponent } from '../odontograma/odontograma.component';
 
 @Component({
   selector: 'app-pacientes',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, OdontogramaComponent],
   templateUrl: './pacientes.component.html',
   styleUrl: './pacientes.component.css'
 })
@@ -56,6 +57,10 @@ export class PacientesComponent implements OnInit {
       { id: 5, nombre: 'Luis', apellido: 'Rodríguez', dni: '99887766', obraSocial: 'Swiss Medical', telefono: '444555666' }
     ]
   };
+
+  odontogramaPaciente: any = null;
+  pacienteSeleccionado: Paciente | null = null;
+  showOdontograma: boolean = false;
 
   constructor(
     private pacienteService: PacienteService,
@@ -299,6 +304,22 @@ export class PacientesComponent implements OnInit {
 
   get canUpdatePaciente(): boolean {
     return this.isValidEditForm() && !this.isUpdating;
+  }
+
+  abrirOdontograma(paciente: Paciente) {
+    this.pacienteSeleccionado = paciente;
+    const id = paciente._id || paciente.id;
+    if (!id) return;
+    this.pacienteService.getOdontograma(id as string).subscribe(odonto => {
+      this.odontogramaPaciente = odonto;
+      this.showOdontograma = true;
+    });
+  }
+
+  cerrarOdontograma() {
+    this.showOdontograma = false;
+    this.odontogramaPaciente = null;
+    this.pacienteSeleccionado = null;
   }
 
   goToDashboard(): void {

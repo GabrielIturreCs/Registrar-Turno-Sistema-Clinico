@@ -153,6 +153,13 @@
                     >
                       <i class="bi bi-trash3"></i>
                     </button>
+                    <button 
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="abrirOdontograma(paciente)"
+                      title="Ver odontograma"
+                    >
+                      <i class="bi bi-diagram-3"></i>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -576,4 +583,29 @@
   
   <!-- Modal backdrop for edit -->
   <div class="modal-backdrop fade" [class.show]="showEditModal" *ngIf="showEditModal" (click)="closeEditModal()"></div>
+
+  <!-- Modal para Odontograma -->
+  <div class="modal fade" [class.show]="showOdontograma" [style.display]="showOdontograma ? 'block' : 'none'" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">
+            <i class="bi bi-diagram-3 me-3"></i>
+            Odontograma de {{ pacienteSeleccionado?.nombre }} {{ pacienteSeleccionado?.apellido }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cerrarOdontograma()" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <app-odontograma 
+            [odontograma]="odontogramaPaciente"
+            [paciente]="pacienteSeleccionado"
+            (cerrar)="cerrarOdontograma()"
+          ></app-odontograma>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal backdrop for odontograma -->
+  <div class="modal-backdrop fade" [class.show]="showOdontograma" *ngIf="showOdontograma" (click)="cerrarOdontograma()"></div>
 </div>

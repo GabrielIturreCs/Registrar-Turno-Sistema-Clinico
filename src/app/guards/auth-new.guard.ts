@@ -52,7 +52,7 @@ export function authGuard(role: string | string[] = ''): CanActivateFn {
       // Si es un array de roles, verificar si el usuario tiene alguno de ellos
       if (Array.isArray(role)) {
         if (!role.includes(userRole || '')) {
-          console.log('🛡️ AuthGuard: Usuario no tiene ninguno de los roles requeridos:', role);
+          console.log('🛡️ AuthGuard: Usuario no tiene ninguno de los roles requeridos:', role, 'Rol del usuario', userRole);
           router.navigate(['/login']);
           return false;
         }

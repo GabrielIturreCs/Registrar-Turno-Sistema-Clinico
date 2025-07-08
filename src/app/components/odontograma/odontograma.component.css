@@ -1,0 +1,52 @@
+.odontograma-modal {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+  padding: 24px;
+  max-width: 600px;
+  margin: 40px auto;
+}
+.odontograma-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.odontograma-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 40px);
+  grid-gap: 12px;
+  justify-content: center;
+}
+.diente {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: box-shadow 0.2s;
+}
+.diente:hover {
+  box-shadow: 0 0 0 3px #007bff44;
+}
+.menu-contextual {
+  position: absolute;
+  top: 45px;
+  left: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 8px;
+  z-index: 10;
+  min-width: 120px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
