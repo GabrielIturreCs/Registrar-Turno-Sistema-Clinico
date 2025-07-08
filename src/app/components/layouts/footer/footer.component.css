@@ -412,7 +412,9 @@
 .back-to-top {
   position: fixed;
   bottom: 30px;
-  right: 30px;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%) translateY(20px);
   width: 50px;
   height: 50px;
   background: linear-gradient(135deg, #4fd1ff, #76f1ff);
@@ -429,13 +431,12 @@
   box-shadow: 0 4px 15px rgba(79, 209, 255, 0.3);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(20px);
 }
 
 .back-to-top.show {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 
 .back-to-top:hover {
@@ -515,10 +516,15 @@
   
   .back-to-top {
     bottom: 20px;
-    right: 20px;
+    left: 50%;
+    right: auto;
     width: 45px;
     height: 45px;
     font-size: 1rem;
+    transform: translateX(-50%) translateY(20px);
+  }
+  .back-to-top.show {
+    transform: translateX(-50%) translateY(0);
   }
 }
 
