@@ -437,7 +437,7 @@ export class ReservarComponent implements OnInit {
         this.isLoading = false;
         this.notificationService.showSuccess('¡Turno registrado exitosamente!');
         // Trigger refresh for patient dashboard
-        // Trigger refresh for patient dashboard
+        this.dataRefreshService.triggerRefresh('agenda'); // Notifica a agenda
         this.dataRefreshService.triggerRefresh('vistaPaciente');
         this.router.navigate(['/dashboard']);
       },
