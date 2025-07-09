@@ -15,7 +15,7 @@ import { DentistaComponent } from './components/dentista/dentista.component';
 import { TratamientoComponent } from './components/tratamiento/tratamiento.component';
 import { CompleteProfileComponent } from './components/complete-profile/complete-profile.component';
 
-import { ReprogramarComponent } from './components/reprogramar/reprogramar.component';
+
 import { PaymentCallbackComponent } from './components/payment-callback/payment-callback.component';
 import { authGuard } from './guards/auth.guard';
 import { ProfileCompleteGuard } from './guards/profile-complete.guard';
@@ -34,7 +34,6 @@ export const routes: Routes = [
   { path: 'misTurnos', component: TurnosComponent, canActivate: [authGuard('paciente'), ProfileCompleteGuard] },
   { path: 'reservarTurno', component: ReservarComponent, canActivate: [authGuard(), ProfileCompleteGuard] },
   { path: 'agenda', component: AgendaComponent, canActivate: [authGuard('dentista')] },
-  { path: 'reprogramar', component: ReprogramarComponent, canActivate: [authGuard('dentista')] },
   { path: 'estadistica', component: EstadisticaComponent, canActivate: [authGuard('administrador')] },
   { path: 'admin', component: AdminComponent, canActivate: [authGuard('administrador')] },
   { path: 'pacientes', component: PacientesComponent, canActivate: [authGuard(['dentista', 'administrador'])] },
