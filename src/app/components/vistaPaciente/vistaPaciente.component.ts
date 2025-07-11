@@ -205,9 +205,24 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
   }
 
   loadMisTurnos(): void {
-    this.turnoService.getMisTurnos().subscribe({
+    this.isLoading = true;
+    this.turnoService.getTurnosFromAPI().subscribe({
       next: (turnos) => {
-        this.misTurnos = turnos;
+        // Filtrar los turnos que pertenecen al paciente autenticado
+        const pacienteId = this.paciente?._id || this.paciente?.id;
+        this.misTurnos = turnos.filter(turno => {
+          // Coincidencia por pacienteId
+          if (pacienteId && turno.pacienteId) {
+            if (turno.pacienteId.toString() === pacienteId.toString()) return true;
+          }
+          // Coincidencia por nombre y apellido (fallback)
+          if (this.paciente?.nombre && this.paciente?.apellido && turno.nombre && turno.apellido) {
+            const nombreMatch = turno.nombre.toLowerCase().trim() === this.paciente.nombre.toLowerCase().trim();
+            const apellidoMatch = turno.apellido.toLowerCase().trim() === this.paciente.apellido.toLowerCase().trim();
+            return nombreMatch && apellidoMatch;
+          }
+          return false;
+        });
         this.calculateStats();
         this.isLoading = false;
       },
