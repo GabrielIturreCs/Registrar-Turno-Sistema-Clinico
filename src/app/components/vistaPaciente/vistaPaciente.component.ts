@@ -231,21 +231,20 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
 
   calculateStats(): void {
     this.pacienteStats.totalTurnos = this.misTurnos.length;
-    this.pacienteStats.turnosReservados = this.misTurnos.filter(t => t.estado === 'reservado').length;
+    this.pacienteStats.turnosReservados = this.misTurnos.filter(t => t.estado === 'reservado' || t.estado === 'pagado').length;
     this.pacienteStats.turnosCompletados = this.misTurnos.filter(t => t.estado === 'completado').length;
     this.pacienteStats.turnosCancelados = this.misTurnos.filter(t => t.estado === 'cancelado').length;
     
     // Calcular total gastado
     this.pacienteStats.totalGastado = this.misTurnos
-      .filter(t => t.estado === 'completado')
+      .filter(t => t.estado === 'completado' || t.estado === 'pagado')
       .reduce((total, turno) => total + Number(turno.precioFinal || 0), 0);
     
-    // Encontrar próximo turno
-    const turnosReservados = this.misTurnos
-      .filter(t => t.estado === 'reservado')
+    // Encontrar próximo turno (reservado o pagado en el futuro)
+    const turnosFuturos = this.misTurnos
+      .filter(t => (t.estado === 'reservado' || t.estado === 'pagado') && new Date(t.fecha) >= new Date())
       .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
-    
-    this.pacienteStats.proximoTurno = turnosReservados.length > 0 ? turnosReservados[0] : null;
+    this.pacienteStats.proximoTurno = turnosFuturos.length > 0 ? turnosFuturos[0] : null;
   }
 
   // Navegación
