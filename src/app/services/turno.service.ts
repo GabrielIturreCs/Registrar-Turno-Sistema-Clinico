@@ -179,4 +179,9 @@ export class TurnoService {
   refreshTurnos(): void {
     this.loadTurnos();
   }
+
+  // Obtener solo los turnos del paciente autenticado (usando JWT)
+  getMisTurnos(): Observable<Turno[]> {
+    return this.http.get<Turno[]>(`${this.apiUrl}/mis-turnos`, { headers: this.getHeaders() });
+  }
 } 

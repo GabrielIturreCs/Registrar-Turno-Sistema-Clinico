@@ -205,45 +205,9 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
   }
 
   loadMisTurnos(): void {
-    if (!this.paciente) {
-      console.error('No hay datos del paciente para cargar turnos');
-      this.isLoading = false;
-      return;
-    }
-    
-    console.log('Cargando turnos para paciente:', this.paciente);
-    
-    // Forzar recarga desde backend para obtener el estado actualizado
-    this.turnoService.getTurnosFromAPI().subscribe({
+    this.turnoService.getMisTurnos().subscribe({
       next: (turnos) => {
-        // Filtrar turnos usando el ID del paciente obtenido
-        const pacienteId = this.paciente?.id?.toString() || this.paciente?._id?.toString();
-        
-        this.misTurnos = turnos.filter(turno => {
-          // Verificar por pacienteId
-          if (pacienteId && turno.pacienteId) {
-            const idMatch = turno.pacienteId.toString() === pacienteId;
-            if (idMatch) {
-              return true;
-            }
-          }
-          
-          // Verificar por nombre y apellido como respaldo
-          if (this.paciente?.nombre && this.paciente?.apellido && turno.nombre && turno.apellido) {
-            const nombreMatch = turno.nombre.toLowerCase().trim() === this.paciente.nombre.toLowerCase().trim();
-            const apellidoMatch = turno.apellido.toLowerCase().trim() === this.paciente.apellido.toLowerCase().trim();
-            
-            if (nombreMatch && apellidoMatch) {
-              return true;
-            }
-          }
-          
-          return false;
-        });
-        
-        if (this.misTurnos.length === 0) {
-        }
-        
+        this.misTurnos = turnos;
         this.calculateStats();
         this.isLoading = false;
       },
