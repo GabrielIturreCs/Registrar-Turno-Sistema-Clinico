@@ -255,9 +255,28 @@ export class VistaPacienteComponent implements OnInit, OnDestroy {
       .filter(t => t.estado === 'completado' || t.estado === 'pagado')
       .reduce((total, turno) => total + Number(turno.precioFinal || 0), 0);
     
-    // Encontrar próximo turno (reservado o pagado en el futuro)
+    // Encontrar próximo turno (reservado, pagado, pendiente o pendiente_pago en el futuro)
+    const estadosProximo = ['reservado', 'pagado', 'pendiente', 'pendiente_pago'];
+    const hoy = new Date();
     const turnosFuturos = this.misTurnos
-      .filter(t => (t.estado === 'reservado' || t.estado === 'pagado') && new Date(t.fecha) >= new Date())
+      .filter(t => {
+        if (!estadosProximo.includes(t.estado)) return false;
+        let fechaTurno: Date | null = null;
+        if (t.fecha && typeof t.fecha === 'object' && Object.prototype.toString.call(t.fecha) === '[object Date]') {
+          fechaTurno = t.fecha as Date;
+        } else if (typeof t.fecha === 'string') {
+          if (/^\d{4}-\d{2}-\d{2}/.test(t.fecha)) {
+            fechaTurno = new Date(t.fecha);
+          } else if (/^\d{2}\/\d{2}\/\d{4}/.test(t.fecha)) {
+            const [dia, mes, anio] = t.fecha.split('/');
+            fechaTurno = new Date(`${anio}-${mes}-${dia}`);
+          } else {
+            fechaTurno = new Date(t.fecha);
+          }
+        }
+        if (!fechaTurno || isNaN(fechaTurno.getTime())) return false;
+        return fechaTurno >= new Date(hoy.toDateString());
+      })
       .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
     this.pacienteStats.proximoTurno = turnosFuturos.length > 0 ? turnosFuturos[0] : null;
   }
