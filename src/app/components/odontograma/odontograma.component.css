@@ -1,106 +1,412 @@
-.odontograma-modal {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
-  padding: 24px;
-  max-width: 600px;
-  margin: 40px auto;
+.odontograma-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #f8fafc;
+  min-height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
-.odontograma-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-.odontograma-grid {
+
+/* Barra de herramientas */
+.toolbar {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   display: grid;
-  grid-template-columns: repeat(8, 40px);
-  grid-gap: 12px;
-  justify-content: center;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 20px;
+  align-items: start;
 }
-.diente {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid #888;
+
+.toolbar-section h3 {
+  margin: 0 0 12px 0;
+  color: #374151;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.herramientas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.herramienta-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  position: relative;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
   cursor: pointer;
-  font-weight: bold;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.herramienta-btn:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.herramienta-btn.active {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  color: white;
+}
+
+.herramienta-btn i {
   font-size: 14px;
-  transition: box-shadow 0.2s;
 }
-.diente:hover {
-  box-shadow: 0 0 0 3px #007bff44;
+
+.estados-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
-.menu-contextual {
-  position: absolute;
-  top: 45px;
-  left: 0;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 8px;
-  z-index: 10;
-  min-width: 120px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+
+.estado-btn {
+  padding: 8px 16px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.estado-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.estado-btn.active {
+  border-color: #1f2937;
+  transform: scale(1.05);
+}
+
+.toggle-btn {
+  padding: 10px 20px;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+}
+
+/* Odontograma principal */
+.odontograma-main {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.dientes-permanentes,
+.dientes-temporales {
+  margin-bottom: 30px;
+}
+
+.dientes-temporales h3 {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.cuadrantes-superiores,
+.cuadrantes-inferiores {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.cuadrante {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
 }
 
-/* Responsive styles for mobile */
-@media (max-width: 600px) {
-  .odontograma-modal {
-    max-width: 98vw;
+.cuadrante-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.piezas-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Panel de información */
+.info-panel {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 20px;
+}
+
+.info-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-section label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.info-section select,
+.info-section textarea {
+  padding: 10px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.info-section select:focus,
+.info-section textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.fecha-info {
+  padding: 10px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  color: #374151;
+  font-size: 14px;
+}
+
+/* Leyenda */
+.leyenda {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.leyenda h3 {
+  margin: 0 0 16px 0;
+  color: #374151;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.leyenda-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.leyenda-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+/* Botones de acción */
+.acciones {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.btn-secondary {
+  background: #6b7280;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #4b5563;
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.btn-warning:hover {
+  background: #d97706;
+}
+
+.btn-info {
+  background: #06b6d4;
+  color: white;
+}
+
+.btn-info:hover {
+  background: #0891b2;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .toolbar {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .herramientas-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+
+  .cuadrantes-superiores,
+  .cuadrantes-inferiores {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .odontograma-container {
     padding: 10px;
-    margin: 10px auto;
-    border-radius: 4px;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.12);
   }
-  .odontograma-header h4 {
-    font-size: 1.1rem;
+
+  .toolbar,
+  .odontograma-main,
+  .info-panel,
+  .leyenda {
+    padding: 15px;
   }
-  .odontograma-grid {
-    grid-template-columns: repeat(8, 28px);
-    grid-gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 8px;
+
+  .info-panel {
+    grid-template-columns: 1fr;
+    gap: 15px;
   }
-  .diente {
-    width: 28px;
-    height: 28px;
-    font-size: 11px;
-    border-width: 1.5px;
+
+  .cuadrantes-superiores,
+  .cuadrantes-inferiores {
+    flex-direction: column;
+    gap: 15px;
   }
-  .menu-contextual {
-    top: 32px;
-    min-width: 90px;
-    padding: 4px;
+
+  .herramientas-grid {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  }
+
+  .herramienta-btn {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+
+  .herramienta-btn span {
+    display: none;
+  }
+
+  .acciones {
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 10px 16px;
     font-size: 12px;
   }
-  .odontograma-header button {
-    font-size: 0.9rem;
-    padding: 2px 8px;
+}
+
+@media (max-width: 480px) {
+  .cuadrantes-superiores,
+  .cuadrantes-inferiores {
+    gap: 10px;
+  }
+
+  .piezas-row {
+    gap: 2px;
+  }
+
+  .estados-grid {
+    flex-direction: column;
+  }
+
+  .estado-btn {
+    padding: 6px 12px;
+    font-size: 11px;
   }
 }
 
-/* Extra small screens */
-@media (max-width: 400px) {
-  .odontograma-grid {
-    grid-template-columns: repeat(8, 22px);
-    grid-gap: 3px;
+/* Estilos para impresión */
+@media print {
+  .toolbar,
+  .acciones,
+  .info-panel {
+    display: none;
   }
-  .diente {
-    width: 22px;
-    height: 22px;
-    font-size: 9px;
+
+  .odontograma-container {
+    background: white;
+    padding: 0;
   }
-  .menu-contextual {
-    top: 24px;
-    min-width: 70px;
-    font-size: 10px;
+
+  .odontograma-main {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+
+  .leyenda {
+    page-break-inside: avoid;
   }
 }

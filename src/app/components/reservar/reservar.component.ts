@@ -13,6 +13,7 @@ import { MercadoPagoService } from '../../services/mercadopago.service';
 import { CookiePaymentService } from '../../services/cookie-payment.service';
 import { Tratamiento } from '../../interfaces';
 import { NotificationService } from '../../services/notification.service';
+import { DentistaService } from '../../services/dentista.service';
 
 interface User {
   id: number;
@@ -47,7 +48,7 @@ export class ReservarComponent implements OnInit {
 
   // Wizard Steps
   currentStep: number = 1;
-  totalSteps: number = 5;
+  totalSteps: number = this.shouldSelectPaciente ? 7 : 6;
   
   // Estado del pago
   paymentSuccess: boolean = false;
@@ -83,6 +84,7 @@ export class ReservarComponent implements OnInit {
 
   turnoForm = {
     pacienteId: '',
+    dentistaId: '',
     fecha: '',
     hora: '',
     tratamientoId: ''
@@ -91,6 +93,8 @@ export class ReservarComponent implements OnInit {
   tratamientos: Tratamiento[] = [];
   pacientes: Paciente[] = [];
   showCancelReservaModal: boolean = false;
+  dentistas: any[] = [];
+  selectedDentista: any = null;
 
   constructor(
     private router: Router,
@@ -103,7 +107,8 @@ export class ReservarComponent implements OnInit {
     private dataRefreshService: DataRefreshService,
     private mercadoPagoService: MercadoPagoService,
     private cookiePaymentService: CookiePaymentService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private dentistaService: DentistaService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -118,6 +123,9 @@ export class ReservarComponent implements OnInit {
     this.addWelcomeMessage();
     this.generateCalendar();
     this.loadOccupiedSlots();
+    if (this.user?.tipoUsuario === 'paciente') {
+      this.loadDentistas();
+    }
     
     // Verificar si hay parámetros de pago de Mercado Pago
     this.procesarResultadoPago();
@@ -615,10 +623,10 @@ export class ReservarComponent implements OnInit {
   // Determinar cuál es el paso actual basado en el tipo de usuario
   getCurrentStepForUser(): number {
     if (this.shouldSelectPaciente) {
-      // Para dentistas: 1=Paciente, 2=Fecha, 3=Hora, 4=Tratamiento, 5=Confirmar, 6=Éxito
+      // Para dentistas: 1=Nuevo, 2=Paciente, 3=Fecha, 4=Hora, 5=Tratamiento, 6=Confirmar, 7=Éxito
       return this.currentStep;
     } else {
-      // Para pacientes: 1=Fecha, 2=Hora, 3=Tratamiento, 4=Confirmar, 5=Éxito
+      // Para pacientes: 1=Nuevo, 2=Dentista, 3=Fecha, 4=Hora, 5=Tratamiento, 6=Confirmar, 7=Éxito
       return this.currentStep;
     }
   }
@@ -737,6 +745,7 @@ export class ReservarComponent implements OnInit {
     // 1. Crear el turno en el backend primero
     const turnoData: any = {
       pacienteId: pacienteId,
+      dentistaId: this.selectedDentista?._id || this.selectedDentista?.id,
       fecha: this.selectedDate,
       hora: this.selectedTime,
       tratamientoId: this.selectedTreatment._id || this.selectedTreatment.id,
@@ -1093,5 +1102,18 @@ export class ReservarComponent implements OnInit {
         }
       });
     });
+  }
+
+  loadDentistas(): void {
+    this.dentistaService.getDentistas().subscribe({
+      next: (dentistas) => this.dentistas = dentistas,
+      error: () => this.dentistas = []
+    });
+  }
+
+  selectDentista(dentista: any) {
+    this.selectedDentista = dentista;
+    this.turnoForm.dentistaId = dentista._id || dentista.id;
+    this.nextStep();
   }
 }

@@ -10,6 +10,7 @@ import { ActionButton } from '../../interfaces/message.interface';
 import { TurnoService } from '../../services/turno.service';
 import { PacienteService } from '../../services/paciente.service';
 import { NotificationService } from '../../services/notification.service';
+import { DentistaService } from '../../services/dentista.service';
 
 @Component({
   selector: 'app-turnos',
@@ -44,6 +45,7 @@ export class TurnosComponent implements OnInit {
   // Formulario de turno
   turnoForm = {
     pacienteId: '',
+    dentistaId: '',
     fecha: '',
     hora: '',
     tratamientoId: ''
@@ -58,6 +60,7 @@ export class TurnosComponent implements OnInit {
   showCancelModal = false;
   showSuccessModal = false;
   reembolsoStatus: string | null = null;
+  dentistas: any[] = [];
 
   constructor(
     private router: Router,
@@ -66,7 +69,8 @@ export class TurnosComponent implements OnInit {
     private chatService: ChatService,
     private turnoService: TurnoService,
     private pacienteService: PacienteService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private dentistaService: DentistaService
   ) {
     this.chatForm = this.fb.group({
       message: ['', [Validators.required, Validators.minLength(1)]]
@@ -78,6 +82,7 @@ export class TurnosComponent implements OnInit {
     this.loadTurnosData();
     this.loadPacientes();
     this.loadTratamientos();
+    this.loadDentistas();
     if (this.user?.tipoUsuario === 'paciente') {
       this.currentView = 'mis-turnos';
       this.loadPacienteData(); // Cargar datos del paciente
@@ -392,6 +397,13 @@ export class TurnosComponent implements OnInit {
     });
   }
 
+  loadDentistas(): void {
+    this.dentistaService.getDentistas().subscribe({
+      next: (dentistas) => this.dentistas = dentistas,
+      error: () => this.dentistas = []
+    });
+  }
+
   loadPacienteData(): void {
     if (!this.user?.id) {
       console.warn('⚠️ No hay user.id disponible para cargar datos del paciente');
@@ -468,6 +480,7 @@ export class TurnosComponent implements OnInit {
     this.isLoading = true;
     const turnoData = {
       pacienteId: this.turnoForm.pacienteId,
+      dentistaId: this.turnoForm.dentistaId,
       fecha: this.turnoForm.fecha,
       hora: this.turnoForm.hora,
       tratamientoId: this.turnoForm.tratamientoId
@@ -494,6 +507,7 @@ export class TurnosComponent implements OnInit {
 
   get canRegisterTurno(): boolean {
     return this.turnoForm.pacienteId !== '' &&
+           this.turnoForm.dentistaId !== '' &&
            this.turnoForm.fecha !== '' &&
            this.turnoForm.hora !== '' &&
            this.turnoForm.tratamientoId !== '';

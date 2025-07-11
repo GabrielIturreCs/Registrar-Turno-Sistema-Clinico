@@ -90,6 +90,23 @@
           </div>
           <div class="card-body p-4">
             <form #turnoFormRef="ngForm" (ngSubmit)="registrarTurno()">
+              <!-- Paso 1: Selección de dentista -->
+              <div class="mb-3">
+                <label for="turnoSelectDentista" class="form-label fw-semibold">Dentista</label>
+                <select 
+                  class="form-select shadow-sm" 
+                  id="turnoSelectDentista"
+                  [(ngModel)]="turnoForm.dentistaId" 
+                  name="dentistaId"
+                  required>
+                  <option value="">Selecciona un dentista</option>
+                  <option *ngFor="let dentista of dentistas" [value]="dentista._id || dentista.id">
+                    {{ dentista.nombre }} {{ dentista.apellido }}
+                    <span *ngIf="dentista.especialidad"> - {{ dentista.especialidad }}</span>
+                  </option>
+                </select>
+              </div>
+              <!-- Paso 2: Selección de paciente (solo para admin/dentista) -->
               <div *ngIf="user?.tipoUsuario !== 'paciente'" class="mb-3">
                 <label for="turnoSelectPaciente" class="form-label fw-semibold">Paciente</label>
                 <select 

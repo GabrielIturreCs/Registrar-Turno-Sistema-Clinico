@@ -10,6 +10,7 @@ import { OdontogramaComponent } from '../odontograma/odontograma.component';
 
 @Component({
   selector: 'app-pacientes',
+  standalone: true,
   imports: [CommonModule, FormsModule, OdontogramaComponent],
   templateUrl: './pacientes.component.html',
   styleUrl: './pacientes.component.css'

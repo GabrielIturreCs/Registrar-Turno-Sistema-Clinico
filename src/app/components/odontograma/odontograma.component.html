@@ -1,25 +1,225 @@
-<div class="odontograma-modal">
-  <div class="odontograma-header">
-    <h4>Odontograma de {{ paciente?.nombre }} {{ paciente?.apellido }}</h4>
-    <button class="btn btn-sm btn-danger float-end" (click)="cerrarModal()">Cerrar</button>
+<div class="odontograma-container">
+  <!-- Barra de herramientas -->
+  <div class="toolbar">
+    <div class="toolbar-section">
+      <h3>Herramientas</h3>
+      <div class="herramientas-grid">
+        <button 
+          *ngFor="let herramienta of herramientas"
+          class="herramienta-btn"
+          [class.active]="herramientaActual === herramienta.id"
+          (click)="seleccionarHerramienta(herramienta.id)"
+          [title]="herramienta.nombre">
+          <i [class]="herramienta.icono"></i>
+          <span>{{ herramienta.nombre }}</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="toolbar-section">
+      <h3>Estados</h3>
+      <div class="estados-grid">
+        <button 
+          *ngFor="let estado of coloresEstado | keyvalue"
+          class="estado-btn"
+          [class.active]="estadoActual === estado.key"
+          [style.background-color]="estado.value"
+          (click)="seleccionarEstado(keyToString(estado.key))">
+          {{ keyToString(estado.key) | titlecase }}
+        </button>
+      </div>
+    </div>
+
+    <div class="toolbar-section">
+      <button class="toggle-btn" (click)="toggleTemporales()">
+        {{ mostrarTemporales ? 'Ocultar' : 'Mostrar' }} Temporales
+      </button>
+    </div>
   </div>
-  <div *ngIf="odontograma; else errorOdontograma">
-    <div class="odontograma-grid">
-      <div *ngFor="let diente of dientesFDI" class="diente" [ngStyle]="{'background': odontograma[diente]?.color}" (click)="seleccionarDiente(diente)">
-        <span>{{ diente }}</span>
-        <div *ngIf="dienteSeleccionado === diente" class="menu-contextual">
-          <button *ngFor="let est of estados" class="btn btn-sm me-1" [ngStyle]="{'background': est.color, 'color': est.estado === 'sano' ? '#000' : '#fff'}" (click)="cambiarEstadoDiente(diente, est)">
-            {{ est.label }}
-          </button>
-          <button class="btn btn-sm btn-secondary" (click)="$event.stopPropagation(); dienteSeleccionado = null">Cancelar</button>
+
+  <!-- Odontograma principal -->
+  <div class="odontograma-main">
+    <!-- Dientes permanentes -->
+    <div class="dientes-permanentes">
+      <div class="cuadrantes-superiores">
+        <!-- Cuadrante 2 - Superior Izquierdo -->
+        <div class="cuadrante cuadrante-2">
+          <div class="cuadrante-label">Cuadrante 2</div>
+          <div class="piezas-row">
+            <app-pieza-dental 
+              *ngFor="let pieza of getPiezasPorCuadrante(2)"
+              [pieza]="pieza"
+              (zonaClic)="onZonaClic($event)">
+            </app-pieza-dental>
+          </div>
+        </div>
+
+        <!-- Cuadrante 1 - Superior Derecho -->
+        <div class="cuadrante cuadrante-1">
+          <div class="cuadrante-label">Cuadrante 1</div>
+          <div class="piezas-row">
+            <app-pieza-dental 
+              *ngFor="let pieza of getPiezasPorCuadrante(1)"
+              [pieza]="pieza"
+              (zonaClic)="onZonaClic($event)">
+            </app-pieza-dental>
+          </div>
+        </div>
+      </div>
+
+      <div class="cuadrantes-inferiores">
+        <!-- Cuadrante 3 - Inferior Izquierdo -->
+        <div class="cuadrante cuadrante-3">
+          <div class="cuadrante-label">Cuadrante 3</div>
+          <div class="piezas-row">
+            <app-pieza-dental 
+              *ngFor="let pieza of getPiezasPorCuadrante(3)"
+              [pieza]="pieza"
+              (zonaClic)="onZonaClic($event)">
+            </app-pieza-dental>
+          </div>
+        </div>
+
+        <!-- Cuadrante 4 - Inferior Derecho -->
+        <div class="cuadrante cuadrante-4">
+          <div class="cuadrante-label">Cuadrante 4</div>
+          <div class="piezas-row">
+            <app-pieza-dental 
+              *ngFor="let pieza of getPiezasPorCuadrante(4)"
+              [pieza]="pieza"
+              (zonaClic)="onZonaClic($event)">
+            </app-pieza-dental>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dientes temporales -->
+    <div class="dientes-temporales" *ngIf="mostrarTemporales">
+      <h3>Dentición Temporal</h3>
+      <div class="cuadrantes-superiores">
+        <!-- Cuadrante 6 - Temporal Superior Izquierdo -->
+        <div class="cuadrante cuadrante-6">
+          <div class="cuadrante-label">Cuadrante 6</div>
+          <div class="piezas-row">
+            <app-pieza-dental 
+              *ngFor="let pieza of getPiezasPorCuadrante(6)"
+              [pieza]="pieza"
+              (zonaClic)="onZonaClic($event)">
+            </app-pieza-dental>
+          </div>
+        </div>
+
+        <!-- Cuadrante 5 - Temporal Superior Derecho -->
+        <div class="cuadrante cuadrante-5">
+          <div class="cuadrante-label">Cuadrante 5</div>
+          <div class="piezas-row">
+            <app-pieza-dental 
+              *ngFor="let pieza of getPiezasPorCuadrante(5)"
+              [pieza]="pieza"
+              (zonaClic)="onZonaClic($event)">
+            </app-pieza-dental>
+          </div>
+        </div>
+      </div>
+
+      <div class="cuadrantes-inferiores">
+        <!-- Cuadrante 7 - Temporal Inferior Izquierdo -->
+        <div class="cuadrante cuadrante-7">
+          <div class="cuadrante-label">Cuadrante 7</div>
+          <div class="piezas-row">
+            <app-pieza-dental 
+              *ngFor="let pieza of getPiezasPorCuadrante(7)"
+              [pieza]="pieza"
+              (zonaClic)="onZonaClic($event)">
+            </app-pieza-dental>
+          </div>
+        </div>
+
+        <!-- Cuadrante 8 - Temporal Inferior Derecho -->
+        <div class="cuadrante cuadrante-8">
+          <div class="cuadrante-label">Cuadrante 8</div>
+          <div class="piezas-row">
+            <app-pieza-dental 
+              *ngFor="let pieza of getPiezasPorCuadrante(8)"
+              [pieza]="pieza"
+              (zonaClic)="onZonaClic($event)">
+            </app-pieza-dental>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  <ng-template #errorOdontograma>
-    <div class="alert alert-danger mt-3">
-      <i class="bi bi-exclamation-triangle me-2"></i>
-      No se pudo cargar el odontograma. Verifique su sesión o intente nuevamente.
+
+  <!-- Panel de información -->
+  <div class="info-panel">
+    <div class="info-section">
+      <label for="odontologo">Odontólogo:</label>
+      <select 
+        id="odontologo" 
+        [value]="odontogramaData.odontologo"
+        (change)="onOdontologoChange($event)">
+        <option value="">Seleccionar odontólogo</option>
+        <option *ngFor="let odontologo of odontologos" [value]="odontologo">
+          {{ odontologo }}
+        </option>
+      </select>
     </div>
-  </ng-template>
+
+    <div class="info-section">
+      <label for="notas">Notas clínicas:</label>
+      <textarea 
+        id="notas"
+        rows="4"
+        [value]="odontogramaData.notas"
+        (input)="onNotasChange($event)"
+        placeholder="Escriba las observaciones clínicas...">
+      </textarea>
+    </div>
+
+    <div class="info-section">
+      <div class="fecha-info">
+        <strong>Fecha:</strong> {{ odontogramaData.fecha | date:'dd/MM/yyyy HH:mm' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Leyenda -->
+  <div class="leyenda">
+    <h3>Leyenda de Estados</h3>
+    <div class="leyenda-items">
+      <div *ngFor="let estado of coloresEstado | keyvalue" class="leyenda-item">
+        <div class="color-box" [style.background-color]="estado.value"></div>
+        <span>{{ keyToString(estado.key) | titlecase }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botones de acción -->
+  <div class="acciones">
+    <button class="btn btn-primary" (click)="guardarOdontograma()" [disabled]="guardando">
+      <i class="fas fa-save"></i>
+      {{ guardando ? 'Guardando...' : 'Guardar' }}
+    </button>
+    
+    <button class="btn btn-secondary" (click)="imprimirGrafico()">
+      <i class="fas fa-print"></i>
+      Imprimir Gráfico
+    </button>
+    
+    <button class="btn btn-secondary" (click)="imprimirDatos()">
+      <i class="fas fa-list"></i>
+      Imprimir Datos
+    </button>
+    
+    <button class="btn btn-warning" (click)="limpiarOdontograma()">
+      <i class="fas fa-trash"></i>
+      Limpiar
+    </button>
+    
+    <button class="btn btn-info" (click)="exportarImagen()">
+      <i class="fas fa-image"></i>
+      Exportar Imagen
+    </button>
+  </div>
 </div>
